@@ -1,0 +1,60 @@
+{
+    "name": "crash-game-service",
+    "version": "1.0.0",
+    "description": "",
+    "main": "./src/app.js",
+    "scripts": {
+        "test": "jest",
+        "test-coverage": "jest --collect-coverage",
+        "dev": "nodemon --es-module-specifier-resolution=node --watch ./src ./src/app.js",
+        "debug": "nodemon --es-module-specifier-resolution=node --watch ./ --inspect ./src/app.js",
+        "prod": "node --max-old-space-size=8192 --es-module-specifier-resolution=node ./src/app.js",
+        "reg": "npm set registry http://npm.lumigame.com",
+        "stats": "nodemon --es-module-specifier-resolution=node --watch ./tests ./tests/results.js"
+    },
+    "jestSonar": {
+        "reportPath": "reports",
+        "reportFile": "test-reporter.xml",
+        "indent": 4
+    },
+    "author": "pentagon",
+    "license": "ISC",
+    "type": "module",
+    "dependencies": {
+        "chance": "^1.1.7",
+        "lodash": "^4.17.19",
+        "nodemon": "^2.0.4",
+        "random": "^3.0.3",
+        "random-int": "^3.0.0",
+        "random-js": "^2.1.0",
+        "sc-game-base": "4.0.0"
+    },
+    "devDependencies": {
+        "@babel/preset-env": "^7.12.11",
+        "@commitlint/cli": "^9.1.2",
+        "@commitlint/config-conventional": "^9.1.2",
+        "@semantic-release/changelog": "^5.0.1",
+        "@semantic-release/commit-analyzer": "^8.0.1",
+        "@semantic-release/git": "^9.0.0",
+        "@semantic-release/gitlab": "^6.0.4",
+        "@semantic-release/npm": "^7.0.5",
+        "@semantic-release/release-notes-generator": "^9.0.1",
+        "@types/jest": "^26.0.20",
+        "babel-jest": "^26.6.3",
+        "husky": "^4.2.5",
+        "install": "^0.13.0",
+        "jest": "^26.6.3",
+        "jest-auto-fixture": "^1.0.6",
+        "jest-extended": "^0.11.5",
+        "jest-junit": "^16.0.0",
+        "jest-micro-auto-stub": "^1.0.6",
+        "jest-sonar-reporter": "^2.0.0",
+        "sc-semantic-release": "^1.1.0",
+        "semantic-release": "^17.1.1"
+    },
+    "husky": {
+        "hooks": {
+            "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+        }
+    }
+}
