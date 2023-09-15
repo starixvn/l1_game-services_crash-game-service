@@ -44,10 +44,7 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 notice: this.getNoticeObj(helpers.noticeHelper.invalidBet, { gameRoundId: roundId }),
             },
             {
-                // Check is cashout time
-                failure:
-                    this.gameData.remainingTime < this.definition.durations.lockingBet ||
-                    this.gameData.remainingTime >= this.definition.durations.placingBets,
+                failure: this.gameData.remainingTime < this.definition.durations.lockingBet,
                 notice: this.getNoticeObj(helpers.noticeHelper.placeBetNextRound),
             },
         ];

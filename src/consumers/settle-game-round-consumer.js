@@ -1,13 +1,13 @@
 import { BaseEventConsumers } from "sc-game-base/src/core";
 
 export class SettleGameRoundConsumer extends BaseEventConsumers.SettleGameRoundConsumer {
-    async settleBets({ result, roundId, time, startTime }) {
+    async settleBets({ result, roundId, time }) {
         const bets = await this.queryBets(roundId);
 
         if (bets && bets.length) {
             await Promise.all(
                 bets.map(async (bet) => {
-                    const betResult = this.calculateBetResult(bet, result, startTime);
+                    const betResult = this.calculateBetResult(bet, result, this.gameData.startTime);
 
                     bet.betwin = betResult.totalWin;
                     bet.paid = true;

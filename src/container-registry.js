@@ -2,6 +2,7 @@ import awilix from "awilix";
 import { Core } from "sc-game-base";
 import { PlaceBetConsumer, SettleGameRoundConsumer, EarlyBetConsumer, CancelBetConsumer } from "./consumers";
 import { Bets, Rounds, Results, BetLogs, EarlyBets } from "./models";
+import GameCrons from "./crons/game-crons";
 
 const { asClass, asValue } = awilix;
 
@@ -12,7 +13,7 @@ export default class ContainerRegistry extends Core.ContainerRegistry {
         this.container.register({
             roundsRepository: asValue(Rounds),
             betsRepository: asValue(Bets),
-            roundsRepository: asValue(Results),
+            resultsRepository: asValue(Results),
             betLogsRepository: asValue(BetLogs),
             earlyBetsRepository: asValue(EarlyBets),
         });
@@ -26,6 +27,16 @@ export default class ContainerRegistry extends Core.ContainerRegistry {
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
             earlyBetConsumer: asClass(EarlyBetConsumer).singleton(),
             cancelBetConsumer: asClass(CancelBetConsumer).singleton(),
+        });
+    }
+    
+    registerCrons() {
+        super.registerCrons();
+
+        this.container.register({
+            gameCron: asClass(GameCrons).singleton().proxy(),
+            //bot: asClass(Bot).singleton(),
+            //processBetQueue: asClass(ProcessBetQueue).singleton().proxy(),
         });
     }
 }

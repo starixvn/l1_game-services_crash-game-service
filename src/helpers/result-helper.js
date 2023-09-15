@@ -57,7 +57,7 @@ const generateResult = (randomMode, maxMultiplier = 2 ** 16) => {
     return Math.floor((100 * maxMultiplier - randomSeed) / (maxMultiplier - randomSeed)) / 100;
 };
 
-const getSettlementResult = () => undefined;
+const getSettlementResult = () => {};
 
 const generateRawResultForHash = (roundResult) => {
     return `{${roundResult}}`;
