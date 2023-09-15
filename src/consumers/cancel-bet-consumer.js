@@ -1,5 +1,6 @@
 import { BaseEventConsumers } from "sc-game-base/src/core";
 import { Actions } from "../constants";
+import { helpers } from "sc-common";
 
 export class CancelBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     constructor(definition, gameData, publisher, earlyBetsRepository) {
@@ -81,7 +82,7 @@ export class CancelBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         const { receivedTime } = earlyBet;
         const roundId = this.gameData.roundId + 1;
         const operatorId = player.session?.operatorId;
-        let existingEarlyBet = await this.earlyBetsRepository.findOne({ roundId, uid: player.UID, operatorId });
+        let existingEarlyBet = await this.earlyBetsRepository.findOne({ roundId, uid: player.UID, operatorId }).lean().exec();
 
         const action = {
             action: Actions.CancelBet,

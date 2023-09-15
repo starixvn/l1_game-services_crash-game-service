@@ -1,5 +1,6 @@
 import { BaseEventConsumers } from "sc-game-base/src/core";
 import { Actions } from "../constants";
+import { helpers } from "sc-common";
 
 export class EarlyBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     constructor(definition, gameData, publisher, earlyBetsRepository) {
@@ -74,7 +75,7 @@ export class EarlyBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
             },
             {
-                failure: roundId !== this.gameData.roundId,
+                failure: roundId !== this.gameData.roundId + 1,
                 notice: this.getNoticeObj(helpers.noticeHelper.invalidBet, { gameRoundId: roundId }),
             },
             {
@@ -91,7 +92,7 @@ export class EarlyBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         const configs = this.gameData.gameConfigs;
         const { earlyBet } = this.gameData.ingame[player.profile.name] || { earlyBet: {} };
         const minBet = Math.max(player.profile.minBet, settings.minBet);
-        const maxBet = Math.min(player.profile.maxBet, settings.maxWinPerRound);
+        const maxBet = Math.min(player.profile.maxBet, settings.maxBet);
 
         return [
             {
@@ -130,7 +131,7 @@ export class EarlyBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         const { amount, receivedTime } = earlyBet;
         const roundId = this.gameData.roundId + 1;
         const operatorId = player.session?.operatorId;
-        let existingEarlyBet = await this.earlyBetsRepository.findOne({ roundId, uid: player.UID, operatorId });
+        let existingEarlyBet = await this.earlyBetsRepository.findOne({ roundId, uid: player.UID, operatorId }).lean().exec();
 
         const action = {
             action: Actions.EarlyBet,
