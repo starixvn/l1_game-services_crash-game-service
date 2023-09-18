@@ -22,8 +22,6 @@ export class SettleGameRoundConsumer extends BaseEventConsumers.SettleGameRoundC
                 })
             );
         }
-
-        this.roundResultPublisher.publishRoundResult(this.collectRoundResult(result, settlementResult, roundId));
     }
 
     calculateBetResult(bet, result, startTime) {
