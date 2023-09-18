@@ -1,7 +1,14 @@
+import { logger } from "sc-common";
+import LiveGamePublisher from "../event-publishers/live-game-publisher";
+
 export default class LivGameCrons {
-    constructor(liveGamePublisher, logService) {
-        this.logService = logService;
+    /**
+     * @param {LiveGamePublisher} dependencies.liveGamePublisher
+     * @param {logger} dependencies.logService
+     */
+    constructor({ liveGamePublisher, logService }) {
         this.liveGamePublisher = liveGamePublisher;
+        this.logService = logService;
     }
 
     start() {
@@ -9,7 +16,7 @@ export default class LivGameCrons {
             this.timeoutId = setTimeout(callback, 100);
             this.proceed();
         };
-        setTimeout(callback, 100);
+        setTimeout(callback(), 100);
     }
 
     stop() {
