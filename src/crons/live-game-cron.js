@@ -1,7 +1,7 @@
-export default class MultiplierPublishCron {
-    constructor(runningRoundInfoPublisher, logService) {
+export default class LivGameCrons {
+    constructor(liveGamePublisher, logService) {
         this.logService = logService;
-        this.runningRoundInfoPublisher = runningRoundInfoPublisher;
+        this.liveGamePublisher = liveGamePublisher;
     }
 
     start() {
@@ -17,6 +17,6 @@ export default class MultiplierPublishCron {
     }
 
     proceed() {
-        console.log(new Date());
+        this.liveGamePublisher.publish();
     }
 }

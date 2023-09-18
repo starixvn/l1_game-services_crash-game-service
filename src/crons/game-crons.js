@@ -1,6 +1,56 @@
 import { Core } from "sc-game-base";
+import { calculateCrashTimeInMillisecond } from "../helpers/crash-point-helper";
 
 export default class GameCrons extends Core.Crons.BaseGameCron {
+    constructor({
+        definition,
+        gameData,
+        bot,
+        settleGameRoundConsumer,
+        gameStatusPublisher,
+        runningRoundInfoPublisher,
+        logService,
+        gameConfigsRepository,
+        roundsRepository,
+        archiveStatusesRepository,
+        notificationRepository,
+        exchangeRatesRepository,
+        currencyGroupGamesRepository,
+        partnerConfigRepository,
+        currencyGroupRepository,
+        currencyRepository,
+        roundResultConsumer,
+        resultsRepository,
+        promotionRepository,
+        appConfigs,
+        liveGameCrons,
+    }) {
+        super({
+            definition,
+            gameData,
+            bot,
+            settleGameRoundConsumer,
+            gameStatusPublisher,
+            runningRoundInfoPublisher,
+            logService,
+            gameConfigsRepository,
+            roundsRepository,
+            archiveStatusesRepository,
+            notificationRepository,
+            exchangeRatesRepository,
+            currencyGroupGamesRepository,
+            partnerConfigRepository,
+            currencyGroupRepository,
+            currencyRepository,
+            roundResultConsumer,
+            resultsRepository,
+            promotionRepository,
+            appConfigs,
+        });
+
+        this.liveGameCrons = liveGameCrons;
+    }
+
     async proceed() {
         const { durations } = this.definition;
 
@@ -30,6 +80,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         if (this.gameData.remainingTime === durations.lockingBet - 1) {
             this.gameStatusPublisher.publishEndPlacingBetStatus();
             this.startDelaySettleRound();
+            this.liveGameCrons.start();
         }
 
         if (this.gameData.remainingTime < durations.placingBets) {
@@ -43,12 +94,14 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
     }
 
     startDelaySettleRound() {
+        const { durations } = this.definition;
         const gameResult = this.gameData.result;
-        const settleTimeOut = this.getSettleTimeInSecond(gameResult) * 1000;
+        const settleTimeOut = calculateCrashTimeInMillisecond(gameResult);
 
         setTimeout(async () => {
-            await this.settleGameRoundConsumer.settleRound(this.gameData);
+            this.liveGameCrons.stop();
             this.gameData.remainingTime = durations.wholeRound;
+            await this.settleGameRoundConsumer.settleRound(this.gameData);
         }, settleTimeOut);
 
         this.gameData.startTime = new Date();
