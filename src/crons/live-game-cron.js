@@ -12,11 +12,11 @@ export default class LivGameCrons {
     }
 
     start() {
-        const callback = () => {
-            this.timeoutId = setTimeout(callback, 100);
+        this.proceed();
+
+        this.timeoutId = setInterval(() => {
             this.proceed();
-        };
-        setTimeout(callback(), 100);
+        }, 100);
     }
 
     stop() {
