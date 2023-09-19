@@ -89,10 +89,6 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         }
     }
 
-    getSettleTimeInSecond(roundResult) {
-        return 4 * Math.sqrt(roundResult - 1);
-    }
-
     startDelaySettleRound() {
         const { durations } = this.definition;
         const gameResult = this.gameData.result;

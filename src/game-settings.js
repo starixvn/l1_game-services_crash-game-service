@@ -2,12 +2,13 @@ export default {
     id: 21,
     name: "CrashGame",
     durations: {
-        wholeRound: 60,
-        placingBets: 52,
-        lockingBet: 49,
+        wholeRound: 14,
+        placingBets: 10,
+        lockingBet: 3,
+        liveTime: 0,
     },
     choices: {},
     choicesMapper: {},
     defaultBetTracks: {},
-    numberOfRoundHistory: 300,
+    numberOfRoundHistory: 11,
 };
