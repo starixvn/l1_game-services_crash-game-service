@@ -1,6 +1,6 @@
 import awilix from "awilix";
 import { Core } from "sc-game-base";
-import { PlaceBetConsumer, SettleGameRoundConsumer, EarlyBetConsumer, CancelBetConsumer } from "./consumers";
+import { PlaceBetConsumer, SettleGameRoundConsumer, EarlyBetConsumer, CancelBetConsumer, AutoCashOutConsumer } from "./consumers";
 import { Bets, Rounds, Results, BetLogs, EarlyBets } from "./models";
 import GameCrons from "./crons/game-crons";
 import { LiveGameCrons } from "./crons";
@@ -29,6 +29,7 @@ export default class ContainerRegistry extends Core.ContainerRegistry {
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
             earlyBetConsumer: asClass(EarlyBetConsumer).singleton(),
             cancelBetConsumer: asClass(CancelBetConsumer).singleton(),
+            autoCashOutConsumer: asClass(AutoCashOutConsumer).singleton(),
         });
     }
 

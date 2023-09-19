@@ -23,7 +23,7 @@ export class EarlyBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         if (!this.validateBetRequest(player, amount, freeBet, roundId)) {
             return;
         }
-
+        this.publisher.publishToUser(player.UID, { earlyBet: amount });
         if (!this.gameData.ingame[name]) {
             const newPlayer = {
                 name: player.profile.name,
@@ -80,9 +80,9 @@ export class EarlyBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
             },
             {
                 failure:
-                    this.gameData.remainingTime >= this.definition.durations.lockingBet - 3 &&
-                    this.gameData.remainingTime < this.definition.durations.placingBets,
-                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
+                    this.gameData.remainingTime >= this.definition.durations.liveTime &&
+                    this.gameData.remainingTime <= this.definition.durations.placingBets,
+                notice: this.getNoticeObj(helpers.noticeHelper.invalidEarlyBet),
             },
         ];
     }

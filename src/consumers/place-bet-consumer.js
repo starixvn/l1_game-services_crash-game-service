@@ -1,5 +1,6 @@
 import { BaseEventConsumers } from "sc-game-base/src/core";
 import { Actions } from "../constants";
+import { helpers } from "sc-common";
 
 export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     consume(player, payload) {

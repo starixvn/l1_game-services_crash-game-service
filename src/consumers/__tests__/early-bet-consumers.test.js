@@ -5,6 +5,7 @@ import { BaseEventPublisher } from "sc-game-base/src/core/event-publishers";
 import { EarlyBetConsumer } from "../early-bet-consumer";
 import gameSettings from "../../../src/game-settings";
 import { helpers } from "sc-common";
+import Chance from "chance";
 
 /** @type {mongoose.Model}*/
 const earlyBetsRepository = stubMongooseModelStupidly(mongoose.Model);
@@ -21,6 +22,7 @@ const player = {
     },
 };
 describe("EarlyBetConsumers", () => {
+    const chance = new Chance();
     const definition = new Core.GameDefinition(gameSettings);
     const gameData = {
         gameConfigs: { odds: {}, enableFreeBet: false },
@@ -29,7 +31,7 @@ describe("EarlyBetConsumers", () => {
         players: {},
         ingame: {},
         roundId: 1,
-        remainingTime: 30,
+        remainingTime: 2,
     };
 
     let consumer;
@@ -96,17 +98,17 @@ describe("EarlyBetConsumers", () => {
         });
 
         describe("when betting on place bet time", () => {
-            it("should return invalid bet ", () => {
+            it("should return invalid Early Bet ", () => {
                 // arrange
                 gameData.gameConfigs.enabled = true;
-                gameData.remainingTime = 50;
+                gameData.remainingTime = 4;
                 // act
                 const criterions = consumer.composeBettingTimeValidationCriteria(2);
 
                 // assert
                 expect(criterions.filter((x) => x.failure)[0]).toStrictEqual({
                     failure: true,
-                    notice: { errorCode: helpers.noticeHelper.invalidBet },
+                    notice: { errorCode: helpers.noticeHelper.invalidEarlyBet },
                 });
             });
         });
@@ -216,6 +218,24 @@ describe("EarlyBetConsumers", () => {
 
                 // Assert
                 expect(consumer.gameData.ingame[player.profile.name].earlyBet.amount).toBe(3);
+            });
+        });
+    });
+
+    describe("adjustEarlyBet", () => {
+        describe("when having player info on ingame data", () => {
+            it("should update player earlyBet", () => {
+                // Arrange
+                const payload = {
+                    amount: chance.natural(),
+                };
+                gameData.ingame[player.profile.name] = { earlyBet: {} };
+
+                // Act
+                consumer.adjustEarlyBet(player.profile.name, payload);
+
+                // Assert
+                expect(gameData.ingame[player.profile.name].earlyBet.amount).toEqual(payload.amount);
             });
         });
     });

@@ -21,6 +21,8 @@ const schema = new mongoose.Schema({
     operatorId: { type: String, required: true },
     roundId: { type: Number, default: 0, required: true },
     paid: { type: Boolean, default: false },
+
+    autoCashOut: { type: Number },
 });
 
 export default mongoose.model("crashgame_bets", schema);

@@ -29,7 +29,7 @@ describe("CancelBetConsumers", () => {
         players: {},
         ingame: {},
         roundId: 1,
-        remainingTime: 30,
+        remainingTime: -2,
     };
 
     let consumer;
@@ -64,17 +64,17 @@ describe("CancelBetConsumers", () => {
 
     describe("composeBettingTimeValidationCriteria", () => {
         describe("when betting on place bet time", () => {
-            it("should return invalid bet ", () => {
+            it("should return cannot cancel bet ", () => {
                 // arrange
                 gameData.gameConfigs.enabled = true;
-                gameData.remainingTime = 50;
+                gameData.remainingTime = 9;
                 // act
                 const criterions = consumer.composeBettingTimeValidationCriteria(2);
 
                 // assert
                 expect(criterions.filter((x) => x.failure)[0]).toStrictEqual({
                     failure: true,
-                    notice: { errorCode: helpers.noticeHelper.invalidBet },
+                    notice: { errorCode: helpers.noticeHelper.cannotCancelBet },
                 });
             });
         });

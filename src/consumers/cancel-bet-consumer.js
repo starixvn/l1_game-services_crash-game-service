@@ -19,7 +19,7 @@ export class CancelBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         if (!this.validateBetRequest(player)) {
             return;
         }
-
+        this.publisher.publishToUser(player.UID, { cancelBet: true });
         if (!this.gameData.ingame[name]) {
             return;
         }
@@ -52,9 +52,9 @@ export class CancelBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         return [
             {
                 failure:
-                    this.gameData.remainingTime >= this.definition.durations.lockingBet - 3 &&
+                    this.gameData.remainingTime >= this.definition.durations.liveTime &&
                     this.gameData.remainingTime <= this.definition.durations.placingBets,
-                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
+                notice: this.getNoticeObj(helpers.noticeHelper.cannotCancelBet),
             },
         ];
     }
