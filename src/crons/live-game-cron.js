@@ -15,13 +15,13 @@ export default class LivGameCrons {
     start() {
         this.proceed();
 
-        this.intervalId = setInterval(() => {
+        this.timeoutId = setInterval(() => {
             this.proceed();
         }, 100);
     }
 
     stop() {
-        clearInterval(this.intervalId);
+        clearTimeout(this.timeoutId);
     }
 
     proceed() {

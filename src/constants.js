@@ -1,6 +1,7 @@
 const Actions = {
     Bet: "bet",
     CashOut: "cashOut",
+    HalfCashOut: "halfCashOut",
     EarlyBet: "earlyBet",
     CancelBet: "cancelBet",
 };
