@@ -1,5 +1,5 @@
 export default {
-    id: 21,
+    id: 73,
     name: "CrashGame",
     durations: {
         wholeRound: 14,

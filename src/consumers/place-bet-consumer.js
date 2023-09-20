@@ -74,7 +74,6 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 notice: this.getNoticeObj(helpers.noticeHelper.invalidBet, { gameRoundId: roundId }),
             },
             {
-                // Check is betting time
                 failure:
                     this.gameData.remainingTime < this.definition.durations.lockingBet ||
                     this.gameData.remainingTime >= this.definition.durations.placingBets,
