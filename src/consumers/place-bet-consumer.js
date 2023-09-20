@@ -1,21 +1,22 @@
 import { BaseEventConsumers } from "sc-game-base/src/core";
-import { Actions } from "../constants";
+import { Actions, MultiplierValues, NoticeHelper } from "../constants";
 import { helpers } from "sc-common";
 
 export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     consume(player, payload) {
         Object.assign(payload, {
             amount: payload.amount >> 0,
+            autoCashOut: payload.autoCashOut >> 0 ?? 0,
             freeBet: payload.freeBet ?? false,
             roundId: payload.roundId ?? this.gameData.roundId,
             mode: payload.m ?? this.DisplayMode.Landscape,
             receivedTime: new Date(),
         });
 
-        const { amount, freeBet, roundId } = payload;
+        const { amount, freeBet, roundId, autoCashOut } = payload;
         const name = player.profile.name;
 
-        if (!this.validateBetRequest(player, amount, freeBet, roundId)) {
+        if (!this.validateBetRequest(player, amount, freeBet, roundId, autoCashOut)) {
             return;
         }
 
@@ -37,12 +38,12 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         this.gameData.ingame[name].betQueue.push({ player, payload });
     }
 
-    validateBetRequest(player, amount, freeBet, roundId) {
+    validateBetRequest(player, amount, freeBet, roundId, autoCashOut) {
         if (!amount) {
             return false;
         }
 
-        const criteria = this.composeValidationCriteria(player, amount, freeBet, roundId);
+        const criteria = this.composeValidationCriteria(player, amount, freeBet, roundId, autoCashOut);
         const failedCriterion = criteria.find((criterion) => criterion.failure);
 
         if (failedCriterion) {
@@ -54,9 +55,9 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         return true;
     }
 
-    composeValidationCriteria(player, amount, freeBet, roundId) {
+    composeValidationCriteria(player, amount, freeBet, roundId, autoCashOut) {
         const bettingTimeValidationCriteria = this.composeBettingTimeValidationCriteria(roundId) ?? [];
-        const betAmountValidationCriteria = this.composeBetAmountValidationCriteria(player, amount, freeBet) || [];
+        const betAmountValidationCriteria = this.composeBetAmountValidationCriteria(player, amount, freeBet, autoCashOut) || [];
 
         return bettingTimeValidationCriteria.concat(betAmountValidationCriteria);
     }
@@ -75,14 +76,14 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
             },
             {
                 failure:
-                    this.gameData.remainingTime < this.definition.durations.lockingBet ||
-                    this.gameData.remainingTime >= this.definition.durations.placingBets,
+                    this.gameData.remainingTime <= this.definition.durations.lockingBet ||
+                    this.gameData.remainingTime > this.definition.durations.placingBets,
                 notice: this.getNoticeObj(helpers.noticeHelper.placeBetNextRound),
             },
         ];
     }
 
-    composeBetAmountValidationCriteria(player, amount, freeBet) {
+    composeBetAmountValidationCriteria(player, amount, freeBet, autoCashOut) {
         const settings = this.gameData.currencyGroupGames.find((x) => x.groupId.toString() === player.session.currencyGroupId);
         const configs = this.gameData.gameConfigs;
         const minBet = Math.max(player.profile.minBet, settings.minBet);
@@ -101,11 +102,15 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 failure: amount > maxBet,
                 notice: this.getNoticeObj(helpers.noticeHelper.maxBet, { maxBet }),
             },
+            {
+                failure: !MultiplierValues.includes(autoCashOut),
+                notice: this.getNoticeObj(NoticeHelper.invalidValueCashOut, { autoCashOut }),
+            },
         ];
     }
 
     adjustBetTracks(playerName, bet) {
-        const { amount, receivedTime } = bet;
+        const { amount, receivedTime, autoCashOut } = bet;
 
         if (this.gameData.ingame?.[playerName]) {
             const playerInGame = this.gameData.ingame[playerName];
@@ -114,6 +119,9 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 amount,
                 time: receivedTime,
             };
+            if (autoCashOut > 0) {
+                playerInGame.betTracks[Actions.Bet].autoCashOut = autoCashOut;
+            }
         }
     }
 }
