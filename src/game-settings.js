@@ -1,6 +1,6 @@
 export default {
     id: 73,
-    name: "CrashGame",
+    name: "SpaceFlight",
     durations: {
         wholeRound: 14,
         placingBets: 10,

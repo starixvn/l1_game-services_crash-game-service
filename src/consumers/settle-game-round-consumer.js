@@ -2,7 +2,7 @@ import { BaseEventConsumers } from "sc-game-base/src/core";
 import { calculateMultiplier } from "../helpers/crash-point-helper";
 
 export class SettleGameRoundConsumer extends BaseEventConsumers.SettleGameRoundConsumer {
-    async settleBets({ result, settlementResult, roundId, time }) {
+    async settleBets({ result, roundId, time }) {
         const bets = await this.queryBets(roundId);
 
         if (bets && bets.length) {
