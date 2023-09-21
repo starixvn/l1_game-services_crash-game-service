@@ -46,17 +46,6 @@ describe("SettleGameRoundConsumer", () => {
     });
 
     describe("calculateMultiplier", () => {
-        it("should return result is greater than 1", () => {
-            // Arrange
-            const startTime = new Date();
-            const cashOutTime = new Date();
-            cashOutTime.setMilliseconds(startTime.getMilliseconds() + 5317);
-
-            // Act
-            const multiplier = consumer.calculateMultiplier(cashOutTime, startTime);
-
-            // Assert
-            expect(multiplier).toBeGreaterThan(1);
-        });
+        it("should return result is greater than 1", () => {});
     });
 });

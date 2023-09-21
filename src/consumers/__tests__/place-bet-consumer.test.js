@@ -23,7 +23,7 @@ describe("PlaceBetConsumer", () => {
         amount: chance.natural(),
         freeBet: chance.bool(),
         roundId: chance.natural(),
-        autoCashOut: chance.integer(),
+        autoCashOut: chance.natural(),
     };
     const definition = new Core.GameDefinition(gameSettings);
     const gameData = {
