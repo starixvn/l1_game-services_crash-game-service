@@ -4,7 +4,6 @@ const schema = new mongoose.Schema({
     uid: { type: String, required: true },
     name: { type: String, required: true },
 
-    cashOutTime: { type: Date },
     multiplier: { type: Number, default: 0 },
 
     amount: { type: Number, default: 0 },

@@ -1,5 +1,5 @@
 import awilix from "awilix";
-import { Core } from "sc-game-base";
+import { Table } from "sc-game-base";
 import { PlaceBetConsumer, SettleGameRoundConsumer } from "./consumers";
 import { Bets, Rounds, Results, BetLogs } from "./models";
 import GameCrons from "./crons/game-crons";
@@ -8,7 +8,7 @@ import LiveGamePublisher from "./event-publishers/live-game-publisher";
 
 const { asClass, asValue } = awilix;
 
-export default class ContainerRegistry extends Core.ContainerRegistry {
+export default class ContainerRegistry extends Table.TableContainerRegistry {
     registerModels() {
         super.registerModels();
 
