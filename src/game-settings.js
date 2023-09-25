@@ -1,5 +1,5 @@
 export default {
-    id: 73,
+    id: 21,
     name: "SpaceFlight",
     durations: {
         wholeRound: 14,
