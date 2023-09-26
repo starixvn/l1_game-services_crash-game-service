@@ -37,9 +37,9 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         const winAmount = amount * calculateMultiplier(timeFromStart);
         const betLog = { ...payload, winAmount };
 
-        await this.insertBetLog(betLog);
+        await this.insertBetLog(player, roundId, betLog);
 
-        this.publishSuccessBet(player.UID, { [Actions.HalfCashOut]: { amount, win: winAmount } });
+        this.placeBetPublisher.publishSuccessBet(player.UID, { [Actions.HalfCashOut]: { amount, win: winAmount } });
     }
 
     async proceedCashOut(player, payload) {
@@ -66,15 +66,14 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         const winAmount = amount * calculateMultiplier(timeFromStart);
         const betLog = { ...payload, winAmount };
 
-        await this.insertBetLog(betLog);
+        await this.insertBetLog(player, roundId, betLog);
 
-        this.publishSuccessBet(player.UID, { [Actions.CashOut]: { amount, win: winAmount } });
+        this.placeBetPublisher.publishSuccessBet(player.UID, { [Actions.CashOut]: { amount, win: winAmount } });
     }
 
     async handleSuccessBet(player, balance, roundId, bet) {
         const rate = this.calculateCurrencyRate(player.session);
 
-        await this.insertBetLog(player, roundId, bet, rate);
         await this.insertBet(player, roundId, bet, rate);
 
         this.notifyPlacingBetResult(player, balance, bet, rate);

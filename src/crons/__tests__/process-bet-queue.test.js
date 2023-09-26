@@ -52,7 +52,7 @@ describe("ProcessBetQueue", () => {
     /** @type {logger}*/
     const logService = stub(logger);
     /** @type {mongoose.Model}*/
-    const betsRepository = stubMongooseModelStupidly(mongoose.Model);
+    const betsRepository = { findOne: jest.fn().mockReturnValue({ lean: jest.fn().mockReturnValue({ exec: jest.fn() }) }) };
 
     /** @type {mongoose.Model}*/
     const betLogsRepository = stubMongooseModelStupidly(mongoose.Model);
@@ -140,9 +140,6 @@ describe("ProcessBetQueue", () => {
 
     describe("proceedHalfCashOut", () => {
         it("should find current round bet", async () => {
-            // Arrange
-            betsRepository.findOne().lean().exec.mockReturnValueOnce({});
-
             // Act
             await proceedBetQueue.proceedHalfCashOut(player, payload);
 

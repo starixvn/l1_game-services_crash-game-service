@@ -5,7 +5,9 @@ const Schema = new mongoose.Schema({
     name: { type: String, required: true },
 
     action: { type: String, required: true },
-    amount: { type: Number, required: true },
+    amount: { type: Number, default: 0 },
+    winAmount: { type: Number, default: 0 },
+    receivedTime: { type: Date, required: true },
 
     time: { type: Date },
 
