@@ -1,6 +1,7 @@
 import { BaseEventConsumers } from "sc-game-base/src/core";
 import { Actions, MultiplierValues, NoticeHelper } from "../constants";
 import { helpers } from "sc-common";
+import noticeHelper from "../helpers/notice-helper";
 
 export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     consume(player, payload) {
@@ -10,6 +11,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
             freeBet: payload.freeBet ?? false,
             roundId: payload.roundId ?? this.gameData.roundId,
             mode: payload.m ?? this.DisplayMode.Landscape,
+            action: Actions.Bet,
             receivedTime: new Date(),
         });
 
@@ -104,7 +106,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
             },
             {
                 failure: !MultiplierValues.includes(autoCashOut),
-                notice: this.getNoticeObj(NoticeHelper.invalidValueCashOut, { autoCashOut }),
+                notice: this.getNoticeObj(noticeHelper.invalidValueCashOut, { autoCashOut }),
             },
         ];
     }

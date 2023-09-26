@@ -10,6 +10,7 @@ import { GameData } from "sc-game-base/src/core";
 import { GameDefinition } from "sc-game-base/src/core";
 import ProcessBetQueue from "../process-bet-queue";
 import { Actions } from "../../constants";
+import noticeHelper from "../../helpers/notice-helper";
 
 describe("ProcessBetQueue", () => {
     jest.mock("sc-game-base/src/core/event-publishers");
@@ -48,7 +49,7 @@ describe("ProcessBetQueue", () => {
         },
         choicesMapper: { red2: 1 },
     });
-    const placeBetPublisher = new PlaceBetPublisher(definition.name, gameData);
+    const placeBetPublisher = stub(PlaceBetPublisher);
     /** @type {logger}*/
     const logService = stub(logger);
     /** @type {mongoose.Model}*/
@@ -145,6 +146,23 @@ describe("ProcessBetQueue", () => {
 
             // Assert
             expect(betsRepository.findOne).toBeCalledWith({ uid: player.UID, roundId: gameData.roundId, freeBet: payload.freeBet });
+        });
+
+        describe("when NOT exist bet", () => {
+            it("should publishGameFailedBet", async () => {
+                // Act
+                await proceedBetQueue.proceedHalfCashOut(player, payload);
+
+                // Assert
+                expect(proceedBetQueue.placeBetPublisher.publishGameFailedBet).toBeCalledWith(player.UID, {
+                    endBet: -1,
+                    notice: { errorCode: noticeHelper.invalidCashOut },
+                });
+            });
+        });
+
+        describe("when existing bet", () => {
+            it("should NOT publishGameFailed");
         });
     });
 

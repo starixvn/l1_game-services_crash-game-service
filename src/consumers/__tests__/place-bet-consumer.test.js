@@ -6,6 +6,7 @@ import { helpers } from "sc-common";
 import Chance from "chance";
 import { stub } from "jest-micro-auto-stub";
 import { NoticeHelper } from "../../constants";
+import noticeHelper from "../../helpers/notice-helper";
 
 const player = {
     socketId: "scoketId1",
@@ -164,7 +165,7 @@ describe("PlaceBetConsumer", () => {
                 // Arrange
                 const amount = 7;
                 const autoCashOut = 2.1;
-                const expectedValue = { failure: true, notice: { errorCode: NoticeHelper.invalidValueCashOut, autoCashOut: 2.1 } };
+                const expectedValue = { failure: true, notice: { errorCode: noticeHelper.invalidValueCashOut, autoCashOut: 2.1 } };
 
                 // Act
                 const actualValue = consumer.composeBetAmountValidationCriteria(player, amount, false, autoCashOut);
