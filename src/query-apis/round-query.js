@@ -32,7 +32,7 @@ export default class RoundQuery extends QueryApis.RoundQuery {
         if (!md5Result) {
             return {};
         }
-        console.log("Md5 result - roundId", md5Result, roundId);
+
         const decryptedResultHash = decrypt(md5Result.encryptedResultHash);
 
         return JSON.parse(decryptedResultHash);
