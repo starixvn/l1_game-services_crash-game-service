@@ -2,73 +2,85 @@ import { Core } from "sc-game-base";
 import { Actions } from "../constants";
 import { calculateMultiplier } from "../helpers/crash-point-helper";
 import noticeHelper from "../helpers/notice-helper";
+import { roundFloat } from "../helpers/number-helper";
 
 export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
+    dequeueBets() {
+        if (this.gameData.ingame) {
+            Object.values(this.gameData.ingame).forEach((playerInGame) => {
+                if (!playerInGame.betProcessing && playerInGame.betQueue && playerInGame.betQueue.length > 0) {
+                    const { player, payload } = playerInGame.betQueue.shift();
+
+                    playerInGame.betProcessing = true;
+                    this.proceedActions(player, payload)
+                        .then(() => (playerInGame.betProcessing = false))
+                        .catch(this.logService.logError);
+                }
+            });
+        }
+    }
+
     async proceedActions(player, payload) {
         switch (payload.action) {
             case Actions.Bet:
                 await this.proceedBet(player, payload);
                 break;
             case Actions.HalfCashOut:
-                await this.proceedHalfCashOut(player, payload);
-                break;
             case Actions.CashOut:
                 await this.proceedCashOut(player, payload);
                 break;
         }
     }
-    async proceedHalfCashOut(player, payload) {
-        const { receivedTime, freeBet } = payload;
-        const { roundId } = this.gameData;
-
-        const bet = await this.betsRepository.findOne({ uid: player.UID, roundId, freeBet }).lean().exec();
-
-        if (!bet) {
-            this.placeBetPublisher.publishGameFailedBet(player.UID, {
-                endBet: -1,
-                notice: { errorCode: noticeHelper.invalidCashOut },
-            });
-
-            return;
-        }
-
-        const amount = bet.amount / 2;
-        const timeFromStart = receivedTime - this.gameData.startTime;
-        const winAmount = amount * calculateMultiplier(timeFromStart);
-        const betLog = { ...payload, winAmount };
-
-        await this.insertBetLog(player, roundId, betLog);
-
-        this.placeBetPublisher.publishSuccessBet(player.UID, { [Actions.HalfCashOut]: { amount, win: winAmount } });
-    }
 
     async proceedCashOut(player, payload) {
-        const { receivedTime } = payload;
-        const { roundId } = this.gameData;
+        const { receivedTime, freeBet, action } = payload;
+        const { roundId, startTime, result } = this.gameData;
 
-        const bet = await this.betsRepository.findOne({ uid: player.UID, roundId, freeBet: bet.freeBet }).lean().exec();
-        const halfCashOutBetLog = await this.betLogsRepository
-            .findOne({ uid: player.UID, roundId, freeBet: bet.freeBet, action: Actions.HalfCashOut })
-            .lean()
-            .exec();
+        const bet = await this.betsRepository.findOne({ uid: player.UID, roundId, freeBet: freeBet }).lean().exec();
 
         if (!bet) {
-            this.placeBetPublisher.publishGameFailedBet(player.UID, {
-                endBet: -1,
-                notice: { errorCode: noticeHelper.invalidCashOut },
-            });
+            this.publishCashOutFailed(player);
 
             return;
         }
 
-        const amount = halfCashOutBetLog ? bet.amount / 2 : bet.amount;
-        const timeFromStart = receivedTime - this.gameData.startTime;
-        const winAmount = amount * calculateMultiplier(timeFromStart);
-        const betLog = { ...payload, winAmount };
+        const isCashOutHalfAmount = await this.isCashOutHalfAmount(player, payload);
+        const amount = isCashOutHalfAmount ? bet.amount / 2 : bet.amount;
+        const timeFromStart = receivedTime - startTime;
+        const multiplier = calculateMultiplier(timeFromStart);
 
-        await this.insertBetLog(player, roundId, betLog);
+        if (multiplier >= result) {
+            this.publishCashOutFailed(player);
+        } else {
+            const winAmount = roundFloat(amount * multiplier);
+            const betLog = { ...payload, winAmount: winAmount };
 
-        this.placeBetPublisher.publishSuccessBet(player.UID, { [Actions.CashOut]: { amount, win: winAmount } });
+            await this.insertBetLog(player, roundId, betLog);
+
+            this.placeBetPublisher.publishSuccessBet(player.UID, { [action]: { amount, win: winAmount } });
+        }
+    }
+
+    async isCashOutHalfAmount(player, payload) {
+        const { action, roundId, freeBet } = payload;
+
+        if (action === Actions.HalfCashOut) {
+            return true;
+        } else {
+            const halfCashOutBetLog = await this.betLogsRepository
+                .findOne({ uid: player.UID, roundId, freeBet, action: Actions.HalfCashOut })
+                .lean()
+                .exec();
+
+            return halfCashOutBetLog;
+        }
+    }
+
+    publishCashOutFailed(player) {
+        this.placeBetPublisher.publishGameFailedBet(player.UID, {
+            endBet: -1,
+            notice: { errorCode: noticeHelper.invalidCashOut },
+        });
     }
 
     async handleSuccessBet(player, balance, roundId, bet) {
@@ -81,19 +93,6 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         if (!bet.freeBet && (player.profile.minBet !== balance.minBet || player.profile.maxBet !== balance.maxBet)) {
             await this.updateUserStakeLevel(player, balance.minBet, balance.maxBet);
         }
-    }
-
-    formatApiBetInfo(payload) {
-        return {
-            amount: payload.amount,
-            gameId: this.definition.id,
-            gameRoundId: payload.roundId,
-            freeBet: payload.freeBet,
-            clientSentTime: payload.time ?? new Date(),
-            metadata: {
-                mode: `${payload.mode}`,
-            },
-        };
     }
 
     async insertBetLog(player, roundId, bet, rate) {

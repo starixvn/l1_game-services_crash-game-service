@@ -94,6 +94,7 @@ const requestInGame = async (socket, gameInfo) =>
 
         socket.on(gameInfo.name, (data) => {
             if (data.gameConfigs) {
+                console.log(JSON.stringify(data.roundHistory));
                 resolve(true);
             }
 
