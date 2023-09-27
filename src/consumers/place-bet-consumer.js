@@ -1,5 +1,5 @@
 import { BaseEventConsumers } from "sc-game-base/src/core";
-import { Actions, MultiplierValues, NoticeHelper } from "../constants";
+import { Actions, MultiplierValues } from "../constants";
 import { helpers } from "sc-common";
 import noticeHelper from "../helpers/notice-helper";
 

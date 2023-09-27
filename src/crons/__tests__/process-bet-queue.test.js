@@ -3,7 +3,7 @@ import { stub, stubMongooseModelStupidly } from "jest-micro-auto-stub";
 import { cloneDeep } from "lodash";
 import mongoose from "mongoose";
 import logger from "sc-common/logger";
-
+import { calculateMultiplier } from "../../helpers/crash-point-helper";
 import BaseMetrics from "sc-game-base/src/core/base-metrics";
 import { PlaceBetPublisher } from "sc-game-base/src/core/event-publishers";
 import { GameData } from "sc-game-base/src/core";
@@ -11,6 +11,10 @@ import { GameDefinition } from "sc-game-base/src/core";
 import ProcessBetQueue from "../process-bet-queue";
 import { Actions } from "../../constants";
 import noticeHelper from "../../helpers/notice-helper";
+
+jest.mock("../../helpers/crash-point-helper", () => ({
+    calculateMultiplier: jest.fn(),
+}));
 
 describe("ProcessBetQueue", () => {
     jest.mock("sc-game-base/src/core/event-publishers");
@@ -24,6 +28,8 @@ describe("ProcessBetQueue", () => {
             IDR: 0.07099,
         },
     };
+
+    gameData.startTime = new Date();
 
     gameData.gameConfigs = {
         odds: {
@@ -162,10 +168,104 @@ describe("ProcessBetQueue", () => {
         });
 
         describe("when existing bet", () => {
-            it("should NOT publishGameFailed");
+            const bet = { receivedTime: new Date(), amount: chance.natural() };
+
+            beforeEach(() => {
+                betsRepository.findOne().lean().exec.mockReturnValueOnce(bet);
+            });
+
+            it("should NOT publishGameFailed", async () => {
+                // Act
+                await proceedBetQueue.proceedHalfCashOut(player, bet);
+
+                // Assert
+                expect(proceedBetQueue.placeBetPublisher.publishGameFailedBet).not.toBeCalled();
+            });
+
+            it("should call calculateMultiplier", async () => {
+                // Act
+                await proceedBetQueue.proceedHalfCashOut(player, bet);
+
+                // Assert
+                expect(calculateMultiplier).toBeCalledWith(bet.receivedTime - proceedBetQueue.gameData.startTime);
+            });
+
+            it("should call placeBetPublisher.publishSuccessBet", async () => {
+                // Arrange
+                const multiplier = chance.floating({ min: 1, max: 10 });
+                calculateMultiplier.mockReturnValueOnce(multiplier);
+
+                // Act
+                await proceedBetQueue.proceedHalfCashOut(player, bet);
+
+                // Assert
+                expect(proceedBetQueue.placeBetPublisher.publishSuccessBet).toBeCalledWith(player.UID, {
+                    [Actions.HalfCashOut]: { amount: bet.amount / 2, win: (bet.amount / 2) * multiplier },
+                });
+            });
         });
     });
 
+    describe("proceedCashOut", () => {
+        it("should find current round bet", async () => {
+            // Act
+            await proceedBetQueue.proceedCashOut(player, payload);
+
+            // Assert
+            expect(betsRepository.findOne).toBeCalledWith({ uid: player.UID, roundId: gameData.roundId, freeBet: payload.freeBet });
+        });
+
+        describe("when NOT exist bet", () => {
+            it("should publishGameFailedBet", async () => {
+                // Act
+                await proceedBetQueue.proceedHalfCashOut(player, payload);
+
+                // Assert
+                expect(proceedBetQueue.placeBetPublisher.publishGameFailedBet).toBeCalledWith(player.UID, {
+                    endBet: -1,
+                    notice: { errorCode: noticeHelper.invalidCashOut },
+                });
+            });
+        });
+
+        describe("when existing bet", () => {
+            const bet = { receivedTime: new Date(), amount: chance.natural() };
+
+            beforeEach(() => {
+                betsRepository.findOne().lean().exec.mockReturnValueOnce(bet);
+            });
+
+            it("should NOT publishGameFailed", async () => {
+                // Act
+                await proceedBetQueue.proceedHalfCashOut(player, bet);
+
+                // Assert
+                expect(proceedBetQueue.placeBetPublisher.publishGameFailedBet).not.toBeCalled();
+            });
+
+            it("should call calculateMultiplier", async () => {
+                // Act
+                await proceedBetQueue.proceedHalfCashOut(player, bet);
+
+                // Assert
+                expect(calculateMultiplier).toBeCalledWith(bet.receivedTime - proceedBetQueue.gameData.startTime);
+            });
+
+            it("should call placeBetPublisher.publishSuccessBet", async () => {
+                // Arrange
+                const multiplier = chance.floating({ min: 1, max: 10 });
+                calculateMultiplier.mockReturnValueOnce(multiplier);
+
+                // Act
+                await proceedBetQueue.proceedHalfCashOut(player, bet);
+
+                // Assert
+                expect(proceedBetQueue.placeBetPublisher.publishSuccessBet).toBeCalledWith(player.UID, {
+                    [Actions.HalfCashOut]: { amount: bet.amount / 2, win: (bet.amount / 2) * multiplier },
+                });
+            });
+        });
+    });
     const initBetQueue = (placeBet) => {
         return new ProcessBetQueue({
             definition,
