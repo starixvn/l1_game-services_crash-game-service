@@ -1,9 +1,7 @@
 import { Core } from "sc-game-base";
-import { calculateMultiplier } from "../helpers/crash-point-helper";
 
 export default class LiveGamePublisher extends Core.BaseEventPublishers.BaseEventPublisher {
-    publish() {
-        const liveTime = new Date() - this.gameData.startTime;
-        this.publishToAllUsers({ m: calculateMultiplier(liveTime), t: liveTime });
+    publish(multiplier, liveTime) {
+        this.publishToAllUsers({ m: multiplier, t: liveTime });
     }
 }

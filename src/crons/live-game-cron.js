@@ -1,7 +1,10 @@
 import { logger } from "sc-common";
 import LiveGamePublisher from "../event-publishers/live-game-publisher";
+import { calculateCrashTimeInMillisecond, calculateMultiplier } from "../helpers/crash-point-helper";
+import { Actions } from "../constants";
+import { addMillisecond } from "../helpers/date-helper";
 
-export default class LivGameCrons {
+export default class LiveGameCrons {
     /**
      * @param {LiveGamePublisher} dependencies.liveGamePublisher
      * @param {logger} dependencies.logService
@@ -13,11 +16,13 @@ export default class LivGameCrons {
     }
 
     start() {
-        this.proceed();
-
-        this.timeoutId = setInterval(() => {
+        const callback = () => {
             this.proceed();
-        }, 100);
+            this.timeoutId = setTimeout(callback, 100);
+        };
+
+        this.proceed();
+        setTimeout(() => callback(), 100);
     }
 
     stop() {
@@ -25,6 +30,35 @@ export default class LivGameCrons {
     }
 
     proceed() {
-        this.liveGamePublisher.publish();
+        const currentTime = new Date();
+        const liveTime = currentTime - this.gameData.startTime;
+        const multiplier = calculateMultiplier(liveTime);
+
+        this.liveGamePublisher.publish(multiplier, liveTime);
+        this.proceedAutoCashOut(multiplier);
+    }
+
+    proceedAutoCashOut(multiplier) {
+        const inGame = this.gameData.ingame;
+
+        Object.keys(inGame).forEach((playerName) => {
+            const playerInGame = inGame?.[playerName];
+            const bet = playerInGame?.betTracks?.[Actions.Bet];
+            if (bet?.autoCashOut && multiplier >= bet.autoCashOut) {
+                const receivedTime = addMillisecond(this.gameData.startTime, calculateCrashTimeInMillisecond(bet.autoCashOut));
+
+                const payload = {
+                    roundId: this.gameData.roundId,
+                    receivedTime,
+                    action: Actions.CashOut,
+                };
+
+                const player = Object.values(this.gameData.realPlayers).find(
+                    (player) => player.UID === playerInGame.UID && player.socketClient && player.socketClient.connected
+                );
+
+                player && playerInGame.betQueue.push({ player, payload });
+            }
+        });
     }
 }
