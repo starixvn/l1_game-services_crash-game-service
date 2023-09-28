@@ -8,6 +8,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         Object.assign(payload, {
             amount: payload.amount >> 0,
             autoCashOut: payload.autoCashOut >> 0 ?? 0,
+            clientSendTime: payload.clientSendTime,
             freeBet: payload.freeBet ?? false,
             roundId: payload.roundId ?? this.gameData.roundId,
             mode: payload.m ?? this.DisplayMode.Landscape,
@@ -112,17 +113,17 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     }
 
     adjustBetTracks(playerName, bet) {
-        const { amount, receivedTime, autoCashOut } = bet;
+        const { amount, receivedTime, autoCashOut, action } = bet;
 
         if (this.gameData.ingame?.[playerName]) {
             const playerInGame = this.gameData.ingame[playerName];
 
-            playerInGame.betTracks[Actions.Bet] = {
+            playerInGame.betTracks[action] = {
                 amount,
                 time: receivedTime,
             };
             if (autoCashOut > 0) {
-                playerInGame.betTracks[Actions.Bet].autoCashOut = autoCashOut;
+                playerInGame.betTracks[action].autoCashOut = autoCashOut;
             }
         }
     }

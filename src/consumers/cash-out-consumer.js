@@ -1,20 +1,22 @@
 import { BaseEventConsumers } from "sc-game-base/src/core";
-import { Actions } from "../constants";
+import { Actions, MaxDeltaTime } from "../constants";
 import noticeHelper from "../helpers/notice-helper";
 
 export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
     consume(player, payload) {
         Object.assign(payload, {
             roundId: payload.roundId ?? this.gameData.roundId,
+            m: payload.m,
+            clientSendTime: payload.clientSendTime,
             mode: payload.m ?? this.DisplayMode.Landscape,
             receivedTime: new Date(),
             action: payload.halfCashOut ? Actions.HalfCashOut : Actions.CashOut,
         });
 
-        const { freeBet, roundId, halfCashOut } = payload;
+        const { roundId, halfCashOut, clientSendTime, receivedTime } = payload;
         const name = player.profile.name;
 
-        if (!this.validateRequest(player, freeBet, roundId, halfCashOut)) {
+        if (!this.validateRequest(player, roundId, halfCashOut, clientSendTime, receivedTime)) {
             return;
         }
 
@@ -23,11 +25,11 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
         this.gameData.ingame[name].betQueue.push({ player, payload });
     }
 
-    validateRequest(player, roundId, halfCashOut) {
+    validateRequest(player, roundId, halfCashOut, clientSendTime, receivedTime) {
         const name = player.profile.name;
         const configs = this.gameData.gameConfigs;
         const inGame = this.gameData.ingame?.[name];
-
+        const deltaTime = receivedTime - clientSendTime;
         const criteria = [
             {
                 failure: !configs.enabled,
@@ -53,6 +55,10 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 failure: this.gameData.remainingTime > this.definition.durations.liveTime,
                 notice: this.getNoticeObj(noticeHelper.invalidCashOut),
             },
+            {
+                failure: deltaTime < 0 || deltaTime > MaxDeltaTime,
+                notice: this.getNoticeObj(noticeHelper.invalidCashOut),
+            },
         ];
 
         const failedCriterion = criteria.find((criterion) => criterion.failure);
@@ -67,8 +73,7 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
     }
 
     adjustBetTracks(playerName, bet) {
-        const { receivedTime, halfCashOut } = bet;
-        const action = halfCashOut ? Actions.HalfCashOut : Actions.CashOut;
+        const { receivedTime, action } = bet;
 
         if (this.gameData.ingame?.[playerName]) {
             const playerInGame = this.gameData.ingame[playerName];

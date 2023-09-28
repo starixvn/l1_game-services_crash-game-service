@@ -5,8 +5,8 @@ import gameSettings from "../../../src/game-settings";
 import { helpers } from "sc-common";
 import Chance from "chance";
 import { stub } from "jest-micro-auto-stub";
-import { NoticeHelper } from "../../constants";
 import noticeHelper from "../../helpers/notice-helper";
+import { Actions } from "../../constants";
 
 const player = {
     socketId: "scoketId1",
@@ -24,7 +24,8 @@ describe("PlaceBetConsumer", () => {
         amount: chance.natural(),
         freeBet: chance.bool(),
         roundId: chance.natural(),
-        autoCashOut: chance.natural(),
+        autoCashOut: chance.natural({ min: 1 }),
+        action: Actions.bet
     };
     const definition = new Core.GameDefinition(gameSettings);
     const gameData = {
@@ -296,8 +297,8 @@ describe("PlaceBetConsumer", () => {
                 consumer.adjustBetTracks(player.profile.name, payload);
 
                 // Assert
-                expect(gameData.ingame[player.profile.name].betTracks["bet"].amount).toStrictEqual(payload.amount);
-                expect(gameData.ingame[player.profile.name].betTracks["bet"].autoCashOut).toStrictEqual(payload.autoCashOut);
+                expect(gameData.ingame[player.profile.name].betTracks[payload.action].amount).toStrictEqual(payload.amount);
+                expect(gameData.ingame[player.profile.name].betTracks[payload.action].autoCashOut).toStrictEqual(payload.autoCashOut);
             });
         });
     });

@@ -63,7 +63,13 @@ describe("CashOutConsumer", () => {
             consumer.consume(player, payload);
 
             // Assert
-            expect(consumer.validateRequest).toBeCalledWith(player, payload.freeBet, payload.roundId, payload.halfCashOut);
+            expect(consumer.validateRequest).toBeCalledWith(
+                player,
+                payload.roundId,
+                payload.halfCashOut,
+                payload.clientSendTime,
+                payload.receivedTime
+            );
         });
 
         describe("when bet request is invalid", () => {
@@ -312,6 +318,63 @@ describe("CashOutConsumer", () => {
                 expect(result).toBeTruthy();
             });
         });
+
+        describe("when deltaTime valid", () => {
+            it("should NOT publishToUser invalid cash out", () => {
+                // Act
+                const clientSendTime = new Date(2023, 8, 1, 10, 10);
+                const receivedTime = new Date(2023, 8, 1, 10, 10);
+                consumer.validateRequest(player, gameData.roundId, payload.halfCashOut, clientSendTime, receivedTime);
+
+                // Assert
+                expect(consumer.publisher.publishToUser).not.toBeCalled();
+            });
+
+            it("should return true", () => {
+                //Arrange
+                const clientSendTime = new Date(2023, 8, 1, 10, 10);
+                const receivedTime = new Date(2023, 8, 1, 10, 10);
+                // Act
+                const result = consumer.validateRequest(player, gameData.roundId, payload.halfCashOut, clientSendTime, receivedTime);
+
+                // Assert
+                expect(result).toBeTruthy();
+            });
+        });
+
+        describe("when deltaTime invalid", () => {
+            it("should  publishToUser invalid cash out", () => {
+                // Act
+                const clientSendTime = new Date(2023, 8, 1, 10, 10);
+                const receivedTime = new Date(2023, 8, 1, 12, 10);
+                consumer.validateRequest(player, gameData.roundId, payload.halfCashOut, clientSendTime, receivedTime);
+
+                // Assert
+                expect(consumer.publisher.publishToUser).toBeCalled();
+            });
+
+            it("should return false", () => {
+                //Arrange
+                const clientSendTime = new Date(2023, 8, 1, 10, 10);
+                const receivedTime = new Date(2023, 8, 1, 12, 10);
+                // Act
+                const result = consumer.validateRequest(player, gameData.roundId, payload.halfCashOut, clientSendTime, receivedTime);
+
+                // Assert
+                expect(result).toBeFalsy();
+            });
+
+            it("should return false", () => {
+                //Arrange
+                const clientSendTime = new Date(2023, 8, 1, 12, 10);
+                const receivedTime = new Date(2023, 8, 1, 10, 10);
+                // Act
+                const result = consumer.validateRequest(player, gameData.roundId, payload.halfCashOut, clientSendTime, receivedTime);
+
+                // Assert
+                expect(result).toBeFalsy();
+            });
+        });
     });
 
     describe("adjustBetTrack", () => {
@@ -321,6 +384,7 @@ describe("CashOutConsumer", () => {
                 const bet = {
                     halfCashOut: true,
                     receivedTime: new Date(),
+                    action: Actions.HalfCashOut,
                 };
                 gameData.ingame[player.profile.name] = { betTracks: {} };
 
@@ -328,7 +392,7 @@ describe("CashOutConsumer", () => {
                 consumer.adjustBetTracks(player.profile.name, bet);
 
                 // Assert
-                expect(gameData.ingame[player.profile.name].betTracks[Actions.HalfCashOut].time).toEqual(bet.receivedTime);
+                expect(gameData.ingame[player.profile.name].betTracks[bet.action].time).toEqual(bet.receivedTime);
             });
         });
 
@@ -337,6 +401,7 @@ describe("CashOutConsumer", () => {
                 // Arrange
                 const bet = {
                     receivedTime: new Date(),
+                    action: Actions.CashOut,
                 };
                 gameData.ingame[player.profile.name] = { betTracks: {} };
 
@@ -344,7 +409,7 @@ describe("CashOutConsumer", () => {
                 consumer.adjustBetTracks(player.profile.name, bet);
 
                 // Assert
-                expect(gameData.ingame[player.profile.name].betTracks[Actions.CashOut].time).toEqual(bet.receivedTime);
+                expect(gameData.ingame[player.profile.name].betTracks[bet.action].time).toEqual(bet.receivedTime);
             });
         });
     });
