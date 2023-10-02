@@ -25,6 +25,8 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         promotionRepository,
         appConfigs,
         liveGameCrons,
+        betsRepository,
+        betLogsRepository,
     }) {
         super({
             definition,
@@ -50,6 +52,8 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         });
 
         this.liveGameCrons = liveGameCrons;
+        this.betsRepository = betsRepository;
+        this.betsRepository = betLogsRepository;
     }
 
     async start() {
@@ -119,8 +123,8 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         const unsettledBets = await this.betsRepository.find({ paid: false, roundId: this.gameData.roundId }).lean().exec();
 
         if (unsettledBets.length > 0) {
-            const betLogs = await this.betLogsRepository.find({ paid: false, roundId: this.gameData.roundId }).lean().exec();
-            
+            const betLogs = await this.betLogsRepository.find({ roundId: this.gameData.roundId }).lean().exec();
+
             await this.roundResultConsumer.generateResultAndPublishHash(this.gameData.lastResultRecord);
 
             for (const bet of unsettledBets) {
@@ -129,6 +133,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
                 if (!betLog.some((x) => x.action === Actions.CashOut)) {
                     const halfCashOutLog = betLog.find((x) => x.action === Actions.HalfCashOut);
                     const amount = halfCashOutLog ? halfCashOutLog.amount : bet.amount;
+
                     await this.betLogsRepository.create({
                         uid: bet.uid,
                         name: bet.name,
