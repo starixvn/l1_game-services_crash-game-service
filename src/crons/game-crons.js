@@ -157,4 +157,9 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
             await this.settleGameRoundConsumer.settleRound();
         }
     }
+
+    resetForNewRound() {
+        super.resetForNewRound();
+        this.gameData.runningBets = {};
+    }
 }

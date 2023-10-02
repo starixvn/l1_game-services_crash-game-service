@@ -173,6 +173,7 @@ describe("ProcessBetQueue", () => {
                 betsRepository.findOne().lean().exec.mockReturnValueOnce(bet);
                 proceedBetQueue.isCashOutHalfAmount = jest.fn();
                 proceedBetQueue.publishCashOutFailed = jest.fn();
+                proceedBetQueue.adjustRunningBets = jest.fn();
             });
 
             it("should NOT publishGameFailed", async () => {
@@ -259,6 +260,7 @@ describe("ProcessBetQueue", () => {
                     // Assert
                     expect(proceedBetQueue.placeBetPublisher.publishSuccessBet).toBeCalledWith(player.UID, {
                         [action]: { amount, win: amount * multiplier },
+                        player: { name: player.profile.name, playerId: player.UID },
                     });
                 });
             });

@@ -1,11 +1,11 @@
 import awilix from "awilix";
 import { Table } from "sc-game-base";
-import { PlaceBetConsumer, SettleGameRoundConsumer } from "./consumers";
+import { CashOutConsumer, PlaceBetConsumer, SettleGameRoundConsumer } from "./consumers";
 import { Bets, Rounds, Results, BetLogs } from "./models";
 import GameCrons from "./crons/game-crons";
 import { LiveGameCrons } from "./crons";
-import LiveGamePublisher from "./event-publishers/live-game-publisher";
 import RoundQuery from "./query-apis/round-query";
+import { LiveGamePublisher, PlaceBetPublisher } from "./event-publishers";
 
 const { asClass, asValue } = awilix;
 
@@ -26,6 +26,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
 
         this.container.register({
             placeBetConsumer: asClass(PlaceBetConsumer).singleton(),
+            cashOutConsumer: asClass(CashOutConsumer).singleton().singleton(),
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
         });
     }
@@ -35,6 +36,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
 
         this.container.register({
             liveGamePublisher: asClass(LiveGamePublisher).singleton(),
+            placeBetConsumer: asClass(PlaceBetPublisher).singleton(),
         });
     }
 
