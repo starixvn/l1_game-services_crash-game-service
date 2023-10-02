@@ -5,14 +5,16 @@ import { randomInt } from "../helpers/random";
 import config from "../config";
 
 const autoPlaceBet = (socket, gameInfo) => {
-    const { betAmount, userBetEvent } = config.testConfig;
-    const { betChoices } = config.gameInfo;
+    const { betAmount } = config.testConfig;
+    let isPlaceBet = false;
 
-    for (let i = 0; i < userBetEvent; i++) {
-        const betChoice = betChoices[randomInt(0, betChoices.length - 1)];
-
-        placeBet(socket, { amount: betAmount, betChoice }, gameInfo);
-    }
+    socket.on("SpaceFlight", (data) => {
+        if (data.spb) {
+            setTimeout(async () => {
+                isPlaceBet = await placeBet(socket, { amount: betAmount, autoCashOut: 1.5 }, gameInfo);
+            }, 1000);
+        }
+    });
 };
 
 export default async function (playerId, gameInfo) {

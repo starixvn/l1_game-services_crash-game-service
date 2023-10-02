@@ -106,7 +106,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 notice: this.getNoticeObj(helpers.noticeHelper.maxBet, { maxBet }),
             },
             {
-                failure: !MultiplierValues.includes(autoCashOut),
+                failure: autoCashOut && !MultiplierValues.includes(autoCashOut),
                 notice: this.getNoticeObj(noticeHelper.invalidValueCashOut, { autoCashOut }),
             },
         ];
