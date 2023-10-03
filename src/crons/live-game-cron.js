@@ -16,6 +16,8 @@ export default class LiveGameCrons {
     }
 
     start() {
+        this.stop();
+
         const callback = () => {
             this.proceed();
             this.timeoutId = setTimeout(callback, 100);
