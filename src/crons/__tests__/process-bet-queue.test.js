@@ -260,7 +260,8 @@ describe("ProcessBetQueue", () => {
                     // Assert
                     expect(proceedBetQueue.placeBetPublisher.publishSuccessBet).toBeCalledWith(player.UID, {
                         [action]: { amount, win: amount * multiplier },
-                        player: { name: player.profile.name, playerId: player.UID },
+                        name: player.profile.name,
+                        playerId: player.UID,
                     });
                 });
             });
