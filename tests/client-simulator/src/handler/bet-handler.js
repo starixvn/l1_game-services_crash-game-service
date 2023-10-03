@@ -8,7 +8,7 @@ const autoPlaceBet = (socket, gameInfo) => {
     const { betAmount } = config.testConfig;
     let isPlaceBet = false;
 
-    socket.on("SpaceFlight", (data) => {
+    socket.on("Spaceflight", (data) => {
         if (data.spb) {
             setTimeout(async () => {
                 isPlaceBet = await placeBet(socket, { amount: betAmount, autoCashOut: 1.5 }, gameInfo);

@@ -48,7 +48,7 @@ const connectSocket = async (gameInfo) =>
 
         const socket = io(uri, socketOptions);
 
-        socket.on("SpaceFlight", (data) => {
+        socket.on("Spaceflight", (data) => {
             console.log(data);
         });
 

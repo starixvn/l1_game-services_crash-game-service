@@ -8,7 +8,7 @@ export default {
     simulatorUrl: "https://l1-glbs3.lumigame.com",
     proxy: "https://l1-proxy3.lumigame.com",
     gameInfo: {
-        gameNames: ["SpaceFlight"],
+        gameNames: ["Spaceflight"],
         proxyRoute: "/spaceflight/socket.io",
         betChoices: [],
     },
