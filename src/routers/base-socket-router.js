@@ -1,12 +1,6 @@
-import { logger } from "sc-common";
-import { Socket } from "socket.io";
+import { Routers } from "sc-game-base/src/core";
 
-import { PlayGamePermissionValidator } from "../validators";
-import { InGameConsumer, PlaceBetConsumer, UserDisconnectConsumer, UserSignInConsumer } from "./../event-consumers";
-import { UserSignInPublisher } from "./../event-publishers";
-import { HistoryQuery } from "./../query-apis";
-
-export default class BaseSocketRouter {
+export default class BaseSocketRouter extends Routers.BaseSocketRouter {
     constructor({
         definition,
         gameData,

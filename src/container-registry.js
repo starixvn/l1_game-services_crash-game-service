@@ -7,6 +7,7 @@ import { LiveGameCrons } from "./crons";
 import RoundQuery from "./query-apis/round-query";
 import { LiveGamePublisher, PlaceBetPublisher } from "./event-publishers";
 import ProcessBetQueue from "./crons/process-bet-queue";
+import BaseSocketRouter from "./routers/base-socket-router";
 
 const { asClass, asValue } = awilix;
 
@@ -57,6 +58,14 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
 
         this.container.register({
             roundQuery: asClass(RoundQuery).singleton(),
+        });
+    }
+
+    registerRouters() {
+        super.registerRouters();
+
+        this.container.register({
+            socketRouter: asClass(BaseSocketRouter).proxy(),
         });
     }
 }

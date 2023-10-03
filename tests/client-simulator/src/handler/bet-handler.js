@@ -14,6 +14,11 @@ const autoPlaceBet = (socket, gameInfo) => {
                 isPlaceBet = await placeBet(socket, { amount: betAmount, autoCashOut: 1.5 }, gameInfo);
             }, 1000);
         }
+
+        if (isPlaceBet && data.m > 1.5) {
+            socket.emit("cashOut", {});
+            isPlaceBet = false;
+        }
     });
 };
 
