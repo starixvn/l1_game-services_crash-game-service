@@ -4,7 +4,7 @@ const Schema = new mongoose.Schema({
     uid: { type: String, required: true },
     name: { type: String, required: true },
 
-    action: { type: String, required: true },
+    action: { type: String },
     amount: { type: Number, default: 0 },
     winAmount: { type: Number, default: 0 },
     receivedTime: { type: Date, required: true },
