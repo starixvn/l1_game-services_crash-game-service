@@ -94,7 +94,6 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
         this.notifyPlacingBetResult(player, balance, bet, rate);
 
-        // gameData
         this.adjustRunningBets(player, bet.action, bet.amount);
 
         if (!bet.freeBet && (player.profile.minBet !== balance.minBet || player.profile.maxBet !== balance.maxBet)) {

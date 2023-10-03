@@ -6,6 +6,7 @@ import GameCrons from "./crons/game-crons";
 import { LiveGameCrons } from "./crons";
 import RoundQuery from "./query-apis/round-query";
 import { LiveGamePublisher, PlaceBetPublisher } from "./event-publishers";
+import ProcessBetQueue from "./crons/process-bet-queue";
 
 const { asClass, asValue } = awilix;
 
@@ -46,8 +47,8 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
         this.container.register({
             gameCron: asClass(GameCrons).singleton().proxy(),
             liveGameCrons: asClass(LiveGameCrons).singleton().proxy(),
+            processBetQueue: asClass(ProcessBetQueue).singleton().proxy(),
             //bot: asClass(Bot).singleton(),
-            //processBetQueue: asClass(ProcessBetQueue).singleton().proxy(),
         });
     }
 
