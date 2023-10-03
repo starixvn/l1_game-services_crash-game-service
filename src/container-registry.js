@@ -26,7 +26,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
 
         this.container.register({
             placeBetConsumer: asClass(PlaceBetConsumer).singleton(),
-            cashOutConsumer: asClass(CashOutConsumer).singleton().singleton(),
+            cashOutConsumer: asClass(CashOutConsumer).singleton(),
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
         });
     }
