@@ -111,9 +111,13 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         const settleTimeOut = calculateCrashTimeInMillisecond(gameResult);
 
         setTimeout(async () => {
-            this.liveGameCrons.stop();
-            this.gameData.remainingTime = durations.wholeRound;
-            await this.settleGameRoundConsumer.settleRound(this.gameData);
+            try {
+                this.liveGameCrons.stop();
+                this.gameData.remainingTime = durations.wholeRound;
+                await this.settleGameRoundConsumer.settleRound(this.gameData);
+            } catch (err) {
+                this.logService.logError(err);
+            }
         }, settleTimeOut);
 
         this.gameData.startTime = new Date();

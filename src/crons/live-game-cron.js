@@ -30,12 +30,17 @@ export default class LiveGameCrons {
     }
 
     proceed() {
-        const currentTime = new Date();
-        const liveTime = currentTime - this.gameData.startTime;
-        const multiplier = calculateMultiplier(liveTime);
+        try {
+            const currentTime = new Date();
+            const liveTime = currentTime - this.gameData.startTime;
+            const multiplier = calculateMultiplier(liveTime);
 
-        this.liveGamePublisher.publish(multiplier, liveTime);
-        this.proceedAutoCashOut(multiplier);
+            this.liveGamePublisher.publish(multiplier, liveTime);
+            this.proceedAutoCashOut(multiplier);
+        } catch (err) {
+            this.stop();
+            this.logService.logError(err);
+        }
     }
 
     proceedAutoCashOut(multiplier) {
