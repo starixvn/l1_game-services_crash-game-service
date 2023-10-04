@@ -53,7 +53,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
 
         this.liveGameCrons = liveGameCrons;
         this.betsRepository = betsRepository;
-        this.betsRepository = betLogsRepository;
+        this.betLogsRepository = betLogsRepository;
     }
 
     async start() {
