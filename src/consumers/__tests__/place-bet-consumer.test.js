@@ -29,7 +29,7 @@ describe("PlaceBetConsumer", () => {
     };
     const definition = new Core.GameDefinition(gameSettings);
     const gameData = {
-        gameConfigs: { odds: {}, enableFreeBet: false },
+        gameConfigs: { odds: {}, enableFreeBet: false, maxMultiplier: 5000 },
         exchangeRates: { code: {} },
         currencyGroupGames: [{ groupId: player.session.currencyGroupId, minBet: 4, maxBet: 18 }],
         players: {},
@@ -134,7 +134,7 @@ describe("PlaceBetConsumer", () => {
 
     describe("composeBetAmountValidationCriteria", () => {
         describe("when amount < min bet", () => {
-            it("should return failed", () => {
+            it("should return failure with min bet", () => {
                 // Arrange
                 const amount = 3;
                 const expectedValue = { failure: true, notice: { errorCode: helpers.noticeHelper.minBet, minBet: 6 } };
@@ -148,7 +148,7 @@ describe("PlaceBetConsumer", () => {
         });
 
         describe("when amount > max bet ", () => {
-            it("should return failed", () => {
+            it("should return failure with", () => {
                 // Arrange
                 const amount = 19;
                 const expectedValue = { failure: true, notice: { errorCode: helpers.noticeHelper.maxBet, maxBet: 8 } };
@@ -161,12 +161,27 @@ describe("PlaceBetConsumer", () => {
             });
         });
 
-        describe("when have autoCashOut ", () => {
-            it("should return failed", () => {
+        describe("when autoCashOut > max multiplier ", () => {
+            it("should return failure with invalid value cash out", () => {
                 // Arrange
                 const amount = 7;
-                const autoCashOut = 2.1;
-                const expectedValue = { failure: true, notice: { errorCode: noticeHelper.invalidValueCashOut, autoCashOut: 2.1 } };
+                const autoCashOut = 10000.1;
+                const expectedValue = { failure: true, notice: { errorCode: noticeHelper.invalidValueCashOut, autoCashOut: autoCashOut } };
+
+                // Act
+                const actualValue = consumer.composeBetAmountValidationCriteria(player, amount, false, autoCashOut);
+
+                // Assert
+                expect(actualValue[3]).toStrictEqual(expectedValue);
+            });
+        });
+
+        describe("when autoCashOut < min multiplier value ", () => {
+            it("should return failure with invalid cash out", () => {
+                // Arrange
+                const amount = 7;
+                const autoCashOut = 1;
+                const expectedValue = { failure: true, notice: { errorCode: noticeHelper.invalidValueCashOut, autoCashOut: autoCashOut } };
 
                 // Act
                 const actualValue = consumer.composeBetAmountValidationCriteria(player, amount, false, autoCashOut);

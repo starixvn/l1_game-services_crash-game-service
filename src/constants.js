@@ -5,9 +5,9 @@ const Actions = {
     Refund: "refund"
 };
 
-const MultiplierValues = [1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.92, 1.99];
+const MinMultiplierValue = 1.01;
 
 const MaxDeltaTime = 100;
 
-export { Actions, MaxDeltaTime, MultiplierValues };
+export { Actions, MaxDeltaTime, MinMultiplierValue };
 

@@ -1,7 +1,8 @@
 import { BaseEventConsumers } from "sc-game-base/src/core";
-import { Actions, MultiplierValues } from "../constants";
+import { Actions, MaxMultiplierValue, MinMultiplierValue } from "../constants";
 import { helpers } from "sc-common";
 import noticeHelper from "../helpers/notice-helper";
+import { roundFloat } from "../helpers/number-helper";
 
 export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     consume(player, payload) {
@@ -91,6 +92,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         const configs = this.gameData.gameConfigs;
         const minBet = Math.max(player.profile.minBet, settings.minBet);
         const maxBet = Math.min(player.profile.maxBet, settings.maxBet);
+        const roundedAutoCashOut = roundFloat(autoCashOut);
 
         return [
             {
@@ -106,7 +108,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 notice: this.getNoticeObj(helpers.noticeHelper.maxBet, { maxBet }),
             },
             {
-                failure: autoCashOut && !MultiplierValues.includes(autoCashOut),
+                failure: autoCashOut && (roundedAutoCashOut < MinMultiplierValue || roundedAutoCashOut > configs.maxMultiplier),
                 notice: this.getNoticeObj(noticeHelper.invalidValueCashOut, { autoCashOut }),
             },
         ];
@@ -123,7 +125,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 time: receivedTime,
             };
             if (autoCashOut > 0) {
-                playerInGame.betTracks[action].autoCashOut = autoCashOut;
+                playerInGame.betTracks[action].autoCashOut = roundFloat(autoCashOut);
             }
         }
     }

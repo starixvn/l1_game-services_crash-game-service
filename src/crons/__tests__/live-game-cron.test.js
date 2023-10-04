@@ -4,7 +4,7 @@ import { GameData } from "sc-game-base/src/core";
 import { stub } from "jest-micro-auto-stub";
 import { Chance } from "chance";
 import { calculateMultiplier } from "../../helpers/crash-point-helper";
-import { Actions, MultiplierValues } from "../../constants";
+import { Actions, MinMultiplierValue, MultiplierValues } from "../../constants";
 import { addMillisecond } from "../../helpers/date-helper";
 
 jest.mock("../../helpers/crash-point-helper", () => ({
@@ -132,7 +132,7 @@ describe("liveGameCrons", () => {
                 const mockReceivedTime = new Date();
                 const playerName = "name01";
                 const UID = "uid";
-                const autoCashOut = chance.pickone(MultiplierValues);
+                const autoCashOut = MinMultiplierValue;
                 const multiplier = autoCashOut + 0.1;
                 const betQueuePushMock = jest.fn();
                 addMillisecond.mockReturnValueOnce(mockReceivedTime);
