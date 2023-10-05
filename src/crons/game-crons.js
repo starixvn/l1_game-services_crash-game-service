@@ -99,9 +99,13 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
             this.liveGameCrons.start();
         }
 
-        if (this.gameData.remainingTime < durations.placingBets) {
+        if (this.gameData.remainingTime < durations.placingBets && this.gameData.remainingTime > 0) {
             this.bot && (await this.bot.run());
             this.runningRoundInfoPublisher.publish();
+        }
+
+        if(this.gameData.remainingTime < -1) {
+            this.bot && (await this.bot.cashOut());
         }
     }
 

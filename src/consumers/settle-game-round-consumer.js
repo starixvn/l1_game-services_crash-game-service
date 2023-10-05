@@ -1,6 +1,6 @@
-import { BaseEventConsumers } from "sc-game-base/src/core";
+import { EventConsumers } from "sc-game-base/src/table";
 
-export class SettleGameRoundConsumer extends BaseEventConsumers.SettleGameRoundConsumer {
+export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRoundConsumer {
     constructor({
         definition,
         gameData,
@@ -10,20 +10,39 @@ export class SettleGameRoundConsumer extends BaseEventConsumers.SettleGameRoundC
         roundsRepository,
         betsRepository,
         betLogsRepository,
+        tempBetsRepository,
+        tempBetLogsRepository,
     }) {
-        super({ definition, gameData, roundResultPublisher, userBetResultPublisher, endGame, roundsRepository, betsRepository });
+        super({
+            definition,
+            gameData,
+            roundResultPublisher,
+            userBetResultPublisher,
+            endGame,
+            roundsRepository,
+            betsRepository,
+            tempBetsRepository,
+        });
 
         this.betLogsRepository = betLogsRepository;
+        this.tempBetLogsRepository = tempBetLogsRepository;
+    }
+
+    async queryBetLogs(roundId) {
+        const realPlayerBetLogs = await this.betLogsRepository.find({ roundId }).exec();
+        const botBetLogs = await this.tempBetLogsRepository.find({ roundId }).exec();
+
+        return realPlayerBetLogs.concat(botBetLogs);
     }
 
     async settleBets({ roundId, time }) {
         const bets = await this.queryBets(roundId);
-        const betLogs = await this.betLogsRepository.find({ roundId }).lean().exec();
+        const betLogs = await this.queryBetLogs(roundId);
 
         if (bets && bets.length) {
             await Promise.all(
                 bets.map(async (bet) => {
-                    const betLog = betLogs?.filter((log) => log.playerId == bet.playerId);
+                    const betLog = betLogs?.filter((log) => log.uid == bet.uid);
                     const betResult = this.calculateBetResult(bet, betLog);
 
                     bet.betwin = betResult.totalWin;

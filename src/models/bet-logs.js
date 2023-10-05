@@ -7,6 +7,7 @@ const Schema = new mongoose.Schema({
     action: { type: String },
     amount: { type: Number, default: 0 },
     winAmount: { type: Number, default: 0 },
+    multiplier: { type: Number, default: 0 },
     receivedTime: { type: Date, required: true },
 
     time: { type: Date },
@@ -21,4 +22,8 @@ const Schema = new mongoose.Schema({
     roundId: { type: Number, default: 0, required: true },
 });
 
+const tempBetLogs = mongoose.model("crashgame_tmpbetlogs", new mongoose.Schema(Schema));
+
 export default mongoose.model("crashgame_betlogs", Schema);
+export { tempBetLogs };
+

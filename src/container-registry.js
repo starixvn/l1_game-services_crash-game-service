@@ -1,12 +1,13 @@
 import awilix from "awilix";
 import { Table } from "sc-game-base";
 import { CashOutConsumer, InGameConsumer, PlaceBetConsumer, SettleGameRoundConsumer } from "./consumers";
-import { Bets, Rounds, Results, BetLogs } from "./models";
-import GameCrons from "./crons/game-crons";
 import { LiveGameCrons } from "./crons";
-import RoundQuery from "./query-apis/round-query";
-import { LiveGamePublisher, PlaceBetPublisher } from "./event-publishers";
+import Bot from "./crons/bot";
+import GameCrons from "./crons/game-crons";
 import ProcessBetQueue from "./crons/process-bet-queue";
+import { LiveGamePublisher, PlaceBetPublisher } from "./event-publishers";
+import { BetLogs, Bets, Results, Rounds, tempBetLogs, tempBets } from "./models";
+import RoundQuery from "./query-apis/round-query";
 import BaseSocketRouter from "./routers/base-socket-router";
 
 const { asClass, asValue } = awilix;
@@ -20,6 +21,8 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             betsRepository: asValue(Bets),
             resultsRepository: asValue(Results),
             betLogsRepository: asValue(BetLogs),
+            tempBetsRepository: asValue(tempBets),
+            tempBetLogsRepository: asValue(tempBetLogs),
         });
     }
 
@@ -50,7 +53,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             gameCron: asClass(GameCrons).singleton().proxy(),
             liveGameCrons: asClass(LiveGameCrons).singleton().proxy(),
             processBetQueue: asClass(ProcessBetQueue).singleton().proxy(),
-            //bot: asClass(Bot).singleton(),
+            bot: asClass(Bot).singleton(),
         });
     }
 

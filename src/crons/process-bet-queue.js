@@ -53,7 +53,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             this.publishCashOutFailed(player);
         } else {
             const winAmount = roundFloat(amount * multiplier);
-            const betLog = { ...payload, winAmount: winAmount };
+            const betLog = { ...payload, winAmount, multiplier };
 
             await this.insertBetLog(player, roundId, betLog);
             this.adjustRunningBets(player, action, amount, winAmount);

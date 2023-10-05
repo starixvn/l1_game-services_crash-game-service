@@ -5631,10 +5631,10 @@ jest-message-util@^26.6.2:
     slash "^3.0.0"
     stack-utils "^2.0.2"
 
-jest-micro-auto-stub@^1.0.6:
-  version "1.0.6"
-  resolved "http://npm.lumigame.com/jest-micro-auto-stub/-/jest-micro-auto-stub-1.0.6.tgz"
-  integrity sha512-608rrjbLAXlnOPDNvwRbJHrNjVOF0At43k4QFanuSYNVWsH0yxFOPNazVtxdZr5ZD5Cbo8gNuQGw3gEA7YRvFQ==
+jest-micro-auto-stub@1.0.9:
+  version "1.0.9"
+  resolved "https://npm.lumigame.com/jest-micro-auto-stub/-/jest-micro-auto-stub-1.0.9.tgz#bedd0b815e148ab13df68f5ba519316ac5377992"
+  integrity sha512-eLOU9mWzDGnuCgBnExEng0l6nWCEOQ46mzpjVLL7dN49+TPTU0Ulin+WNyOQWas0OadTLTD48uW07LyLjj0axg==
   dependencies:
     jest "^26.6.3"
     mongoose "^5.9.25"

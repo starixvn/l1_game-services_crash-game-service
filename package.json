@@ -46,7 +46,7 @@
         "jest-auto-fixture": "^1.0.6",
         "jest-extended": "^0.11.5",
         "jest-junit": "^16.0.0",
-        "jest-micro-auto-stub": "^1.0.6",
+        "jest-micro-auto-stub": "1.0.9",
         "jest-sonar-reporter": "^2.0.0",
         "sc-semantic-release": "^1.1.0",
         "semantic-release": "^17.1.1",
