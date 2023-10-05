@@ -16,7 +16,7 @@ const autoPlaceBet = (socket, gameInfo) => {
         }
 
         if (isPlaceBet && data.m > 1.5) {
-            socket.emit("cashOut", {});
+            socket.emit("cashOut", { halfCashOut: false });
             isPlaceBet = false;
         }
     });

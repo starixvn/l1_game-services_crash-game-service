@@ -124,11 +124,13 @@ describe("CashOutConsumer", () => {
             gameData.ingame = {
                 [player.profile.name]: {
                     betQueue: [],
-                    [Actions.Bet]: {
-                        time: new Date(),
+                    betTracks: {
+                        [Actions.Bet]: {
+                            time: new Date(),
+                        },
+                        [Actions.CashOut]: undefined,
+                        [Actions.HalfCashOut]: undefined,
                     },
-                    [Actions.CashOut]: undefined,
-                    [Actions.HalfCashOut]: undefined,
                 },
             };
         });
@@ -163,7 +165,9 @@ describe("CashOutConsumer", () => {
                 gameData.ingame = {
                     [player.profile.name]: {
                         betQueue: [],
-                        [Actions.Bet]: undefined,
+                        betTracks: {
+                            [Actions.Bet]: undefined,
+                        },
                     },
                 };
             });
@@ -193,8 +197,10 @@ describe("CashOutConsumer", () => {
                 gameData.ingame = {
                     [player.profile.name]: {
                         betQueue: [],
-                        [Actions.CashOut]: {
-                            time: new Date(),
+                        betTracks: {
+                            [Actions.CashOut]: {
+                                time: new Date(),
+                            },
                         },
                     },
                 };
@@ -225,8 +231,10 @@ describe("CashOutConsumer", () => {
                 gameData.ingame = {
                     [player.profile.name]: {
                         betQueue: [],
-                        [Actions.HalfCashOut]: {
-                            time: new Date(),
+                        betTracks: {
+                            [Actions.HalfCashOut]: {
+                                time: new Date(),
+                            },
                         },
                     },
                 };

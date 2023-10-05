@@ -26,25 +26,52 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
     }
 
     validateRequest(player, roundId, halfCashOut, clientSendTime, receivedTime) {
+        const criteria = this.composeValidationCriteria(roundId, player, halfCashOut, clientSendTime, receivedTime);
+        const failedCriterion = criteria.find((criterion) => criterion.failure);
+
+        if (failedCriterion) {
+            this.publisher.publishToUser(player.UID, { endBet: -1, notice: failedCriterion.notice });
+
+            return false;
+        }
+
+        return true;
+    }
+
+    composeValidationCriteria(roundId, player, isHalfCashOut, clientSendTime, receivedTime) {
         const name = player.profile.name;
+        const betTracks = this.gameData.ingame?.[name]?.betTracks;
+
+        const bettingTimeValidationCriteria = this.composeBettingTimeValidationCriteria(roundId, clientSendTime, receivedTime);
+        const betTrackValidationCriteria = this.composeBetTrackValidationCriteria(betTracks, isHalfCashOut);
+
+        return bettingTimeValidationCriteria.concat(betTrackValidationCriteria);
+    }
+
+    composeBetTrackValidationCriteria(betTracks, isHalfCashOut) {
+        return [
+            {
+                failure: !betTracks?.[Actions.Bet]?.time,
+                notice: this.getNoticeObj(noticeHelper.invalidCashOut),
+            },
+            {
+                failure: betTracks?.[Actions.CashOut]?.time,
+                notice: this.getNoticeObj(noticeHelper.invalidCashOut),
+            },
+            {
+                failure: isHalfCashOut && betTracks?.[Actions.HalfCashOut]?.time,
+                notice: this.getNoticeObj(noticeHelper.invalidCashOut),
+            },
+        ];
+    }
+
+    composeBettingTimeValidationCriteria(roundId, clientSendTime, receivedTime) {
         const configs = this.gameData.gameConfigs;
-        const inGame = this.gameData.ingame?.[name];
         const deltaTime = receivedTime - clientSendTime;
-        const criteria = [
+
+        return [
             {
                 failure: !configs.enabled,
-                notice: this.getNoticeObj(noticeHelper.invalidCashOut),
-            },
-            {
-                failure: !inGame?.[Actions.Bet]?.time,
-                notice: this.getNoticeObj(noticeHelper.invalidCashOut),
-            },
-            {
-                failure: inGame?.[Actions.CashOut]?.time,
-                notice: this.getNoticeObj(noticeHelper.invalidCashOut),
-            },
-            {
-                failure: halfCashOut && inGame?.[Actions.HalfCashOut]?.time,
                 notice: this.getNoticeObj(noticeHelper.invalidCashOut),
             },
             {
@@ -60,16 +87,6 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 notice: this.getNoticeObj(noticeHelper.invalidCashOut),
             },
         ];
-
-        const failedCriterion = criteria.find((criterion) => criterion.failure);
-
-        if (failedCriterion) {
-            this.publisher.publishToUser(player.UID, { endBet: -1, notice: failedCriterion.notice });
-
-            return false;
-        }
-
-        return true;
     }
 
     adjustBetTracks(playerName, bet) {

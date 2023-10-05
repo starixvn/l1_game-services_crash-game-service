@@ -4,12 +4,12 @@ export default {
     // simulatorUrl: "https://l2-glbs.lumigame.com",
     // proxy: "https://l2-proxy.lumigame.com",
     system: "SC1",
-    owUrl: "https://l1-ows3.lumigame.com/SabaClub",
-    simulatorUrl: "https://l1-glbs3.lumigame.com",
-    proxy: "https://l1-proxy3.lumigame.com",
+    owUrl: "https://l1-ows2.lumigame.com/SabaClub",
+    simulatorUrl: "https://l1-glbs2.lumigame.com",
+    proxy: "https://l1-proxy2.lumigame.com",
     gameInfo: {
         gameNames: ["Spaceflight"],
-        proxyRoute: "/spaceflight/socket.io",
+        proxyRoute: "/socket.io",
         betChoices: [],
     },
     testConfig: {

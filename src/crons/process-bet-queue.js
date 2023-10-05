@@ -36,7 +36,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         const { receivedTime, freeBet, action } = payload;
         const { roundId, startTime, result } = this.gameData;
 
-        const bet = await this.betsRepository.findOne({ uid: player.UID, roundId, freeBet: freeBet }).lean().exec();
+        const bet = await this.betsRepository.findOne({ uid: player.UID, roundId, freeBet: !!freeBet }).lean().exec();
 
         if (!bet) {
             this.publishCashOutFailed(player);
@@ -101,7 +101,9 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         }
     }
 
-    async insertBetLog(player, roundId, bet, rate) {
+    async insertBetLog(player, roundId, bet) {
+        const rate = this.calculateCurrencyRate(player.session);
+
         const newBetLog = {
             uid: player.UID,
             name: player.profile.name,
