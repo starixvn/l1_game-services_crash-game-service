@@ -96,14 +96,17 @@ describe("getBotsToCashOut", () => {
                 1: {
                     totalBet: 100,
                     cashOut: true,
+                    multiplier: 2
                 },
                 2: {
                     totalBet: 200,
                     cashOut: true,
+                    multiplier: 3,
                 },
                 3: {
                     totalBet: 300,
                     cashOut: true,
+                    multiplier: 2.5,
                 },
             };
 
@@ -114,7 +117,7 @@ describe("getBotsToCashOut", () => {
             expect(botsToCashOut).toBeEmpty();
         });
     });
-    
+
     describe("when botsHaveCashOut length is less than maxCashOutBot", () => {
         it("should return the correct number of bots to cash out ", () => {
             //Arrange
