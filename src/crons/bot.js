@@ -127,6 +127,8 @@ export default class Bot extends Table.Crons.TableGameBot {
             const botsToCashOut = botsHaveBet.filter((bot) => !bot.cashOut);
             return this.chance.pickset(botsToCashOut, this.chance.integer({ min: 0, max: maxCashOutBot - botsHaveCashOut.length }));
         }
+
+        return [];
     }
 
     updateBotInRoomData(bot, amount, balance) {

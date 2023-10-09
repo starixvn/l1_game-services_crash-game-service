@@ -3,10 +3,13 @@ import mongoose from "mongoose";
 import { BaseEventPublisher } from "sc-game-base/src/core/event-publishers";
 import { TableGameData, TableGameDefinition } from "sc-game-base/src/table";
 import gameSettings from "../../game-settings";
+import { calculateMultiplier } from "../../helpers/crash-point-helper";
 import Bot from "../bot";
 
 jest.mock("sc-game-base/src/core/event-publishers/base-event-publisher");
-
+jest.mock("../../helpers/crash-point-helper", () => ({
+    calculateMultiplier: jest.fn(),
+}));
 const tempBetsRepository = stubMongoose(mongoose.Model);
 const tempBetLogsRepository = stubMongoose(mongoose.Model);
 const userInfosRepository = stubMongoose(mongoose.Model);
@@ -20,6 +23,7 @@ function initBot() {
 
 afterEach(() => {
     jest.clearAllMocks();
+    gameData.remainingTIme = 0;
 });
 
 describe("getRemovalBotIds", () => {
@@ -73,6 +77,7 @@ describe("getBotsToCashOut", () => {
             //Arrange
             const bot = initBot();
             bot.gameData.startTime = new Date(new Date() - 4000);
+            calculateMultiplier.mockReturnValueOnce(3);
 
             //Act
             const botsToCashOut = bot.getBotsToCashOut();
@@ -85,6 +90,7 @@ describe("getBotsToCashOut", () => {
         it("should return an empty array", () => {
             //Arrange
             const bot = initBot();
+            calculateMultiplier.mockReturnValueOnce(3);
             bot.gameData.startTime = new Date(new Date() - 4000);
             bot.botsInRoom = {
                 1: {
@@ -108,53 +114,31 @@ describe("getBotsToCashOut", () => {
             expect(botsToCashOut).toBeEmpty();
         });
     });
+    
+    describe("when botsHaveCashOut length is less than maxCashOutBot", () => {
+        it("should return the correct number of bots to cash out ", () => {
+            //Arrange
+            const bot = initBot();
+            bot.gameData.startTime = new Date(new Date() - 4000);
 
-    /* it("should return all bots if the multiplier is greater than the cash out boundary", () => {
-        const botsInRoom = {
-            bot1: {
-                totalBet: 100,
-                cashOut: false,
-            },
-            bot2: {
-                totalBet: 200,
-                cashOut: false,
-            },
-            bot3: {
-                totalBet: 300,
-                cashOut: false,
-            },
-        };
-        const cashOutBoundary = 1.5;
+            bot.botsInRoom = {
+                1: { totalBet: 1, cashOut: false },
+                2: { totalBet: 2, cashOut: false },
+                3: { totalBet: 2, cashOut: false },
+                4: { totalBet: 2, cashOut: false },
+                5: { totalBet: 2, cashOut: false },
+            };
 
-        jest.mock("./calculateMultiplier", () => () => 2.0);
+            bot.chance = {
+                pickset: jest.fn().mockReturnValue([bot.botsInRoom[1]]),
+                integer: jest.fn().mockReturnValue(1),
+            };
+            calculateMultiplier.mockReturnValueOnce(3);
+            //Act
+            const result = bot.getBotsToCashOut();
 
-        const botsToCashOut = getBotsToCashOut({ botsInRoom, cashOutBoundary, chance });
-
-        expect(botsToCashOut).toEqual(["bot1", "bot2", "bot3"]);
+            //Assert
+            expect(result).toContain(bot.botsInRoom[1]);
+        });
     });
-
-    it("should return a random subset of bots if the multiplier is less than the cash out boundary", () => {
-        const botsInRoom = {
-            bot1: {
-                totalBet: 100,
-                cashOut: false,
-            },
-            bot2: {
-                totalBet: 200,
-                cashOut: false,
-            },
-            bot3: {
-                totalBet: 300,
-                cashOut: false,
-            },
-        };
-        const cashOutBoundary = 1.5;
-
-        jest.mock("./calculateMultiplier", () => () => 1.0);
-
-        const botsToCashOut = getBotsToCashOut({ botsInRoom, cashOutBoundary, chance });
-
-        expect(botsToCashOut.length).toBeLessThanOrEqual(botsInRoom.length);
-        expect(botsToCashOut.every((bot) => botsInRoom.hasOwnProperty(bot))).toBeTruthy();
-    }); */
 });
