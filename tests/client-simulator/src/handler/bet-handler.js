@@ -1,7 +1,6 @@
 import getSSOToken from "./sso-handler";
 import { authorize } from "./authorize-handler.js";
 import { joinGame, placeBet } from "./socket-handler";
-import { randomInt } from "../helpers/random";
 import config from "../config";
 
 const autoPlaceBet = (socket, gameInfo) => {
@@ -11,7 +10,8 @@ const autoPlaceBet = (socket, gameInfo) => {
     socket.on("Spaceflight", (data) => {
         if (data.spb) {
             setTimeout(async () => {
-                isPlaceBet = await placeBet(socket, { amount: betAmount, autoCashOut: 1.5 }, gameInfo);
+                isPlaceBet = true;
+                await placeBet(socket, { amount: betAmount }, gameInfo);
             }, 1000);
         }
 

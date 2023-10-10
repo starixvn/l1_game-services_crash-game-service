@@ -1,6 +1,6 @@
-import { stub, stubMongoose } from "jest-micro-auto-stub";
+import { stub, stubMongooseModelStupidly } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
-import { Core } from "sc-game-base";
+import { Table, Core } from "sc-game-base";
 import GameData from "sc-game-base/src/core/game-data";
 import { RoundQuery } from "../../query-apis/round-query";
 import { InGameConsumer } from "../in-game-consumer";
@@ -19,7 +19,7 @@ describe("in game consumer instance", () => {
     const gameData = new GameData(0);
 
     /** @type {mongoose.Model}*/
-    const userInfosRepository = stubMongoose(mongoose.Model);
+    const userInfosRepository = stubMongooseModelStupidly(mongoose.Model);
     const roundQuery = stub(RoundQuery);
     const publisher = stub(Core.BaseEventPublishers.BaseEventPublisher);
     const getBalance = jest.fn();
@@ -34,14 +34,14 @@ describe("in game consumer instance", () => {
 
     const consumer = new InGameConsumer(definition, gameData, roundQuery, publisher, getBalance, userInfosRepository);
 
-    it("should be instance of Core.BaseEventConsumers.InGameConsumer", () => {
-        expect(consumer instanceof Core.BaseEventConsumers.InGameConsumer).toBeTruthy();
+    it("should be instance of Table.EventConsumers.TableInGameConsumer", () => {
+        expect(consumer instanceof Table.EventConsumers.TableInGameConsumer).toBeTruthy();
     });
 
     describe("buildPayload tests", () => {
         const basePayload = { roundId: 1, gameConfigs: {}, roundHistory: [], ownBets: {}, totalBets: {}, user: {} };
         beforeEach(() => {
-            spyOn(Core.BaseEventConsumers.InGameConsumer.prototype, "buildPayload").and.callFake(() => basePayload);
+            spyOn(Table.EventConsumers.TableInGameConsumer.prototype, "buildPayload").and.callFake(() => basePayload);
         });
 
         it("should call super.buildPayload", async () => {
@@ -49,7 +49,7 @@ describe("in game consumer instance", () => {
             await consumer.buildPayload(realPlayer);
 
             // assert
-            expect(Core.BaseEventConsumers.InGameConsumer.prototype.buildPayload).toHaveBeenCalled();
+            expect(Table.EventConsumers.TableInGameConsumer.prototype.buildPayload).toHaveBeenCalled();
         });
 
         it("should return correct result when remaining time greater than finish first half", async () => {

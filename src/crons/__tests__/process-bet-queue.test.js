@@ -61,9 +61,10 @@ describe("ProcessBetQueue", () => {
     const betsRepository = { findOne: jest.fn().mockReturnValue({ lean: jest.fn().mockReturnValue({ exec: jest.fn() }) }) };
 
     /** @type {mongoose.Model}*/
-    const betLogsRepository = stubMongooseModelStupidly(mongoose.Model);
-    betLogsRepository.create = jest.fn();
-    betLogsRepository.findOne = jest.fn().mockReturnValue({ lean: jest.fn().mockReturnValue({ exec: jest.fn() }) });
+    const betLogsRepository = {
+        create: jest.fn(),
+        findOne: jest.fn().mockReturnValue({ lean: jest.fn().mockReturnValue({ exec: jest.fn() }) }),
+    };
 
     /** @type {mongoose.Model}*/
     const userInfosRepository = stubMongooseModelStupidly(mongoose.Model);
@@ -233,19 +234,6 @@ describe("ProcessBetQueue", () => {
                     expect(proceedBetQueue.publishCashOutFailed).not.toBeCalled();
                 });
 
-                it("should call betLogsRepository.findOne", async () => {
-                    // Act
-                    await proceedBetQueue.proceedCashOut(player, payload);
-
-                    // Assert
-                    expect(betLogsRepository.findOne).toBeCalledWith({
-                        uid: player.UID,
-                        roundId: payload.roundId,
-                        freeBet: payload.freeBet,
-                        action: Actions.HalfCashOut,
-                    });
-                });
-
                 describe("when action is Cash Out", () => {
                     describe("when NOT exist halfCashOut bet logs", () => {
                         it("should call betLogsRepository.findOne", async () => {
@@ -255,7 +243,7 @@ describe("ProcessBetQueue", () => {
                             // Assert
                             expect(betLogsRepository.findOne).toBeCalledWith({
                                 uid: player.UID,
-                                roundId,
+                                roundId: gameData.roundId,
                                 freeBet: payload.freeBet,
                                 action: Actions.HalfCashOut,
                             });
@@ -302,9 +290,9 @@ describe("ProcessBetQueue", () => {
                     });
                 });
 
-                describe("when action is Half Cash Out", () => {
-                    it("should NOT call betLogs repository.findOne");
-                });
+                // describe("when action is Half Cash Out", () => {
+                //     it("should NOT call betLogs repository.findOne");
+                // });
             });
         });
     });
