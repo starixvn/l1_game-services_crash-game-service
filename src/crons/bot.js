@@ -1,9 +1,10 @@
 import Chance from "chance";
 import { helpers } from "sc-common";
 import { Constants, Table } from "sc-game-base";
-import constants, { Actions } from "../constants";
+import { Actions, Chips } from "../constants";
 import { calculateMultiplier } from "../helpers/crash-point-helper";
 import { roundFloat } from "../helpers/number-helper";
+
 export default class Bot extends Table.Crons.TableGameBot {
     /**
      * @param {Table.TableGameDefinition} definition
@@ -94,7 +95,7 @@ export default class Bot extends Table.Crons.TableGameBot {
                     }
 
                     const action = bot.cashOut ? Actions.CashOut : Actions.HalfCashOut;
-                    const amount = bot.halfCashOut ? roundFloat(bet.totalBet / 2) : bet.totalBet;
+                    const amount = bot.halfCashOut ? roundFloat(bot.totalBet / 2) : bot.totalBet;
                     const multiplier = calculateMultiplier(new Date() - startTime);
 
                     if (multiplier < result) {
@@ -146,7 +147,7 @@ export default class Bot extends Table.Crons.TableGameBot {
     }
 
     convertAmountToChip(amount) {
-        const chipList = constants.chips.filter((chip) => amount % chip === 0);
+        const chipList = Chips.filter((chip) => amount % chip === 0);
 
         return chipList.length > 0 ? chipList[0] : this.getMinBet();
     }
@@ -172,6 +173,7 @@ export default class Bot extends Table.Crons.TableGameBot {
             name: bot.name,
             roundId: this.gameData.roundId,
             time: new Date(),
+            receivedTime: new Date(),
             currency: " ",
             operatorId: " ",
             amount,
@@ -181,6 +183,6 @@ export default class Bot extends Table.Crons.TableGameBot {
             multiplier,
         };
 
-        await this.tempBetsRepository.create(newBet);
+        await this.tempBetLogsRepository.create(newBet);
     }
 }
