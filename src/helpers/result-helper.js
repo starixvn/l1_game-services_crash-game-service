@@ -34,14 +34,10 @@ function random6(max) {
     return randomInteger(MinRandomValue, max);
 }
 
-function random7(max) {
-    return Math.floor(Math.random() * (max - MinRandomValue + 1)) + MinRandomValue;
-}
-
 const randomModes = {
     1: [random1, random2, random3, random4, random5],
     2: [random2, random3, random6],
-    3: [random7, random5],
+    3: [random6, random5],
 };
 
 const generateResult = (randomMode, maxMultiplier = 2 ** 16) => {

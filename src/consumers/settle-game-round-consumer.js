@@ -42,7 +42,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
         if (bets && bets.length) {
             await Promise.all(
                 bets.map(async (bet) => {
-                    const betLog = betLogs?.filter((log) => log.uid == bet.uid);
+                    const betLog = betLogs?.filter((log) => log.uid === bet.uid);
                     const betResult = this.calculateBetResult(bet, betLog);
 
                     bet.betwin = betResult.totalWin;

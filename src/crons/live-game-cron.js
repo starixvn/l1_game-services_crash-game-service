@@ -4,7 +4,7 @@ import { calculateCrashTimeInMillisecond, calculateMultiplier } from "../helpers
 import { Actions } from "../constants";
 import { addMillisecond } from "../helpers/date-helper";
 
-export default class LiveGameCrons {
+export default class LiveGameCron {
     /**
      * @param {LiveGamePublisher} dependencies.liveGamePublisher
      * @param {logger} dependencies.logService

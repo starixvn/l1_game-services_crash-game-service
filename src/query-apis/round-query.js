@@ -11,7 +11,7 @@ export default class RoundQuery extends QueryApis.RoundQuery {
             .lean()
             .exec();
 
-        const roundHistory = await Promise.all(
+        return Promise.all(
             rounds.map(async (round) => {
                 const result = round.result || this.convertResult(round);
                 const md5Result = this.resultsRepository ? await this.getMd5Result(round.id) : {};
@@ -23,8 +23,6 @@ export default class RoundQuery extends QueryApis.RoundQuery {
                 };
             })
         );
-
-        return roundHistory;
     }
 
     async getMd5Result(roundId) {
