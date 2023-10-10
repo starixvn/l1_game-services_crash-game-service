@@ -105,6 +105,107 @@ describe("ProcessBetQueue", () => {
         };
     });
 
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    describe("dequeueBets", () => {
+        beforeEach(() => {
+            proceedBetQueue.proceedActions = jest.fn();
+        });
+
+        describe("when gameData.inGame is undefined", () => {
+            it("should not call proceedActions", () => {
+                // Arrange
+                gameData.ingame = undefined;
+
+                // Act
+                proceedBetQueue.dequeueBets();
+
+                // Assert
+                expect(proceedBetQueue.proceedActions).not.toBeCalled();
+            });
+        });
+
+        describe("when gameData.inGame is empty", () => {
+            it("should not call proceedActions", () => {
+                // Arrange
+                gameData.ingame = {};
+
+                // Act
+                proceedBetQueue.dequeueBets();
+
+                // Assert
+                expect(proceedBetQueue.proceedActions).not.toBeCalled();
+            });
+        });
+
+        describe("when gameData.inGame is not empty", () => {
+            describe("when playerInGame.betProcessing is true", () => {
+                it("should not call proceedActions", () => {
+                    // Arrange
+                    gameData.ingame.player01.betProcessing = true;
+
+                    // Act
+                    proceedBetQueue.dequeueBets();
+
+                    // Assert
+                    expect(proceedBetQueue.proceedActions).not.toBeCalled();
+                });
+            });
+
+            describe("when playerInGame.betQueue is undefined", () => {
+                it("should not call proceedActions", () => {
+                    // Arrange
+                    gameData.ingame.player01.betQueue = undefined;
+
+                    // Act
+                    proceedBetQueue.dequeueBets();
+
+                    // Assert
+                    expect(proceedBetQueue.proceedActions).not.toBeCalled();
+                });
+            });
+
+            describe("when playerInGame.betQueue is empty", () => {
+                it("should not call proceedActions", () => {
+                    // Arrange
+                    gameData.ingame.player01.betQueue = [];
+
+                    // Act
+                    proceedBetQueue.dequeueBets();
+
+                    // Assert
+                    expect(proceedBetQueue.proceedActions).not.toBeCalled();
+                });
+            });
+
+            describe("when playerInGame.betProcessing is false and betQueue is not empty", () => {
+                it("should call proceedActions", () => {
+                    // Arrange
+                    proceedBetQueue.proceedActions = jest.fn().mockResolvedValueOnce({});
+
+                    // Act
+                    proceedBetQueue.dequeueBets();
+
+                    // Assert
+                    expect(proceedBetQueue.proceedActions).toBeCalledWith({}, {});
+                });
+
+                it("should update playerInGame.processingBet to true", () => {
+                    // Arrange
+                    proceedBetQueue.proceedActions = jest.fn().mockResolvedValueOnce({});
+
+                    // Act
+                    proceedBetQueue.dequeueBets();
+
+                    // Assert
+                    expect(gameData.ingame.player01.betProcessing).toBeTruthy();
+                });
+            });
+        });
+    });
+
     describe("proceedActions", () => {
         beforeEach(() => {
             proceedBetQueue.proceedBet = jest.fn();
@@ -293,6 +394,98 @@ describe("ProcessBetQueue", () => {
                 // describe("when action is Half Cash Out", () => {
                 //     it("should NOT call betLogs repository.findOne");
                 // });
+            });
+        });
+    });
+
+    describe("handleSuccessBet", () => {
+        const player = {
+                session: chance.guid(),
+                profile: {
+                    minBet: chance.natural(),
+                    maxBet: chance.natural(),
+                },
+            },
+            balance = {
+                minBet: chance.natural(),
+                maxBet: chance.natural(),
+            },
+            roundId = chance.natural(),
+            rate = chance.floating({ min: 1 });
+
+        beforeEach(() => {
+            proceedBetQueue.calculateCurrencyRate = jest.fn().mockReturnValueOnce(rate);
+            proceedBetQueue.insertBet = jest.fn();
+            proceedBetQueue.notifyPlacingBetResult = jest.fn();
+            proceedBetQueue.adjustRunningBets = jest.fn();
+            proceedBetQueue.updateUserStakeLevel = jest.fn();
+        });
+
+        it("should call calculateCurrencyRate", async () => {
+            // Act
+            await proceedBetQueue.handleSuccessBet(player, balance, roundId, payload);
+
+            // Assert
+            expect(proceedBetQueue.calculateCurrencyRate).toBeCalledWith(player.session);
+        });
+
+        it("should call insertBet", async () => {
+            // Act
+            await proceedBetQueue.handleSuccessBet(player, balance, roundId, payload);
+
+            // Assert
+            expect(proceedBetQueue.insertBet).toBeCalledWith(player, roundId, payload, rate);
+        });
+
+        it("should call notifyPlacingBetResult", async () => {
+            // Act
+            await proceedBetQueue.handleSuccessBet(player, balance, roundId, payload);
+
+            // Assert
+            expect(proceedBetQueue.notifyPlacingBetResult).toBeCalledWith(player, balance, payload, rate);
+        });
+
+        it("should call adjustRunningBets", async () => {
+            // Act
+            await proceedBetQueue.handleSuccessBet(player, balance, roundId, payload);
+
+            // Assert
+            expect(proceedBetQueue.adjustRunningBets).toBeCalledWith(player, payload.action, payload.amount);
+        });
+
+        describe("when bet is free bet", () => {
+            it("should not call updateUserStakeLevel", async () => {
+                // Act
+                await proceedBetQueue.handleSuccessBet(player, balance, roundId, { ...payload, freeBet: true });
+
+                // Assert
+                expect(proceedBetQueue.updateUserStakeLevel).not.toBeCalled();
+            });
+        });
+
+        describe("when bet is not free bet and user stake level is not updated", () => {
+            it("should not call updateUserStakeLevel", async () => {
+                // Arrange
+                const res = {
+                    minBet: player.profile.minBet,
+                    maxBet: player.profile.maxBet,
+                };
+
+                // Act
+                await proceedBetQueue.handleSuccessBet(player, res, roundId, { ...payload, freeBet: false });
+
+                // Assert
+                expect(proceedBetQueue.updateUserStakeLevel).not.toBeCalled();
+            });
+        });
+
+        describe("when bet is not free bet and user stake level is updated", () => {
+            it("should call updateUserStakeLevel", async () => {
+                // Act
+                await proceedBetQueue.handleSuccessBet(player, balance, roundId, payload);
+
+                // Assert
+                expect(proceedBetQueue.updateUserStakeLevel).toBeCalledWith(player, balance.minBet, balance.maxBet);
             });
         });
     });
