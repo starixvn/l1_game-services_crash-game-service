@@ -44,7 +44,7 @@ const connectSocket = async (gameInfo) =>
             },
         };
 
-        const uri = `http://localhost:5000/user/${gameInfo.name.toLowerCase()}`;
+        const uri = `${config.proxy}/user/${gameInfo.name.toLowerCase()}`;
 
         const socket = io(uri, socketOptions);
 

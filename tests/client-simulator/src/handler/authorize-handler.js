@@ -17,7 +17,7 @@ export const signName = async (authorizeInfo) => {
 };
 
 export const authorize = async (ssoToken) => {
-    const result = await axios.get(`http://127.0.0.1:5001/auth/sso?token=${ssoToken}&system=1`, {
+    const result = await axios.get(`${userServiceUrl}/auth/sso?token=${ssoToken}&system=1`, {
         "user-agent": userAgent,
     });
 
