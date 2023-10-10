@@ -29,8 +29,8 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
     }
 
     async queryBetLogs(roundId) {
-        const realPlayerBetLogs = await this.betLogsRepository.find({ roundId }).exec();
-        const botBetLogs = await this.tempBetLogsRepository.find({ roundId }).exec();
+        const realPlayerBetLogs = await this.betLogsRepository.find({ roundId }).lean().exec();
+        const botBetLogs = await this.tempBetLogsRepository.find({ roundId }).lean().exec();
 
         return realPlayerBetLogs.concat(botBetLogs);
     }

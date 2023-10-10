@@ -1,3 +1,9 @@
+variables:
+  SMOKE_PRODUCT_NAME: SpaceFlight    
+  ENABLE_NODEJS_INTEGRATION_TEST: 'false'
+  NODEJS_INTEGRATION_TEST_IMAGE_VERSION: hub.lumigame.com/docker-hub/library/node:18.1-alpine
+  NODEJS_INTEGRATION_TEST_DB_IMAGE_VERSION: hub.lumigame.com/docker-hub/library/mongo:4.4.8
+
 include:
   - project: ci/core-cicd
     ref: main

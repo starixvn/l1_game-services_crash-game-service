@@ -983,6 +983,24 @@
   resolved "http://npm.lumigame.com/@commitlint%2ftypes/-/types-9.1.2.tgz"
   integrity sha512-r3fwVbVH+M8W0qYlBBZFsUwKe6NT5qvz+EmU7sr8VeN1cQ63z+3cfXyTo7WGGEMEgKiT0jboNAK3b1FZp8k9LQ==
 
+"@grpc/grpc-js@^1.7.1":
+  version "1.9.5"
+  resolved "https://npm.lumigame.com/@grpc/grpc-js/-/grpc-js-1.9.5.tgz#22e283754b7b10d1ad26c3fb21849028dcaabc53"
+  integrity sha512-iouYNlPxRAwZ2XboDT+OfRKHuaKHiqjB5VFYZ0NFrHkbEF+AV3muIUY9olQsp8uxU4VvRCMiRk9ftzFDGb61aw==
+  dependencies:
+    "@grpc/proto-loader" "^0.7.8"
+    "@types/node" ">=12.12.47"
+
+"@grpc/proto-loader@^0.7.8":
+  version "0.7.10"
+  resolved "https://npm.lumigame.com/@grpc/proto-loader/-/proto-loader-0.7.10.tgz#6bf26742b1b54d0a473067743da5d3189d06d720"
+  integrity sha512-CAqDfoaQ8ykFd9zqBDn4k6iWT9loLAlc2ETmDFS9JCD70gDcnA4L3AFEo2iV7KyAtAAHFW9ftq1Fz+Vsgq80RQ==
+  dependencies:
+    lodash.camelcase "^4.3.0"
+    long "^5.0.0"
+    protobufjs "^7.2.4"
+    yargs "^17.7.2"
+
 "@iarna/cli@^1.2.0":
   version "1.2.0"
   resolved "http://npm.lumigame.com/@iarna%2fcli/-/cli-1.2.0.tgz#0f7af5e851afe895104583c4ca07377a8094d641"
@@ -1338,6 +1356,313 @@
   integrity sha512-kCkiN8scbCmSq+gwdJV0iLgHc0O/GTPY1/cffo9kECu1MvatLPh9E+qFhfRIktKfHEA6ZYvv6S1B4Wnv3bi3pA==
   dependencies:
     "@octokit/openapi-types" "^5.3.2"
+
+"@opentelemetry/api-logs@0.41.2":
+  version "0.41.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/api-logs/-/api-logs-0.41.2.tgz#600c9b3d79018e7421d2ff7189f41b6d2c987d6a"
+  integrity sha512-JEV2RAqijAFdWeT6HddYymfnkiRu2ASxoTBr4WsnGJhOjWZkEy6vp+Sx9ozr1NaIODOa2HUyckExIqQjn6qywQ==
+  dependencies:
+    "@opentelemetry/api" "^1.0.0"
+
+"@opentelemetry/api@^1.0.0":
+  version "1.6.0"
+  resolved "https://npm.lumigame.com/@opentelemetry/api/-/api-1.6.0.tgz#de2c6823203d6f319511898bb5de7e70f5267e19"
+  integrity sha512-OWlrQAnWn9577PhVgqjUvMr1pg57Bc4jv0iL4w0PRuOSRvq67rvHW9Ie/dZVMvCzhSCB+UxhcY/PmCmFj33Q+g==
+
+"@opentelemetry/context-async-hooks@1.15.2":
+  version "1.15.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/context-async-hooks/-/context-async-hooks-1.15.2.tgz#116bd5fef231137198d5bf551e8c0521fbdfe928"
+  integrity sha512-VAMHG67srGFQDG/N2ns5AyUT9vUcoKpZ/NpJ5fDQIPfJd7t3ju+aHwvDsMcrYBWuCh03U3Ky6o16+872CZchBg==
+
+"@opentelemetry/core@1.15.2":
+  version "1.15.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/core/-/core-1.15.2.tgz#5b170bf223a2333884bbc2d29d95812cdbda7c9f"
+  integrity sha512-+gBv15ta96WqkHZaPpcDHiaz0utiiHZVfm2YOYSqFGrUaJpPkMoSuLBB58YFQGi6Rsb9EHos84X6X5+9JspmLw==
+  dependencies:
+    "@opentelemetry/semantic-conventions" "1.15.2"
+
+"@opentelemetry/core@^1.8.0":
+  version "1.17.0"
+  resolved "https://npm.lumigame.com/@opentelemetry/core/-/core-1.17.0.tgz#6a72425f5f953dc68b4c7c66d947c018173d30d2"
+  integrity sha512-tfnl3h+UefCgx1aeN2xtrmr6BmdWGKXypk0pflQR0urFS40aE88trnkOMc2HTJZbMrqEEl4HsaBeFhwLVXsrJg==
+  dependencies:
+    "@opentelemetry/semantic-conventions" "1.17.0"
+
+"@opentelemetry/exporter-jaeger@1.15.2":
+  version "1.15.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/exporter-jaeger/-/exporter-jaeger-1.15.2.tgz#1ac7020d798ec4e47417bd90e00763e0947e17de"
+  integrity sha512-BwYd5836GYvuiQcF4l5X0ca09jGJr/F37MMGyz94VH0b1dp0uYBwRJw2CQh56RlVZEdpKv29JyDRVZ/4UrRgLQ==
+  dependencies:
+    "@opentelemetry/core" "1.15.2"
+    "@opentelemetry/sdk-trace-base" "1.15.2"
+    "@opentelemetry/semantic-conventions" "1.15.2"
+    jaeger-client "^3.15.0"
+
+"@opentelemetry/exporter-trace-otlp-grpc@0.41.2":
+  version "0.41.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/exporter-trace-otlp-grpc/-/exporter-trace-otlp-grpc-0.41.2.tgz#445f850f4675e0afc3e326b2663576fa0b5fbee4"
+  integrity sha512-tRM/mq7PFj7mXCws5ICMVp/rmgU93JvZdoLE0uLj4tugNz231u2ZgeRYXulBjdeHM88ZQSsWTJMu2mvr/3JV1A==
+  dependencies:
+    "@grpc/grpc-js" "^1.7.1"
+    "@opentelemetry/core" "1.15.2"
+    "@opentelemetry/otlp-grpc-exporter-base" "0.41.2"
+    "@opentelemetry/otlp-transformer" "0.41.2"
+    "@opentelemetry/resources" "1.15.2"
+    "@opentelemetry/sdk-trace-base" "1.15.2"
+
+"@opentelemetry/exporter-trace-otlp-http@0.41.2":
+  version "0.41.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/exporter-trace-otlp-http/-/exporter-trace-otlp-http-0.41.2.tgz#4818088c652f2077a55c9c1364d8320e994dc00f"
+  integrity sha512-Y0fGLipjZXLMelWtlS1/MDtrPxf25oM408KukRdkN31a1MEFo4h/ZkNwS7ZfmqHGUa+4rWRt2bi6JBiqy7Ytgw==
+  dependencies:
+    "@opentelemetry/core" "1.15.2"
+    "@opentelemetry/otlp-exporter-base" "0.41.2"
+    "@opentelemetry/otlp-transformer" "0.41.2"
+    "@opentelemetry/resources" "1.15.2"
+    "@opentelemetry/sdk-trace-base" "1.15.2"
+
+"@opentelemetry/exporter-trace-otlp-proto@0.41.2":
+  version "0.41.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/exporter-trace-otlp-proto/-/exporter-trace-otlp-proto-0.41.2.tgz#8e8f823d5264e34dc7c8b400f9d03871c7bfcbc5"
+  integrity sha512-IGZga9IIckqYE3IpRE9FO9G5umabObIrChlXUHYpMJtDgx797dsb3qXCvLeuAwB+HoB8NsEZstlzmLnoa6/HmA==
+  dependencies:
+    "@opentelemetry/core" "1.15.2"
+    "@opentelemetry/otlp-exporter-base" "0.41.2"
+    "@opentelemetry/otlp-proto-exporter-base" "0.41.2"
+    "@opentelemetry/otlp-transformer" "0.41.2"
+    "@opentelemetry/resources" "1.15.2"
+    "@opentelemetry/sdk-trace-base" "1.15.2"
+
+"@opentelemetry/exporter-zipkin@1.15.2":
+  version "1.15.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/exporter-zipkin/-/exporter-zipkin-1.15.2.tgz#4f72482909fd7a197fb614fc1f285b15ca008a39"
+  integrity sha512-j9dPe8tyx4KqIqJAfZ/LCYfkF9+ggsT0V1+bVg9ZKTBNcLf5dTsTMdcxUxc/9s599kgcn6UERnti/tozbzwa6Q==
+  dependencies:
+    "@opentelemetry/core" "1.15.2"
+    "@opentelemetry/resources" "1.15.2"
+    "@opentelemetry/sdk-trace-base" "1.15.2"
+    "@opentelemetry/semantic-conventions" "1.15.2"
+
+"@opentelemetry/instrumentation-http@0.41.2":
+  version "0.41.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/instrumentation-http/-/instrumentation-http-0.41.2.tgz#dad5a693eaad2113ce7ed089fa46ef98d79f2bfc"
+  integrity sha512-dzOC6xkfK0LM6Dzo91aInLdSbdIzKA0IgSDnyLi6YZ0Z7c1bfrFncFx/3gZs8vi+KXLALgfMlpzE7IYDW/cM3A==
+  dependencies:
+    "@opentelemetry/core" "1.15.2"
+    "@opentelemetry/instrumentation" "0.41.2"
+    "@opentelemetry/semantic-conventions" "1.15.2"
+    semver "^7.5.1"
+
+"@opentelemetry/instrumentation-mongoose@0.33.0":
+  version "0.33.0"
+  resolved "https://npm.lumigame.com/@opentelemetry/instrumentation-mongoose/-/instrumentation-mongoose-0.33.0.tgz#8063740274120105f559bcf663125d3f7cc00cb4"
+  integrity sha512-IB4zCJ7vsiILx5hjPH7PtlvKIVN84m3rER8zu7xeaMpfpzD5/khj6et0x1aE+KzPS49nIOZx3qmH67MocSNevg==
+  dependencies:
+    "@opentelemetry/core" "^1.8.0"
+    "@opentelemetry/instrumentation" "^0.41.0"
+    "@opentelemetry/semantic-conventions" "^1.0.0"
+    tslib "^2.3.1"
+
+"@opentelemetry/instrumentation@0.41.2", "@opentelemetry/instrumentation@^0.41.0":
+  version "0.41.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/instrumentation/-/instrumentation-0.41.2.tgz#cae11fa64485dcf03dae331f35b315b64bc6189f"
+  integrity sha512-rxU72E0pKNH6ae2w5+xgVYZLzc5mlxAbGzF4shxMVK8YC2QQsfN38B2GPbj0jvrKWWNUElfclQ+YTykkNg/grw==
+  dependencies:
+    "@types/shimmer" "^1.0.2"
+    import-in-the-middle "1.4.2"
+    require-in-the-middle "^7.1.1"
+    semver "^7.5.1"
+    shimmer "^1.2.1"
+
+"@opentelemetry/instrumentation@^0.34.0":
+  version "0.34.0"
+  resolved "https://npm.lumigame.com/@opentelemetry/instrumentation/-/instrumentation-0.34.0.tgz#bae86da46ea4466594689975cd10f0c3720b4071"
+  integrity sha512-VET/bOh4StOQV4vf1sAvn2JD67BhW2vPZ/ynl2gHXyafme2yB8Hs9+tr1TLzFwNGo7jwMFviFQkZjCYxMuK0AA==
+  dependencies:
+    require-in-the-middle "^5.0.3"
+    semver "^7.3.2"
+    shimmer "^1.2.1"
+
+"@opentelemetry/otlp-exporter-base@0.41.2":
+  version "0.41.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/otlp-exporter-base/-/otlp-exporter-base-0.41.2.tgz#5928dfedb2a70117f03809862cf2cbdf8b7f9bf3"
+  integrity sha512-pfwa6d+Dax3itZcGWiA0AoXeVaCuZbbqUTsCtOysd2re8C2PWXNxDONUfBWsn+KgxAdi+ljwTjJGiaVLDaIEvQ==
+  dependencies:
+    "@opentelemetry/core" "1.15.2"
+
+"@opentelemetry/otlp-grpc-exporter-base@0.41.2":
+  version "0.41.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/otlp-grpc-exporter-base/-/otlp-grpc-exporter-base-0.41.2.tgz#b056915aa274947517ac86b0c78533db274404e8"
+  integrity sha512-OErK8dYjXG01XIMIpmOV2SzL9ctkZ0Nyhf2UumICOAKtgLvR5dG1JMlsNVp8Jn0RzpsKc6Urv7JpP69wzRXN+A==
+  dependencies:
+    "@grpc/grpc-js" "^1.7.1"
+    "@opentelemetry/core" "1.15.2"
+    "@opentelemetry/otlp-exporter-base" "0.41.2"
+    protobufjs "^7.2.3"
+
+"@opentelemetry/otlp-proto-exporter-base@0.41.2":
+  version "0.41.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/otlp-proto-exporter-base/-/otlp-proto-exporter-base-0.41.2.tgz#10b1a4bb973bd6e0e741931d90f22387c5a3a151"
+  integrity sha512-BxmEMiP6tHiFroe5/dTt9BsxCci7BTLtF7A6d4DKHLiLweWWZxQ9l7hON7qt/IhpKrQcAFD1OzZ1Gq2ZkNzhCw==
+  dependencies:
+    "@opentelemetry/core" "1.15.2"
+    "@opentelemetry/otlp-exporter-base" "0.41.2"
+    protobufjs "^7.2.3"
+
+"@opentelemetry/otlp-transformer@0.41.2":
+  version "0.41.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/otlp-transformer/-/otlp-transformer-0.41.2.tgz#cd3a7185ef77fe9b7b4c2d2f9e001fa1d2fa6cf8"
+  integrity sha512-jJbPwB0tNu2v+Xi0c/v/R3YBLJKLonw1p+v3RVjT2VfzeUyzSp/tBeVdY7RZtL6dzZpA9XSmp8UEfWIFQo33yA==
+  dependencies:
+    "@opentelemetry/api-logs" "0.41.2"
+    "@opentelemetry/core" "1.15.2"
+    "@opentelemetry/resources" "1.15.2"
+    "@opentelemetry/sdk-logs" "0.41.2"
+    "@opentelemetry/sdk-metrics" "1.15.2"
+    "@opentelemetry/sdk-trace-base" "1.15.2"
+
+"@opentelemetry/propagator-b3@1.15.2":
+  version "1.15.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/propagator-b3/-/propagator-b3-1.15.2.tgz#7bcb9fa645042a440922669fbac06a1a91e6704b"
+  integrity sha512-ZSrL3DpMEDsjD8dPt9Ze3ue53nEXJt512KyxXlLgLWnSNbe1mrWaXWkh7OLDoVJh9LqFw+tlvAhDVt/x3DaFGg==
+  dependencies:
+    "@opentelemetry/core" "1.15.2"
+
+"@opentelemetry/propagator-jaeger@1.15.2":
+  version "1.15.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/propagator-jaeger/-/propagator-jaeger-1.15.2.tgz#90757fc9529da806a1845f502acb6d0eb821e3db"
+  integrity sha512-6m1yu7PVDIRz6BwA36lacfBZJCfAEHKgu+kSyukNwVdVjsTNeyD9xNPQnkl0WN7Rvhk8/yWJ83tLPEyGhk1wCQ==
+  dependencies:
+    "@opentelemetry/core" "1.15.2"
+
+"@opentelemetry/resources@1.15.2":
+  version "1.15.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/resources/-/resources-1.15.2.tgz#0c9e26cb65652a1402834a3c030cce6028d6dd9d"
+  integrity sha512-xmMRLenT9CXmm5HMbzpZ1hWhaUowQf8UB4jMjFlAxx1QzQcsD3KFNAVX/CAWzFPtllTyTplrA4JrQ7sCH3qmYw==
+  dependencies:
+    "@opentelemetry/core" "1.15.2"
+    "@opentelemetry/semantic-conventions" "1.15.2"
+
+"@opentelemetry/sdk-logs@0.41.2":
+  version "0.41.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/sdk-logs/-/sdk-logs-0.41.2.tgz#c3eeb6793bdfa52351d66e2e66637e433abed672"
+  integrity sha512-smqKIw0tTW15waj7BAPHFomii5c3aHnSE4LQYTszGoK5P9nZs8tEAIpu15UBxi3aG31ZfsLmm4EUQkjckdlFrw==
+  dependencies:
+    "@opentelemetry/core" "1.15.2"
+    "@opentelemetry/resources" "1.15.2"
+
+"@opentelemetry/sdk-metrics@1.15.2":
+  version "1.15.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/sdk-metrics/-/sdk-metrics-1.15.2.tgz#eadd0a049de9cd860e1e0d49eea01156469c4b60"
+  integrity sha512-9aIlcX8GnhcsAHW/Wl8bzk4ZnWTpNlLtud+fxUfBtFATu6OZ6TrGrF4JkT9EVrnoxwtPIDtjHdEsSjOqisY/iA==
+  dependencies:
+    "@opentelemetry/core" "1.15.2"
+    "@opentelemetry/resources" "1.15.2"
+    lodash.merge "^4.6.2"
+
+"@opentelemetry/sdk-node@0.41.2":
+  version "0.41.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/sdk-node/-/sdk-node-0.41.2.tgz#7ac2fc149d371a9f17c2adba395a9aa257ed1bf4"
+  integrity sha512-t3vaB5ajoXLtVFoL8TSoSgaVATmOyUfkIfBE4nvykm0dM2vQjMS/SUUelzR06eiPTbMPsr2UkevWhy2/oXy2vg==
+  dependencies:
+    "@opentelemetry/api-logs" "0.41.2"
+    "@opentelemetry/core" "1.15.2"
+    "@opentelemetry/exporter-jaeger" "1.15.2"
+    "@opentelemetry/exporter-trace-otlp-grpc" "0.41.2"
+    "@opentelemetry/exporter-trace-otlp-http" "0.41.2"
+    "@opentelemetry/exporter-trace-otlp-proto" "0.41.2"
+    "@opentelemetry/exporter-zipkin" "1.15.2"
+    "@opentelemetry/instrumentation" "0.41.2"
+    "@opentelemetry/resources" "1.15.2"
+    "@opentelemetry/sdk-logs" "0.41.2"
+    "@opentelemetry/sdk-metrics" "1.15.2"
+    "@opentelemetry/sdk-trace-base" "1.15.2"
+    "@opentelemetry/sdk-trace-node" "1.15.2"
+    "@opentelemetry/semantic-conventions" "1.15.2"
+
+"@opentelemetry/sdk-trace-base@1.15.2":
+  version "1.15.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/sdk-trace-base/-/sdk-trace-base-1.15.2.tgz#4821f94033c55a6c8bbd35ae387b715b6108517a"
+  integrity sha512-BEaxGZbWtvnSPchV98qqqqa96AOcb41pjgvhfzDij10tkBhIu9m0Jd6tZ1tJB5ZHfHbTffqYVYE0AOGobec/EQ==
+  dependencies:
+    "@opentelemetry/core" "1.15.2"
+    "@opentelemetry/resources" "1.15.2"
+    "@opentelemetry/semantic-conventions" "1.15.2"
+
+"@opentelemetry/sdk-trace-node@1.15.2":
+  version "1.15.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/sdk-trace-node/-/sdk-trace-node-1.15.2.tgz#987c929597ca274995164508f57a15f682d9de2f"
+  integrity sha512-5deakfKLCbPpKJRCE2GPI8LBE2LezyvR17y3t37ZI3sbaeogtyxmBaFV+slmG9fN8OaIT+EUsm1QAT1+z59gbQ==
+  dependencies:
+    "@opentelemetry/context-async-hooks" "1.15.2"
+    "@opentelemetry/core" "1.15.2"
+    "@opentelemetry/propagator-b3" "1.15.2"
+    "@opentelemetry/propagator-jaeger" "1.15.2"
+    "@opentelemetry/sdk-trace-base" "1.15.2"
+    semver "^7.5.1"
+
+"@opentelemetry/semantic-conventions@1.15.2":
+  version "1.15.2"
+  resolved "https://npm.lumigame.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.15.2.tgz#3bafb5de3e20e841dff6cb3c66f4d6e9694c4241"
+  integrity sha512-CjbOKwk2s+3xPIMcd5UNYQzsf+v94RczbdNix9/kQh38WiQkM90sUOi3if8eyHFgiBjBjhwXrA7W3ydiSQP9mw==
+
+"@opentelemetry/semantic-conventions@1.17.0", "@opentelemetry/semantic-conventions@^1.0.0", "@opentelemetry/semantic-conventions@^1.8.0":
+  version "1.17.0"
+  resolved "https://npm.lumigame.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.17.0.tgz#af10baa9f05ce1e64a14065fc138b5739bfb65f6"
+  integrity sha512-+fguCd2d8d2qruk0H0DsCEy2CTK3t0Tugg7MhZ/UQMvmewbZLNnJ6heSYyzIZWG5IPfAXzoj4f4F/qpM7l4VBA==
+
+"@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
+  version "1.1.2"
+  resolved "https://npm.lumigame.com/@protobufjs/aspromise/-/aspromise-1.1.2.tgz#9b8b0cc663d669a7d8f6f5d0893a14d348f30fbf"
+  integrity sha1-m4sMxmPWaafY9vXQiToU00jzD78=
+
+"@protobufjs/base64@^1.1.2":
+  version "1.1.2"
+  resolved "https://npm.lumigame.com/@protobufjs/base64/-/base64-1.1.2.tgz#4c85730e59b9a1f1f349047dbf24296034bb2735"
+  integrity sha512-AZkcAA5vnN/v4PDqKyMR5lx7hZttPDgClv83E//FMNhR2TMcLUhfRUBHCmSl0oi9zMgDDqRUJkSxO3wm85+XLg==
+
+"@protobufjs/codegen@^2.0.4":
+  version "2.0.4"
+  resolved "https://npm.lumigame.com/@protobufjs/codegen/-/codegen-2.0.4.tgz#7ef37f0d010fb028ad1ad59722e506d9262815cb"
+  integrity sha512-YyFaikqM5sH0ziFZCN3xDC7zeGaB/d0IUb9CATugHWbd1FRFwWwt4ld4OYMPWu5a3Xe01mGAULCdqhMlPl29Jg==
+
+"@protobufjs/eventemitter@^1.1.0":
+  version "1.1.0"
+  resolved "https://npm.lumigame.com/@protobufjs/eventemitter/-/eventemitter-1.1.0.tgz#355cbc98bafad5978f9ed095f397621f1d066b70"
+  integrity sha1-NVy8mLr61ZePntCV85diHx0Ga3A=
+
+"@protobufjs/fetch@^1.1.0":
+  version "1.1.0"
+  resolved "https://npm.lumigame.com/@protobufjs/fetch/-/fetch-1.1.0.tgz#ba99fb598614af65700c1619ff06d454b0d84c45"
+  integrity sha1-upn7WYYUr2VwDBYZ/wbUVLDYTEU=
+  dependencies:
+    "@protobufjs/aspromise" "^1.1.1"
+    "@protobufjs/inquire" "^1.1.0"
+
+"@protobufjs/float@^1.0.2":
+  version "1.0.2"
+  resolved "https://npm.lumigame.com/@protobufjs/float/-/float-1.0.2.tgz#5e9e1abdcb73fc0a7cb8b291df78c8cbd97b87d1"
+  integrity sha1-Xp4avctz/Ap8uLKR33jIy9l7h9E=
+
+"@protobufjs/inquire@^1.1.0":
+  version "1.1.0"
+  resolved "https://npm.lumigame.com/@protobufjs/inquire/-/inquire-1.1.0.tgz#ff200e3e7cf2429e2dcafc1140828e8cc638f089"
+  integrity sha1-/yAOPnzyQp4tyvwRQIKOjMY48Ik=
+
+"@protobufjs/path@^1.1.2":
+  version "1.1.2"
+  resolved "https://npm.lumigame.com/@protobufjs/path/-/path-1.1.2.tgz#6cc2b20c5c9ad6ad0dccfd21ca7673d8d7fbf68d"
+  integrity sha1-bMKyDFya1q0NzP0hynZz2Nf79o0=
+
+"@protobufjs/pool@^1.1.0":
+  version "1.1.0"
+  resolved "https://npm.lumigame.com/@protobufjs/pool/-/pool-1.1.0.tgz#09fd15f2d6d3abfa9b65bc366506d6ad7846ff54"
+  integrity sha1-Cf0V8tbTq/qbZbw2ZQbWrXhG/1Q=
+
+"@protobufjs/utf8@^1.1.0":
+  version "1.1.0"
+  resolved "https://npm.lumigame.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
+  integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
 "@semantic-release/changelog@^5.0.1":
   version "5.0.1"
@@ -1773,6 +2098,13 @@
   resolved "http://npm.lumigame.com/@types%2fnode/-/node-16.11.7.tgz#36820945061326978c42a01e56b61cd223dfdc42"
   integrity sha512-QB5D2sqfSjCmTuWcBWyJ+/44bcjO7VbjSbOE0ucoVbAsSNQc4Lt6QkgkVXkTDwkL4z/beecZNDvVX15D4P8Jbw==
 
+"@types/node@>=12.12.47", "@types/node@>=13.7.0":
+  version "20.8.4"
+  resolved "https://npm.lumigame.com/@types/node/-/node-20.8.4.tgz#0e9ebb2ff29d5c3302fc84477d066fa7c6b441aa"
+  integrity sha512-ZVPnqU58giiCjSxjVUESDtdPk4QR5WQhhINbc9UBrKLU68MX5BF6kbQzTrkwbolyr0X8ChBpXfavr5mZFKZQ5A==
+  dependencies:
+    undici-types "~5.25.1"
+
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"
   resolved "http://npm.lumigame.com/@types%2fnormalize-package-data/-/normalize-package-data-2.4.0.tgz"
@@ -1817,6 +2149,11 @@
   dependencies:
     "@types/mime" "^1"
     "@types/node" "*"
+
+"@types/shimmer@^1.0.2":
+  version "1.0.3"
+  resolved "https://npm.lumigame.com/@types/shimmer/-/shimmer-1.0.3.tgz#2259274874392a4413fb6f6717a7ec209a8651a7"
+  integrity sha512-F/IjUGnV6pIN7R4ZV4npHJVoNtaLZWvb+2/9gctxjb99wkpI7Ozg8VPogwDiTRyjLwZXAYxjvdg1KS8LTHKdDA==
 
 "@types/stack-utils@^1.0.1":
   version "1.0.1"
@@ -1881,6 +2218,11 @@ acorn-globals@^6.0.0:
     acorn "^7.1.1"
     acorn-walk "^7.1.1"
 
+acorn-import-assertions@^1.9.0:
+  version "1.9.0"
+  resolved "https://npm.lumigame.com/acorn-import-assertions/-/acorn-import-assertions-1.9.0.tgz#507276249d684797c84e0734ef84860334cfb1ac"
+  integrity sha512-cmMwop9x+8KFhxvKrKfPYmN6/pKTYYHBqLa0DfvVZcKMJWNyWLnaqND7dx/qn66R7ewM1UX5XMaDVP5wlVTaVA==
+
 acorn-walk@^7.1.1:
   version "7.2.0"
   resolved "http://npm.lumigame.com/acorn-walk/-/acorn-walk-7.2.0.tgz"
@@ -1895,6 +2237,11 @@ acorn@^8.0.5:
   version "8.1.0"
   resolved "http://npm.lumigame.com/acorn/-/acorn-8.1.0.tgz"
   integrity sha512-LWCF/Wn0nfHOmJ9rzQApGnxnvgfROzGilS8936rqN/lfcYkY9MYZzdMqN+2NJ4SlTc+m5HiSa+kNfDtI64dwUA==
+
+acorn@^8.8.2:
+  version "8.10.0"
+  resolved "https://npm.lumigame.com/acorn/-/acorn-8.10.0.tgz#8be5b3907a67221a81ab23c7889c4c5526b62ec5"
+  integrity sha512-F0SAmZ8iUtS//m8DmCTA0jlh6TDKkHQyK6xc6V4KDTyZKA9dnvX9/3sRTVQrWm79glUAZbnmmNcdYwUIHWVybw==
 
 agent-base@4, agent-base@^4.3.0:
   version "4.3.0"
@@ -1955,6 +2302,11 @@ ansi-align@^3.0.0:
   integrity sha512-ZpClVKqXN3RGBmKibdfWzqCY4lnjEuoNzU5T0oEFpfd/z5qJHVarukridD4juLO2FXMiwUQxr9WqQtaYa8XRYw==
   dependencies:
     string-width "^3.0.0"
+
+ansi-color@^0.2.1:
+  version "0.2.1"
+  resolved "https://npm.lumigame.com/ansi-color/-/ansi-color-0.2.1.tgz#3e75c037475217544ed763a8db5709fa9ae5bf9a"
+  integrity sha1-PnXAN0dSF1RO12Oo21cJ+prlv5o=
 
 ansi-escapes@^4.2.1, ansi-escapes@^4.3.1:
   version "4.3.1"
@@ -2477,6 +2829,16 @@ buffer-from@^1.0.0:
   resolved "http://npm.lumigame.com/buffer-from/-/buffer-from-1.1.1.tgz"
   integrity sha512-MQcXEUbCKtEo7bhqEs6560Hyd4XaovZlO/k9V3hjVUF/zwW7KBVdSK4gIt/bzwS9MbR5qob+F5jusZsb0YQK2A==
 
+bufrw@^1.3.0:
+  version "1.3.0"
+  resolved "https://npm.lumigame.com/bufrw/-/bufrw-1.3.0.tgz#28d6cfdaf34300376836310f5c31d57eeb40c8fa"
+  integrity sha512-jzQnSbdJqhIltU9O5KUiTtljP9ccw2u5ix59McQy4pV2xGhVLhRZIndY8GIrgh5HjXa6+QJ9AQhOd2QWQizJFQ==
+  dependencies:
+    ansi-color "^0.2.1"
+    error "^7.0.0"
+    hexer "^1.5.0"
+    xtend "^4.0.0"
+
 builtins@^1.0.3:
   version "1.0.3"
   resolved "http://npm.lumigame.com/builtins/-/builtins-1.0.3.tgz"
@@ -2724,6 +3086,11 @@ cjs-module-lexer@^0.6.0:
   resolved "http://npm.lumigame.com/cjs-module-lexer/-/cjs-module-lexer-0.6.0.tgz"
   integrity sha512-uc2Vix1frTfnuzxxu1Hp4ktSvM3QaI4oXl4ZUqL1wjTu/BGki9TrCWoqLTg/drR1KwAEarXuRFCG2Svr1GxPFw==
 
+cjs-module-lexer@^1.2.2:
+  version "1.2.3"
+  resolved "https://npm.lumigame.com/cjs-module-lexer/-/cjs-module-lexer-1.2.3.tgz#6c370ab19f8a3394e318fe682686ec0ac684d107"
+  integrity sha512-0TNiGstbQmCFwt4akjjBg5pLRTSyj/PkWQ1ZoO2zntmg9yLqSRxwEa4iCfQLGjqhiqBfOJa7W/E8wfGrTDmlZQ==
+
 class-utils@^0.3.5:
   version "0.3.6"
   resolved "http://npm.lumigame.com/class-utils/-/class-utils-0.3.6.tgz"
@@ -2808,6 +3175,15 @@ cliui@^7.0.2:
   dependencies:
     string-width "^4.2.0"
     strip-ansi "^6.0.0"
+    wrap-ansi "^7.0.0"
+
+cliui@^8.0.1:
+  version "8.0.1"
+  resolved "https://npm.lumigame.com/cliui/-/cliui-8.0.1.tgz#0c04b075db02cbfe60dc8e6cf2f5486b1a3608aa"
+  integrity sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==
+  dependencies:
+    string-width "^4.2.0"
+    strip-ansi "^6.0.1"
     wrap-ansi "^7.0.0"
 
 clone-response@^1.0.2:
@@ -3586,12 +3962,28 @@ end-of-stream@^1.0.0, end-of-stream@^1.1.0:
   dependencies:
     once "^1.4.0"
 
+engine.io-client@~6.5.2:
+  version "6.5.2"
+  resolved "https://npm.lumigame.com/engine.io-client/-/engine.io-client-6.5.2.tgz#8709e22c291d4297ae80318d3c8baeae71f0e002"
+  integrity sha512-CQZqbrpEYnrpGqC07a9dJDz4gePZUgTPMU3NKJPSeQOyw27Tst4Pl3FemKoFGAlHzgZmKjoRmiJvbWfhCXUlIg==
+  dependencies:
+    "@socket.io/component-emitter" "~3.1.0"
+    debug "~4.3.1"
+    engine.io-parser "~5.2.1"
+    ws "~8.11.0"
+    xmlhttprequest-ssl "~2.0.0"
+
 engine.io-parser@~5.0.0:
   version "5.0.2"
   resolved "http://npm.lumigame.com/engine.io-parser/-/engine.io-parser-5.0.2.tgz#69a2ec3ed431da021f0666712d07f106bcffa6ce"
   integrity sha512-wuiO7qO/OEkPJSFueuATIXtrxF7/6GTbAO9QLv7nnbjwZ5tYhLm9zxvLwxstRs0dcT0KUlWTjtIOs1T86jt12g==
   dependencies:
     base64-arraybuffer "~1.0.1"
+
+engine.io-parser@~5.0.3:
+  version "5.0.7"
+  resolved "https://npm.lumigame.com/engine.io-parser/-/engine.io-parser-5.0.7.tgz#ed5eae76c71f398284c578ab6deafd3ba7e4e4f6"
+  integrity sha512-P+jDFbvK6lE3n1OL+q9KuzdOFWkkZ/cMV9gol/SbVfpyqfvrfrFTOFJ6fQm2VC3PZHlU3QPhVwmbsCnauHF2MQ==
 
 engine.io-parser@~5.2.1:
   version "5.2.1"
@@ -3613,6 +4005,22 @@ engine.io@~6.0.0:
     debug "~4.3.1"
     engine.io-parser "~5.0.0"
     ws "~8.2.3"
+
+engine.io@~6.4.1:
+  version "6.4.2"
+  resolved "https://npm.lumigame.com/engine.io/-/engine.io-6.4.2.tgz#ffeaf68f69b1364b0286badddf15ff633476473f"
+  integrity sha512-FKn/3oMiJjrOEOeUub2WCox6JhxBXq/Zn3fZOMCBxKnNYtsdKjxhl7yR3fZhM9PV+rdE75SU5SYMc+2PGzo+Tg==
+  dependencies:
+    "@types/cookie" "^0.4.1"
+    "@types/cors" "^2.8.12"
+    "@types/node" ">=10.0.0"
+    accepts "~1.3.4"
+    base64id "2.0.0"
+    cookie "~0.4.1"
+    cors "~2.8.5"
+    debug "~4.3.1"
+    engine.io-parser "~5.0.3"
+    ws "~8.11.0"
 
 engine.io@~6.5.2:
   version "6.5.2"
@@ -3661,6 +4069,21 @@ error-ex@^1.2.0, error-ex@^1.3.1:
   integrity sha512-7dFHNmqeFSEt2ZBsCriorKnn3Z2pj+fd9kmI6QoWw4//DL+icEBfc0U7qJCisqrTsKTjw4fNFy2pW9OqStD84g==
   dependencies:
     is-arrayish "^0.2.1"
+
+error@7.0.2:
+  version "7.0.2"
+  resolved "https://npm.lumigame.com/error/-/error-7.0.2.tgz#a5f75fff4d9926126ddac0ea5dc38e689153cb02"
+  integrity sha1-pfdf/02ZJhJt2sDqXcOOaJFTywI=
+  dependencies:
+    string-template "~0.2.1"
+    xtend "~4.0.0"
+
+error@^7.0.0:
+  version "7.2.1"
+  resolved "https://npm.lumigame.com/error/-/error-7.2.1.tgz#eab21a4689b5f684fc83da84a0e390de82d94894"
+  integrity sha512-fo9HBvWnx3NGUKMvMwB/CBCMMrfEJgbDTVDEkPygA3Bdd3lM1OyCd+rbQ8BwnpF6GdVeOLDNmyL4N5Bg80ZvdA==
+  dependencies:
+    string-template "~0.2.1"
 
 es-abstract@^1.19.1:
   version "1.19.1"
@@ -4619,6 +5042,16 @@ helmet@^6.0.0:
   resolved "http://npm.lumigame.com/helmet/-/helmet-6.2.0.tgz#c29d62014be4c70b8ef092c9c5e54c8c26b8e16e"
   integrity sha512-DWlwuXLLqbrIOltR6tFQXShj/+7Cyp0gLi6uAb8qMdFh/YBBFbKSgQ6nbXmScYd8emMctuthmgIa7tUfo9Rtyg==
 
+hexer@^1.5.0:
+  version "1.5.0"
+  resolved "https://npm.lumigame.com/hexer/-/hexer-1.5.0.tgz#b86ce808598e8a9d1892c571f3cedd86fc9f0653"
+  integrity sha512-dyrPC8KzBzUJ19QTIo1gXNqIISRXQ0NwteW6OeQHRN4ZuZeHkdODfj0zHBdOlHbRY8GqbqK57C9oWSvQZizFsg==
+  dependencies:
+    ansi-color "^0.2.1"
+    minimist "^1.1.0"
+    process "^0.10.0"
+    xtend "^4.0.0"
+
 hook-std@^2.0.0:
   version "2.0.0"
   resolved "http://npm.lumigame.com/hook-std/-/hook-std-2.0.0.tgz"
@@ -4807,6 +5240,16 @@ import-from@^3.0.0:
   dependencies:
     resolve-from "^5.0.0"
 
+import-in-the-middle@1.4.2:
+  version "1.4.2"
+  resolved "https://npm.lumigame.com/import-in-the-middle/-/import-in-the-middle-1.4.2.tgz#2a266676e3495e72c04bbaa5ec14756ba168391b"
+  integrity sha512-9WOz1Yh/cvO/p69sxRmhyQwrIGGSp7EIdcb+fFNVi7CzQGQB8U1/1XrKVSbEd/GNOAeM0peJtmi7+qphe7NvAw==
+  dependencies:
+    acorn "^8.8.2"
+    acorn-import-assertions "^1.9.0"
+    cjs-module-lexer "^1.2.2"
+    module-details-from-path "^1.0.3"
+
 import-lazy@^2.1.0:
   version "2.1.0"
   resolved "http://npm.lumigame.com/import-lazy/-/import-lazy-2.1.0.tgz"
@@ -4990,6 +5433,13 @@ is-cidr@^3.0.0:
   integrity sha512-Gx+oErgq1j2jAKCR2Kbq0b3wbH0vQKqZ0wOlHxm0o56nq51Cs/DZA8oz9dMDhbHyHEGgJ86eTeVudtgMMOx3Mw==
   dependencies:
     cidr-regex "^2.0.10"
+
+is-core-module@^2.13.0:
+  version "2.13.0"
+  resolved "https://npm.lumigame.com/is-core-module/-/is-core-module-2.13.0.tgz#bb52aa6e2cbd49a30c2ba68c42bf3435ba6072db"
+  integrity sha512-Z7dk6Qo8pOCp3l4tsX2C5ZVas4V+UxwQodwZhLopL91TX8UyyHEXafPcyoeeWuLrwzHcr3igO78wNLwHJHsMCQ==
+  dependencies:
+    has "^1.0.3"
 
 is-core-module@^2.2.0:
   version "2.2.0"
@@ -5187,6 +5637,11 @@ is-potential-custom-element-name@^1.0.0:
   resolved "http://npm.lumigame.com/is-potential-custom-element-name/-/is-potential-custom-element-name-1.0.0.tgz"
   integrity sha1-DFLlS8yjkbssSUsh6GJtczbG45c=
 
+is-promise@^4.0.0:
+  version "4.0.0"
+  resolved "https://npm.lumigame.com/is-promise/-/is-promise-4.0.0.tgz#42ff9f84206c1991d26debf520dd5c01042dd2f3"
+  integrity sha512-hvpoI6korhJMnej285dSg6nu1+e6uxs7zG3BYAm5byqDsgJNWwxzM6z6iZiAgQR4TJ30JmBTOwqZUw3WlyH3AQ==
+
 is-redirect@^1.0.0:
   version "1.0.0"
   resolved "http://npm.lumigame.com/is-redirect/-/is-redirect-1.0.0.tgz"
@@ -5360,6 +5815,17 @@ istanbul-reports@^3.0.2:
   dependencies:
     html-escaper "^2.0.0"
     istanbul-lib-report "^3.0.0"
+
+jaeger-client@^3.15.0:
+  version "3.19.0"
+  resolved "https://npm.lumigame.com/jaeger-client/-/jaeger-client-3.19.0.tgz#9b5bd818ebd24e818616ee0f5cffe1722a53ae6e"
+  integrity sha512-M0c7cKHmdyEUtjemnJyx/y9uX16XHocL46yQvyqDlPdvAcwPDbHrIbKjQdBqtiE4apQ/9dmr+ZLJYYPGnurgpw==
+  dependencies:
+    node-int64 "^0.4.0"
+    opentracing "^0.14.4"
+    thriftrw "^3.5.0"
+    uuid "^8.3.2"
+    xorshift "^1.1.1"
 
 java-properties@^1.0.0:
   version "1.0.2"
@@ -6338,6 +6804,11 @@ lodash._root@~3.0.0:
   resolved "http://npm.lumigame.com/lodash._root/-/lodash._root-3.0.1.tgz"
   integrity sha1-+6HEUkwZ7ppfgTa0YJ8BfPTe1pI=
 
+lodash.camelcase@^4.3.0:
+  version "4.3.0"
+  resolved "https://npm.lumigame.com/lodash.camelcase/-/lodash.camelcase-4.3.0.tgz#b28aa6288a2b9fc651035c7711f65ab6190331a6"
+  integrity sha1-soqmKIorn8ZRA1x3EfZathkDMaY=
+
 lodash.capitalize@^4.2.1:
   version "4.2.1"
   resolved "http://npm.lumigame.com/lodash.capitalize/-/lodash.capitalize-4.2.1.tgz"
@@ -6393,6 +6864,16 @@ lodash.isstring@^4.0.1:
   resolved "http://npm.lumigame.com/lodash.isstring/-/lodash.isstring-4.0.1.tgz"
   integrity sha1-1SfftUVuynzJu5XV2ur4i6VKVFE=
 
+lodash.matches@^4.6.0:
+  version "4.6.0"
+  resolved "https://npm.lumigame.com/lodash.matches/-/lodash.matches-4.6.0.tgz#ae1affba8047f02368905fe585376bd2c10aaf5e"
+  integrity sha1-rhr/uoBH8CNokF/lhTdr0sEKr14=
+
+lodash.merge@^4.6.2:
+  version "4.6.2"
+  resolved "https://npm.lumigame.com/lodash.merge/-/lodash.merge-4.6.2.tgz#558aa53b43b661e1925a0afdfa36a9a1085fe57a"
+  integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
+
 lodash.once@^4.0.0:
   version "4.1.1"
   resolved "http://npm.lumigame.com/lodash.once/-/lodash.once-4.1.1.tgz"
@@ -6428,10 +6909,20 @@ lodash.without@~4.4.0:
   resolved "http://npm.lumigame.com/lodash.without/-/lodash.without-4.4.0.tgz"
   integrity sha1-PNRXSgC2e643OpS3SHcmQFB7eqw=
 
-lodash@^4.17.11, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.4:
+lodash@^4.17.11, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.21, lodash@^4.17.4:
   version "4.17.21"
   resolved "http://npm.lumigame.com/lodash/-/lodash-4.17.21.tgz"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
+
+long@^2.4.0:
+  version "2.4.0"
+  resolved "https://npm.lumigame.com/long/-/long-2.4.0.tgz#9fa180bb1d9500cdc29c4156766a1995e1f4524f"
+  integrity sha1-n6GAux2VAM3CnEFWdmoZleH0Uk8=
+
+long@^5.0.0:
+  version "5.2.3"
+  resolved "https://npm.lumigame.com/long/-/long-5.2.3.tgz#a3ba97f3877cf1d778eccbcb048525ebb77499e1"
+  integrity sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==
 
 lower-case@^2.0.2:
   version "2.0.2"
@@ -6732,6 +7223,11 @@ minimist-options@4.1.0:
     is-plain-obj "^1.1.0"
     kind-of "^6.0.3"
 
+minimist@^1.1.0:
+  version "1.2.8"
+  resolved "https://npm.lumigame.com/minimist/-/minimist-1.2.8.tgz#c1a464e7693302e082a075cee0c057741ac4772c"
+  integrity sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==
+
 minimist@^1.1.1, minimist@^1.2.0, minimist@^1.2.5:
   version "1.2.5"
   resolved "http://npm.lumigame.com/minimist/-/minimist-1.2.5.tgz"
@@ -6792,6 +7288,11 @@ modify-values@^1.0.0:
   version "1.0.1"
   resolved "http://npm.lumigame.com/modify-values/-/modify-values-1.0.1.tgz"
   integrity sha512-xV2bxeN6F7oYjZWTe/YPAy6MN2M+sL4u/Rlm2AHCIVGfo2p1yGmBHQ6vHehl4bRTZBdHu3TSkWdYgkwpYzAGSw==
+
+module-details-from-path@^1.0.3:
+  version "1.0.3"
+  resolved "https://npm.lumigame.com/module-details-from-path/-/module-details-from-path-1.0.3.tgz#114c949673e2a8a35e9d35788527aa37b679da2b"
+  integrity sha1-EUyUlnPiqKNenTV4hSeqN7Z52is=
 
 moment@^2.29.4:
   version "2.29.4"
@@ -6952,6 +7453,16 @@ no-case@^3.0.4:
   dependencies:
     lower-case "^2.0.2"
     tslib "^2.0.3"
+
+nock@^13.2.1:
+  version "13.3.3"
+  resolved "https://npm.lumigame.com/nock/-/nock-13.3.3.tgz#179759c07d3f88ad3e794ace885629c1adfd3fe7"
+  integrity sha512-z+KUlILy9SK/RjpeXDiDUEAq4T94ADPHE3qaRkf66mpEhzc/ytOMm3Bwdrbq6k1tMWkbdujiKim3G2tfQARuJw==
+  dependencies:
+    debug "^4.1.0"
+    json-stringify-safe "^5.0.1"
+    lodash "^4.17.21"
+    propagate "^2.0.0"
 
 node-emoji@^1.10.0:
   version "1.10.0"
@@ -7480,6 +7991,20 @@ openid-client@^5.0.0:
     object-hash "^2.2.0"
     oidc-token-hash "^5.0.3"
 
+opentelemetry-instrumentation-socket.io@0.34.0:
+  version "0.34.0"
+  resolved "https://npm.lumigame.com/opentelemetry-instrumentation-socket.io/-/opentelemetry-instrumentation-socket.io-0.34.0.tgz#65bcce7f55cbe7587b831a2f204f4f9a6da9eab0"
+  integrity sha512-uBKb87SQViOgkzxcRRbHVboHMFc2IFsHXStD+uB7sLTr5iepHzvgHJEU7dyJhY1mv8JEmT/nm21OvLexlTNYpQ==
+  dependencies:
+    "@opentelemetry/instrumentation" "^0.34.0"
+    "@opentelemetry/semantic-conventions" "^1.8.0"
+    is-promise "^4.0.0"
+
+opentracing@^0.14.4:
+  version "0.14.7"
+  resolved "https://npm.lumigame.com/opentracing/-/opentracing-0.14.7.tgz#25d472bd0296dc0b64d7b94cbc995219031428f5"
+  integrity sha512-vz9iS7MJ5+Bp1URw8Khvdyw1H/hGvzHWlKQ7eRrQojSCDL1/SrWfrY9QebLw97n2deyRtzHRC3MkQfVNUCo91Q==
+
 optionator@^0.8.1:
   version "0.8.3"
   resolved "http://npm.lumigame.com/optionator/-/optionator-0.8.3.tgz"
@@ -7814,6 +8339,11 @@ path-parse@^1.0.6:
   resolved "http://npm.lumigame.com/path-parse/-/path-parse-1.0.6.tgz"
   integrity sha512-GSmOT2EbHrINBf9SR7CDELwlJ8AENk3Qn7OikK4nFYAu3Ote2+JYNVvkpAEQm3/TLNEJFD/xZJjzyxg3KBWOzw==
 
+path-parse@^1.0.7:
+  version "1.0.7"
+  resolved "https://npm.lumigame.com/path-parse/-/path-parse-1.0.7.tgz#fbc114b60ca42b30d9daf5858e4bd68bbedb6735"
+  integrity sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==
+
 path-to-regexp@0.1.7:
   version "0.1.7"
   resolved "http://npm.lumigame.com/path-to-regexp/-/path-to-regexp-0.1.7.tgz"
@@ -7945,6 +8475,11 @@ process-nextick-args@~2.0.0:
   resolved "http://npm.lumigame.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
+process@^0.10.0:
+  version "0.10.1"
+  resolved "https://npm.lumigame.com/process/-/process-0.10.1.tgz#842457cc51cfed72dc775afeeafb8c6034372725"
+  integrity sha1-hCRXzFHP7XLcd1r+6vuMYDQ3JyU=
+
 prom-client@^11.2.1:
   version "11.5.3"
   resolved "http://npm.lumigame.com/prom-client/-/prom-client-11.5.3.tgz"
@@ -7980,10 +8515,33 @@ promzard@^0.3.0:
   dependencies:
     read "1"
 
+propagate@^2.0.0:
+  version "2.0.1"
+  resolved "https://npm.lumigame.com/propagate/-/propagate-2.0.1.tgz#40cdedab18085c792334e64f0ac17256d38f9a45"
+  integrity sha512-vGrhOavPSTz4QVNuBNdcNXePNdNMaO1xj9yBeH1ScQPjk/rhg9sSlCXPhMkFuaNNW/syTvYqsnbIJxMBfRbbag==
+
 proto-list@~1.2.1:
   version "1.2.4"
   resolved "http://npm.lumigame.com/proto-list/-/proto-list-1.2.4.tgz"
   integrity sha1-IS1b/hMYMGpCD2QCuOJv85ZHqEk=
+
+protobufjs@^7.2.3, protobufjs@^7.2.4:
+  version "7.2.5"
+  resolved "https://npm.lumigame.com/protobufjs/-/protobufjs-7.2.5.tgz#45d5c57387a6d29a17aab6846dcc283f9b8e7f2d"
+  integrity sha512-gGXRSXvxQ7UiPgfw8gevrfRWcTlSbOFg+p/N+JVJEK5VhueL2miT6qTymqAmjr1Q5WbOCyJbyrk6JfWKwlFn6A==
+  dependencies:
+    "@protobufjs/aspromise" "^1.1.2"
+    "@protobufjs/base64" "^1.1.2"
+    "@protobufjs/codegen" "^2.0.4"
+    "@protobufjs/eventemitter" "^1.1.0"
+    "@protobufjs/fetch" "^1.1.0"
+    "@protobufjs/float" "^1.0.2"
+    "@protobufjs/inquire" "^1.1.0"
+    "@protobufjs/path" "^1.1.2"
+    "@protobufjs/pool" "^1.1.0"
+    "@protobufjs/utf8" "^1.1.0"
+    "@types/node" ">=13.7.0"
+    long "^5.0.0"
 
 protocols@^1.1.0, protocols@^1.4.0:
   version "1.4.8"
@@ -8468,6 +9026,24 @@ require-directory@^2.1.1:
   resolved "http://npm.lumigame.com/require-directory/-/require-directory-2.1.1.tgz"
   integrity sha1-jGStX9MNqxyXbiNE/+f3kqam30I=
 
+require-in-the-middle@^5.0.3:
+  version "5.2.0"
+  resolved "https://npm.lumigame.com/require-in-the-middle/-/require-in-the-middle-5.2.0.tgz#4b71e3cc7f59977100af9beb76bf2d056a5a6de2"
+  integrity sha512-efCx3b+0Z69/LGJmm9Yvi4cqEdxnoGnxYxGxBghkkTTFeXRtTCmmhO0AnAfHz59k957uTSuy8WaHqOs8wbYUWg==
+  dependencies:
+    debug "^4.1.1"
+    module-details-from-path "^1.0.3"
+    resolve "^1.22.1"
+
+require-in-the-middle@^7.1.1:
+  version "7.2.0"
+  resolved "https://npm.lumigame.com/require-in-the-middle/-/require-in-the-middle-7.2.0.tgz#b539de8f00955444dc8aed95e17c69b0a4f10fcf"
+  integrity sha512-3TLx5TGyAY6AOqLBoXmHkNql0HIf2RGbuMgCDT2WO/uGVAPJs6h7Kl+bN6TIZGd9bWhWPwnDnTHGtW8Iu77sdw==
+  dependencies:
+    debug "^4.1.1"
+    module-details-from-path "^1.0.3"
+    resolve "^1.22.1"
+
 require-main-filename@^1.0.1:
   version "1.0.1"
   resolved "http://npm.lumigame.com/require-main-filename/-/require-main-filename-1.0.1.tgz#97f717b69d48784f5f526a6c5aa8ffdda055a4d1"
@@ -8527,6 +9103,15 @@ resolve@^1.10.0, resolve@^1.14.2, resolve@^1.17.0, resolve@^1.18.1:
   dependencies:
     is-core-module "^2.2.0"
     path-parse "^1.0.6"
+
+resolve@^1.22.1:
+  version "1.22.6"
+  resolved "https://npm.lumigame.com/resolve/-/resolve-1.22.6.tgz#dd209739eca3aef739c626fea1b4f3c506195362"
+  integrity sha512-njhxM7mV12JfufShqGy3Rz8j11RPdLy4xi15UurGJeoHLfJpVXKdh3ueuOqbYUcDZnffr6X739JBo5LzyahEsw==
+  dependencies:
+    is-core-module "^2.13.0"
+    path-parse "^1.0.7"
+    supports-preserve-symlinks-flag "^1.0.0"
 
 responselike@^1.0.2:
   version "1.0.2"
@@ -8682,10 +9267,10 @@ sc-common@1.8.1:
     mongoose-long "^0.3.0"
     numeral "^2.0.6"
 
-sc-game-base@4.0.0:
-  version "4.0.0"
-  resolved "http://npm.lumigame.com/sc-game-base/-/sc-game-base-4.0.0.tgz#92a2206975bc04616c9e39f1c2cd59b15436c647"
-  integrity sha512-WI70demII8ERf1MupBJU16DRMwaQNETUXyixHFBl14JtdqlqwEuj9OEAbX5zmClhUhUT5uhmWFNu5I8zdaVLmw==
+sc-game-base@4.1.0:
+  version "4.1.0"
+  resolved "https://npm.lumigame.com/sc-game-base/-/sc-game-base-4.1.0.tgz#b1d3d9a29bdb125b84f64a8b9b2a5e51248a85bb"
+  integrity sha512-zyJ0liS5Xs/wKTYE/BziUbjQs72t1KTkqh4+UxaQtihA4zCo234oM8GUWMS65EF1EtSBJ4MnoO79wHhEnZvzCw==
   dependencies:
     awilix "^8.0.0"
     axios "^1.0.0"
@@ -8701,9 +9286,49 @@ sc-game-base@4.0.0:
     sc-base-apis "1.18.1"
     sc-base-database "1.11.1"
     sc-common "1.8.1"
+    sc-instrument "1.0.0"
+    sc-instrument-helper "1.0.0"
     socket.io "^4.5.4"
     socket.io-msgpack-parser "^3.0.1"
     socket.io-prom-metrics "^1.0.3"
+
+sc-game-service-integration-utils@^1.3.7:
+  version "1.3.7"
+  resolved "https://npm.lumigame.com/sc-game-service-integration-utils/-/sc-game-service-integration-utils-1.3.7.tgz#2d1559cf34e00308824f46030ccce9a76ebbd184"
+  integrity sha512-SHdz7SfJB6ccTVIYk6MZHYUhhSsnfDtFAL3IzxkaRKq9BUXkiVHcu7Y7Y3PALBbFDINMGLDQLzLaMmc6kpIhLw==
+  dependencies:
+    lodash.matches "^4.6.0"
+    nock "^13.2.1"
+    sc-game-base "4.1.0"
+    socket.io-client "^4.4.0"
+
+sc-instrument-helper@1.0.0:
+  version "1.0.0"
+  resolved "https://npm.lumigame.com/sc-instrument-helper/-/sc-instrument-helper-1.0.0.tgz#c00cf6b76bc51574cb9b909c3f148914a6648066"
+  integrity sha512-XtUFHavpVtqK4kxv0V8gOFxMrkQxm6z5FGjhw6gcUKN0JchXntkDsR1T306Pe5ZEPFQ/5RPxKRORraVxtMqIWw==
+  dependencies:
+    mongoose "^5.9.25"
+    socket.io "^4.1.2"
+    socket.io-msgpack-parser "^3.0.1"
+
+sc-instrument@1.0.0:
+  version "1.0.0"
+  resolved "https://npm.lumigame.com/sc-instrument/-/sc-instrument-1.0.0.tgz#e9b1606e6069c97b939f0466f6f06ac5f2695fcc"
+  integrity sha512-RRnQgBDls/PDs27GVAEFk/fE+BdBRRRtdSXZ0TFAlTKC8g6tW6iRnYIAJp/WCdM4q/LE/lzmkIALaTLRWVwfcw==
+  dependencies:
+    "@opentelemetry/context-async-hooks" "1.15.2"
+    "@opentelemetry/core" "1.15.2"
+    "@opentelemetry/exporter-trace-otlp-proto" "0.41.2"
+    "@opentelemetry/instrumentation-http" "0.41.2"
+    "@opentelemetry/instrumentation-mongoose" "0.33.0"
+    "@opentelemetry/propagator-b3" "1.15.2"
+    "@opentelemetry/propagator-jaeger" "1.15.2"
+    "@opentelemetry/resources" "1.15.2"
+    "@opentelemetry/sdk-node" "0.41.2"
+    "@opentelemetry/sdk-trace-base" "1.15.2"
+    "@opentelemetry/semantic-conventions" "1.15.2"
+    opentelemetry-instrumentation-socket.io "0.34.0"
+    socket.io "4.6.1"
 
 sc-semantic-release@^1.1.0:
   version "1.2.0"
@@ -8800,6 +9425,13 @@ semver@^7.1.2, semver@^7.3.2:
   dependencies:
     lru-cache "^6.0.0"
 
+semver@^7.5.1:
+  version "7.5.4"
+  resolved "https://npm.lumigame.com/semver/-/semver-7.5.4.tgz#483986ec4ed38e1c6c48c34894a9182dbff68a6e"
+  integrity sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==
+  dependencies:
+    lru-cache "^6.0.0"
+
 send@0.17.1:
   version "0.17.1"
   resolved "http://npm.lumigame.com/send/-/send-0.17.1.tgz"
@@ -8884,6 +9516,11 @@ shellwords@^0.1.1:
   version "0.1.1"
   resolved "http://npm.lumigame.com/shellwords/-/shellwords-0.1.1.tgz"
   integrity sha512-vFwSUfQvqybiICwZY5+DAWIPLKsWO31Q91JSKl3UYv+K5c2QRPzn0qzec6QPu1Qc9eHYItiP3NdJqNVqetYAww==
+
+shimmer@^1.2.1:
+  version "1.2.1"
+  resolved "https://npm.lumigame.com/shimmer/-/shimmer-1.2.1.tgz#610859f7de327b587efebf501fb43117f9aff337"
+  integrity sha512-sQTKC1Re/rM6XyFM6fIAGHRPVGvyXfgzIDvzoq608vM+jeyVD0Tu1E6Np0Kc2zAIFWIj963V2800iF/9LPieQw==
 
 side-channel@^1.0.4:
   version "1.0.4"
@@ -8985,6 +9622,16 @@ socket.io-adapter@~2.5.2:
   dependencies:
     ws "~8.11.0"
 
+socket.io-client@^4.4.0:
+  version "4.7.2"
+  resolved "https://npm.lumigame.com/socket.io-client/-/socket.io-client-4.7.2.tgz#f2f13f68058bd4e40f94f2a1541f275157ff2c08"
+  integrity sha512-vtA0uD4ibrYD793SOIAwlo8cj6haOeMHrGvwPxJsxH7CeIksqJ+3Zc06RvWTIFgiSqx4A3sOnTXpfAEE2Zyz6w==
+  dependencies:
+    "@socket.io/component-emitter" "~3.1.0"
+    debug "~4.3.2"
+    engine.io-client "~6.5.2"
+    socket.io-parser "~4.2.4"
+
 socket.io-msgpack-parser@^3.0.1:
   version "3.0.1"
   resolved "http://npm.lumigame.com/socket.io-msgpack-parser/-/socket.io-msgpack-parser-3.0.1.tgz#48ea37b51f1fa1b09253bc97073be9204664f3c6"
@@ -9002,7 +9649,7 @@ socket.io-parser@~4.0.4:
     component-emitter "~1.3.0"
     debug "~4.3.1"
 
-socket.io-parser@~4.2.4:
+socket.io-parser@~4.2.1, socket.io-parser@~4.2.4:
   version "4.2.4"
   resolved "http://npm.lumigame.com/socket.io-parser/-/socket.io-parser-4.2.4.tgz#c806966cf7270601e47469ddeec30fbdfda44c83"
   integrity sha512-/GbIKmo8ioc+NIWIhwdecY0ge+qVBSMdgxGygevmdHj24bsfgtCmcUUcQ5ZzcylGFHsN3k4HB4Cgkl96KVnuew==
@@ -9018,19 +9665,19 @@ socket.io-prom-metrics@^1.0.3:
     prom-client "^11.2.1"
     socket.io "^4.1.3"
 
-socket.io@^4.1.3:
-  version "4.3.2"
-  resolved "http://npm.lumigame.com/socket.io/-/socket.io-4.3.2.tgz#85ae0cf5cf18acbce648ac9f48aba66df8cea6bf"
-  integrity sha512-6S5tV4jcY6dbZ/lLzD6EkvNWI3s81JO6ABP/EpvOlK1NPOcIj3AS4khi6xXw6JlZCASq82HQV4SapfmVMMl2dg==
+socket.io@4.6.1:
+  version "4.6.1"
+  resolved "https://npm.lumigame.com/socket.io/-/socket.io-4.6.1.tgz#62ec117e5fce0692fa50498da9347cfb52c3bc70"
+  integrity sha512-KMcaAi4l/8+xEjkRICl6ak8ySoxsYG+gG6/XfRCPJPQ/haCRIJBTL4wIl8YCsmtaBovcAXGLOShyVWQ/FG8GZA==
   dependencies:
     accepts "~1.3.4"
     base64id "~2.0.0"
     debug "~4.3.2"
-    engine.io "~6.0.0"
-    socket.io-adapter "~2.3.2"
-    socket.io-parser "~4.0.4"
+    engine.io "~6.4.1"
+    socket.io-adapter "~2.5.2"
+    socket.io-parser "~4.2.1"
 
-socket.io@^4.5.4:
+socket.io@^4.1.2, socket.io@^4.5.4:
   version "4.7.2"
   resolved "http://npm.lumigame.com/socket.io/-/socket.io-4.7.2.tgz#22557d76c3f3ca48f82e73d68b7add36a22df002"
   integrity sha512-bvKVS29/I5fl2FGLNHuXlQaUH/BlzX1IN6S+NKLNZpBsPZIDH+90eQmCs2Railn4YUiww4SzUedJ6+uzwFnKLw==
@@ -9042,6 +9689,18 @@ socket.io@^4.5.4:
     engine.io "~6.5.2"
     socket.io-adapter "~2.5.2"
     socket.io-parser "~4.2.4"
+
+socket.io@^4.1.3:
+  version "4.3.2"
+  resolved "http://npm.lumigame.com/socket.io/-/socket.io-4.3.2.tgz#85ae0cf5cf18acbce648ac9f48aba66df8cea6bf"
+  integrity sha512-6S5tV4jcY6dbZ/lLzD6EkvNWI3s81JO6ABP/EpvOlK1NPOcIj3AS4khi6xXw6JlZCASq82HQV4SapfmVMMl2dg==
+  dependencies:
+    accepts "~1.3.4"
+    base64id "~2.0.0"
+    debug "~4.3.2"
+    engine.io "~6.0.0"
+    socket.io-adapter "~2.3.2"
+    socket.io-parser "~4.0.4"
 
 socks-proxy-agent@^4.0.0:
   version "4.0.2"
@@ -9283,6 +9942,11 @@ string-length@^4.0.1:
     char-regex "^1.0.2"
     strip-ansi "^6.0.0"
 
+string-template@~0.2.1:
+  version "0.2.1"
+  resolved "https://npm.lumigame.com/string-template/-/string-template-0.2.1.tgz#42932e598a352d01fc22ec3367d9d84eec6c9add"
+  integrity sha1-QpMuWYo1LQH8IuwzZ9nYTuxsmt0=
+
 string-width@^1.0.1:
   version "1.0.2"
   resolved "http://npm.lumigame.com/string-width/-/string-width-1.0.2.tgz#118bdf5b8cdc51a2a7e70d211e07e2b0b9b107d3"
@@ -9292,7 +9956,7 @@ string-width@^1.0.1:
     is-fullwidth-code-point "^1.0.0"
     strip-ansi "^3.0.0"
 
-"string-width@^1.0.2 || 2 || 3 || 4":
+"string-width@^1.0.2 || 2 || 3 || 4", string-width@^4.2.3:
   version "4.2.3"
   resolved "http://npm.lumigame.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -9449,6 +10113,11 @@ supports-hyperlinks@^2.0.0, supports-hyperlinks@^2.1.0:
     has-flag "^4.0.0"
     supports-color "^7.0.0"
 
+supports-preserve-symlinks-flag@^1.0.0:
+  version "1.0.0"
+  resolved "https://npm.lumigame.com/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
+  integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
+
 symbol-tree@^3.2.4:
   version "3.2.4"
   resolved "http://npm.lumigame.com/symbol-tree/-/symbol-tree-3.2.4.tgz"
@@ -9528,6 +10197,15 @@ text-table@~0.2.0:
   version "0.2.0"
   resolved "http://npm.lumigame.com/text-table/-/text-table-0.2.0.tgz"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
+
+thriftrw@^3.5.0:
+  version "3.12.0"
+  resolved "https://npm.lumigame.com/thriftrw/-/thriftrw-3.12.0.tgz#30857847755e7f036b2e0a79d11c9f55075539d9"
+  integrity sha512-4YZvR4DPEI41n4Opwr4jmrLGG4hndxr7387kzRFIIzxHQjarPusH4lGXrugvgb7TtPrfZVTpZCVe44/xUxowEw==
+  dependencies:
+    bufrw "^1.3.0"
+    error "7.0.2"
+    long "^2.4.0"
 
 throat@^5.0.0:
   version "5.0.0"
@@ -9677,6 +10355,11 @@ tslib@^2.0.3:
   resolved "http://npm.lumigame.com/tslib/-/tslib-2.1.0.tgz"
   integrity sha512-hcVC3wYEziELGGmEEXue7D75zbwIIVUMWAVbHItGPx0ziyXxrOMQx4rQEVEV45Ut/1IotuEvwqPopzIOkDMf0A==
 
+tslib@^2.3.1:
+  version "2.6.2"
+  resolved "https://npm.lumigame.com/tslib/-/tslib-2.6.2.tgz#703ac29425e7b37cd6fd456e92404d46d1f3e4ae"
+  integrity sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==
+
 tunnel-agent@^0.6.0:
   version "0.6.0"
   resolved "http://npm.lumigame.com/tunnel-agent/-/tunnel-agent-0.6.0.tgz"
@@ -9782,6 +10465,11 @@ undefsafe@^2.0.3:
   integrity sha512-nrXZwwXrD/T/JXeygJqdCO6NZZ1L66HrxM/Z7mIq2oPanoN0F1nLx3lwJMu6AwJY69hdixaFQOuoYsMjE5/C2A==
   dependencies:
     debug "^2.2.0"
+
+undici-types@~5.25.1:
+  version "5.25.3"
+  resolved "https://npm.lumigame.com/undici-types/-/undici-types-5.25.3.tgz#e044115914c85f0bcbb229f346ab739f064998c3"
+  integrity sha512-Ga1jfYwRn7+cP9v8auvEXN1rX3sWqlayd4HP7OKk4mZWylEmu3KzXDUGrQUN6Ol7qo1gPvB2e5gX6udnyEPgdA==
 
 unicode-canonical-property-names-ecmascript@^1.0.4:
   version "1.0.4"
@@ -10249,7 +10937,17 @@ xmlchars@^2.2.0:
   resolved "http://npm.lumigame.com/xmlchars/-/xmlchars-2.2.0.tgz"
   integrity sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==
 
-xtend@~4.0.1:
+xmlhttprequest-ssl@~2.0.0:
+  version "2.0.0"
+  resolved "https://npm.lumigame.com/xmlhttprequest-ssl/-/xmlhttprequest-ssl-2.0.0.tgz#91360c86b914e67f44dce769180027c0da618c67"
+  integrity sha512-QKxVRxiRACQcVuQEYFsI1hhkrMlrXHPegbbd1yn9UHOmRxY+si12nQYzri3vbzt8VdTTRviqcKxcyllFas5z2A==
+
+xorshift@^1.1.1:
+  version "1.2.0"
+  resolved "https://npm.lumigame.com/xorshift/-/xorshift-1.2.0.tgz#30a4cdd8e9f8d09d959ed2a88c42a09c660e8148"
+  integrity sha512-iYgNnGyeeJ4t6U11NpA/QiKy+PXn5Aa3Azg5qkwIFz1tBLllQrjjsk9yzD7IAK0naNU4JxdeDgqW9ov4u/hc4g==
+
+xtend@^4.0.0, xtend@~4.0.0, xtend@~4.0.1:
   version "4.0.2"
   resolved "http://npm.lumigame.com/xtend/-/xtend-4.0.2.tgz"
   integrity sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==
@@ -10310,6 +11008,11 @@ yargs-parser@^20.2.2, yargs-parser@^20.2.3:
   resolved "http://npm.lumigame.com/yargs-parser/-/yargs-parser-20.2.6.tgz"
   integrity sha512-AP1+fQIWSM/sMiET8fyayjx/J+JmTPt2Mr0FkrgqB4todtfa53sOsrSAcIrJRD5XS20bKUwaDIuMkWKCEiQLKA==
 
+yargs-parser@^21.1.1:
+  version "21.1.1"
+  resolved "https://npm.lumigame.com/yargs-parser/-/yargs-parser-21.1.1.tgz#9096bceebf990d21bb31fa9516e0ede294a77d35"
+  integrity sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==
+
 yargs-parser@^7.0.0:
   version "7.0.0"
   resolved "http://npm.lumigame.com/yargs-parser/-/yargs-parser-7.0.0.tgz#8d0ac42f16ea55debd332caf4c4038b3e3f5dfd9"
@@ -10363,6 +11066,19 @@ yargs@^16.2.0:
     string-width "^4.2.0"
     y18n "^5.0.5"
     yargs-parser "^20.2.2"
+
+yargs@^17.7.2:
+  version "17.7.2"
+  resolved "https://npm.lumigame.com/yargs/-/yargs-17.7.2.tgz#991df39aca675a192b816e1e0363f9d75d2aa269"
+  integrity sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w==
+  dependencies:
+    cliui "^8.0.1"
+    escalade "^3.1.1"
+    get-caller-file "^2.0.5"
+    require-directory "^2.1.1"
+    string-width "^4.2.3"
+    y18n "^5.0.5"
+    yargs-parser "^21.1.1"
 
 yargs@^8.0.2:
   version "8.0.2"

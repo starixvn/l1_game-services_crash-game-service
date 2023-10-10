@@ -1,11 +1,11 @@
-import { stubMongoose, stub } from "jest-micro-auto-stub";
+import Chance from "chance";
+import { Models } from "jest-auto-fixture";
+import { stub, stubMongoose } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
 import { RoundResultPublisher, UserBetResultPublisher } from "sc-game-base/src/core/event-publishers";
 import GameData from "sc-game-base/src/core/game-data";
 import GameDefinition from "sc-game-base/src/core/game-definition";
 import { SettleGameRoundConsumer } from "../settle-game-round-consumer";
-import Chance from "chance";
-import { Models } from "jest-auto-fixture";
 
 describe("SettleGameRoundConsumer", () => {
     const chance = new Chance();
@@ -29,13 +29,14 @@ describe("SettleGameRoundConsumer", () => {
     /** @type {mongoose.Model}*/
     const betsRepository = stubMongoose(mongoose.Model);
 
-    const betLogsRepository = {
-        find: jest.fn().mockReturnValue({
-            lean: jest.fn().mockReturnValue({
-                exec: jest.fn(),
-            }),
-        }),
-    };
+    /** @type {mongoose.Model}*/
+    const betLogsRepository = stubMongoose(mongoose.Model);
+
+    /** @type {mongoose.Model}*/
+    const tempBetsRepository = stubMongoose(mongoose.Model);
+
+    /** @type {mongoose.Model}*/
+    const tempBetLogsRepository = stubMongoose(mongoose.Model);
 
     const endGame = jest.fn();
 
@@ -53,6 +54,8 @@ describe("SettleGameRoundConsumer", () => {
             roundsRepository,
             betsRepository,
             betLogsRepository,
+            tempBetsRepository,
+            tempBetLogsRepository,
         });
     });
 
@@ -87,6 +90,7 @@ describe("SettleGameRoundConsumer", () => {
             consumer.calculateBetResult = jest.fn(() => betResult);
             consumer.captureBetResult = jest.fn();
             consumer.betLogsRepository.find().lean().exec.mockReturnValueOnce([]);
+            consumer.tempBetLogsRepository.find().lean().exec.mockReturnValueOnce([]);
         });
 
         it("should call queryBets", async () => {
