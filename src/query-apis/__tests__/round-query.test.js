@@ -1,4 +1,4 @@
-import { stubMongooseModelStupidly } from "jest-micro-auto-stub";
+import { stubMongoose } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
 import RoundQuery from "../round-query";
 
@@ -12,9 +12,9 @@ jest.mock("sc-game-base/src/core/helpers/crypto-helper", () => {
 
 describe("round query test", () => {
     /** @type {mongoose.Model}*/
-    const roundsRepository = stubMongooseModelStupidly(mongoose.Model);
+    const roundsRepository = stubMongoose(mongoose.Model);
     /** @type {mongoose.Model}*/
-    const resultsRepository = stubMongooseModelStupidly(mongoose.Model);
+    const resultsRepository = stubMongoose(mongoose.Model);
 
     const roundQuery = new RoundQuery(roundsRepository, resultsRepository);
     beforeEach(() => {

@@ -1,4 +1,4 @@
-import { stubMongooseModelStupidly, stub } from "jest-micro-auto-stub";
+import { stubMongoose, stub } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
 import { RoundResultPublisher, UserBetResultPublisher } from "sc-game-base/src/core/event-publishers";
 import GameData from "sc-game-base/src/core/game-data";
@@ -24,10 +24,10 @@ describe("SettleGameRoundConsumer", () => {
     const userBetResultPublisher = stub(UserBetResultPublisher);
 
     /** @type {mongoose.Model}*/
-    const roundsRepository = stubMongooseModelStupidly(mongoose.Model);
+    const roundsRepository = stubMongoose(mongoose.Model);
 
     /** @type {mongoose.Model}*/
-    const betsRepository = stubMongooseModelStupidly(mongoose.Model);
+    const betsRepository = stubMongoose(mongoose.Model);
 
     const betLogsRepository = {
         find: jest.fn().mockReturnValue({

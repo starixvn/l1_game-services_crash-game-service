@@ -1,4 +1,4 @@
-import { stub, stubMongooseModelStupidly } from "jest-micro-auto-stub";
+import { stub, stubMongoose } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
 import { Table, Core } from "sc-game-base";
 import GameData from "sc-game-base/src/core/game-data";
@@ -19,7 +19,7 @@ describe("in game consumer instance", () => {
     const gameData = new GameData(0);
 
     /** @type {mongoose.Model}*/
-    const userInfosRepository = stubMongooseModelStupidly(mongoose.Model);
+    const userInfosRepository = stubMongoose(mongoose.Model);
     const roundQuery = stub(RoundQuery);
     const publisher = stub(Core.BaseEventPublishers.BaseEventPublisher);
     const getBalance = jest.fn();

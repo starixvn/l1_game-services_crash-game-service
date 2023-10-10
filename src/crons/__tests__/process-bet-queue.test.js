@@ -1,5 +1,5 @@
 import Chance from "chance";
-import { stub, stubMongooseModelStupidly } from "jest-micro-auto-stub";
+import { stub, stubMongoose } from "jest-micro-auto-stub";
 import { cloneDeep } from "lodash";
 import mongoose from "mongoose";
 import logger from "sc-common/logger";
@@ -67,7 +67,7 @@ describe("ProcessBetQueue", () => {
     };
 
     /** @type {mongoose.Model}*/
-    const userInfosRepository = stubMongooseModelStupidly(mongoose.Model);
+    const userInfosRepository = stubMongoose(mongoose.Model);
     userInfosRepository.updateOne = jest.fn();
 
     const baseMetrics = stub(BaseMetrics);
