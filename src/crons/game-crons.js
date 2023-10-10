@@ -59,11 +59,11 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
     async start() {
         await this.initRoundId();
         await this.queryLastResult();
+        await this.updateExchangeRates();
         await this.proceedUnsettledBets();
 
         await this.initResultHash();
         await this.getSettingForNewRound();
-        await this.updateExchangeRates();
         this.startCron();
     }
 
@@ -104,7 +104,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
             this.runningRoundInfoPublisher.publish();
         }
 
-        if(this.gameData.remainingTime < -1) {
+        if (this.gameData.remainingTime < -1) {
             this.bot && (await this.bot.cashOut());
         }
     }
@@ -129,7 +129,6 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
 
     async proceedUnsettledBets() {
         const unsettledBets = await this.betsRepository.find({ paid: false, roundId: this.gameData.roundId }).lean().exec();
-
         if (unsettledBets.length > 0) {
             const betLogs = await this.betLogsRepository.find({ roundId: this.gameData.roundId }).lean().exec();
 
@@ -141,7 +140,6 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
                 if (!betLog.some((x) => x.action === Actions.CashOut)) {
                     const halfCashOutLog = betLog.find((x) => x.action === Actions.HalfCashOut);
                     const amount = halfCashOutLog ? halfCashOutLog.amount : bet.amount;
-
                     await this.betLogsRepository.create({
                         uid: bet.uid,
                         name: bet.name,
@@ -154,7 +152,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
                         receivedTime: new Date(),
                         roundId: bet.roundId,
                         siteId: bet.siteId,
-                        currency: bet.currencyName,
+                        currency: bet.currency,
                         rate: bet.rate,
                         operatorId: bet.operatorId,
                         playerId: bet.playerId,

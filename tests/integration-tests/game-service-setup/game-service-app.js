@@ -2,6 +2,7 @@ import { Core, Table } from "sc-game-base";
 import { initAPIStub, stubUserService } from "sc-game-service-integration-utils";
 import appConfigs from "../../../src/app-configs.IGT";
 import gameSettings from "../../../src/game-settings";
+import { generateRawResultForHash, generateResult, getSettlementResult } from "../../../src/helpers/result-helper";
 import IGTContainerRegistry from "./igt-container-registry";
 
 export const run = async () => {

@@ -10,9 +10,9 @@ import {
     normalUser,
 } from "sc-game-service-integration-utils";
 import configs from "../../../src/app-configs.IGT";
-import { Rounds } from "../../../src/models";
+import { Bets, Results, Rounds } from "../../../src/models";
 import { createCurrencyGroupGames } from "./currency-group-games-stub";
-import { currencyData, game, gameConfig, rounds as roundDatas } from "./test-data";
+import { currencyData, game, gameConfig, hashResults, rounds as roundDatas, userBetData } from "./test-data";
 
 const connectDatabase = async () => {
     await middlewares.database.configureDatabase(mongoose, configs.database);
@@ -35,12 +35,16 @@ const createTestData = async () => {
     const currency = await createDummyCurrency(partnerConfig.partnerId, currencyData.code, currencyData.name);
     await createCurrencyGroupGames(currency.groupId, game.id, gameConfig);
     await createDummyUsers(currency);
-    await createRounds();
+    //await createRounds();
     await createUserBetData();
-
+    await createHashResult();
     console.log("Create game config & dummy user for testing successfully!");
 
     process.exit(0);
+};
+
+const createHashResult = async (hash) => {
+    await Results.insertMany(hashResults);
 };
 
 const createRounds = async () => {
@@ -55,7 +59,7 @@ const getUserId = async (memberId) => {
 const createUserBetData = async () => {
     const userId = await getUserId(normalUser.playerId);
     const betData = userBetData({ uid: userId, name: normalUser.playerName, playerId: normalUser.playerId });
-    return getBetModel(`${gameConfig.name}_bet`).insertMany(betData);
+    return Bets.insertMany(betData);
 };
 
 createTestData();
