@@ -35,49 +35,44 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     async proceedCashOut(player, payload) {
         const { receivedTime, freeBet, action } = payload;
         const { roundId, startTime, result } = this.gameData;
+        const timeFromStart = receivedTime - startTime;
+        const multiplier = calculateMultiplier(timeFromStart);
 
         const bet = await this.betsRepository.findOne({ uid: player.UID, roundId, freeBet: !!freeBet }).lean().exec();
 
-        if (!bet) {
+        if (!bet || multiplier >= result) {
             this.publishCashOutFailed(player);
 
             return;
         }
 
-        const isCashOutHalfAmount = await this.isCashOutHalfAmount(player, payload);
-        const amount = isCashOutHalfAmount ? bet.amount / 2 : bet.amount;
-        const timeFromStart = receivedTime - startTime;
-        const multiplier = calculateMultiplier(timeFromStart);
+        const halfCashOutBetLog =
+            action === Actions.CashOut
+                ? await this.betLogsRepository.findOne({ uid: player.UID, roundId, freeBet, action: Actions.HalfCashOut }).lean().exec()
+                : undefined;
 
-        if (multiplier >= result) {
-            this.publishCashOutFailed(player);
-        } else {
-            const winAmount = roundFloat(amount * multiplier);
-            const betLog = { ...payload, winAmount, multiplier };
+        const amount = halfCashOutBetLog || action === Actions.halfCashOutBetLog ? bet.amount / 2 : bet.amount;
 
-            await this.insertBetLog(player, roundId, betLog);
-            this.adjustRunningBets(player, action, amount, winAmount);
-            this.placeBetPublisher.publishSuccessBet(player.UID, {
-                name: player.profile.name,
-                playerId: player.UID,
-                [action]: { amount, win: winAmount },
-            });
-        }
+        await this.settleCashOut(player, payload, amount, multiplier, halfCashOutBetLog?.winAmount);
     }
 
-    async isCashOutHalfAmount(player, payload) {
-        const { action, roundId, freeBet } = payload;
+    async settleCashOut(player, payload, amount, multiplier, currentWinAmount = 0) {
+        const { action, roundId } = payload;
+        const cashOutWin = roundFloat(amount * multiplier);
+        const playerMaxWin = this.getMaxWinPerRound(player);
+        const totalWinAmount = cashOutWin + currentWinAmount;
+        const actualWinAmount = totalWinAmount < playerMaxWin ? cashOutWin : playerMaxWin - totalWinAmount;
+        const finalWinAmount = actualWinAmount > 0 ? actualWinAmount : 0;
 
-        if (action === Actions.HalfCashOut) {
-            return true;
-        } else {
-            const halfCashOutBetLog = await this.betLogsRepository
-                .findOne({ uid: player.UID, roundId, freeBet, action: Actions.HalfCashOut })
-                .lean()
-                .exec();
+        const betLog = { ...payload, winAmount: finalWinAmount };
 
-            return halfCashOutBetLog;
-        }
+        await this.insertBetLog(player, roundId, betLog);
+        this.adjustRunningBets(player, action, amount, finalWinAmount);
+        this.placeBetPublisher.publishSuccessBet(player.UID, {
+            name: player.profile.name,
+            playerId: player.UID,
+            [action]: { amount, win: finalWinAmount },
+        });
     }
 
     publishCashOutFailed(player) {
@@ -153,5 +148,13 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
     adjustRunningBets(player, action, amount, win) {
         this.gameData.runningBets[player.UID] = { name: player.profile.name, playerId: player.UID, [action]: { amount, win } };
+    }
+
+    getMaxWinPerRound(player) {
+        const { maxWinPerRound } = this.gameData.gameConfigs.crashConfig;
+        const settings = this.gameData.currencyGroupGames.find((x) => x.groupId.toString() === player.session.currencyGroupId);
+        const maxBet = Math.min(player.profile.maxBet, settings.maxBet);
+
+        return maxWinPerRound * maxBet;
     }
 }

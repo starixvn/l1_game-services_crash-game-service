@@ -1,6 +1,6 @@
-import { helpers } from "sc-common";
 import { BaseEventConsumers } from "sc-game-base/src/core";
 import { Actions, MinMultiplierValue } from "../constants";
+import { helpers } from "sc-common";
 import noticeHelper from "../helpers/notice-helper";
 import { roundFloat } from "../helpers/number-helper";
 
