@@ -5,11 +5,12 @@ describe("roundResultConsumer", () => {
     const chance = new Chance();
     const roundId = chance.natural();
     const maxMultiplier = chance.floating({ min: 10 });
+    const crashAtBase = chance.natural({ min: 0, max: 100 });
     const gameData = {
         roundId,
         gameConfigs: {
             randomMode: chance.natural(),
-            crashConfig: { maxMultiplier },
+            crashConfig: { maxMultiplier, crashAtBase },
         },
         settlementResultFromAdmin: {},
     };
@@ -65,7 +66,7 @@ describe("roundResultConsumer", () => {
                 consumer.generateResult();
 
                 // Assert
-                expect(definition.generateResult).toBeCalledWith(gameData.gameConfigs.randomMode);
+                expect(definition.generateResult).toBeCalledWith(gameData.gameConfigs.randomMode, crashAtBase);
             });
 
             describe("when result generated > max multiplier config", () => {

@@ -31,6 +31,8 @@ describe("ProcessBetQueue", () => {
         },
     };
 
+    gameData.runningBets = {};
+
     gameData.startTime = new Date();
 
     gameData.gameConfigs = {
@@ -392,10 +394,6 @@ describe("ProcessBetQueue", () => {
                         });
                     });
                 });
-
-                // describe("when action is Half Cash Out", () => {
-                //     it("should NOT call betLogs repository.findOne");
-                // });
             });
         });
     });
@@ -484,7 +482,7 @@ describe("ProcessBetQueue", () => {
         describe("when bet is not free bet and user stake level is updated", () => {
             it("should call updateUserStakeLevel", async () => {
                 // Act
-                await proceedBetQueue.handleSuccessBet(player, balance, roundId, payload);
+                await proceedBetQueue.handleSuccessBet(player, balance, roundId, { ...payload, freeBet: false });
 
                 // Assert
                 expect(proceedBetQueue.updateUserStakeLevel).toBeCalledWith(player, balance.minBet, balance.maxBet);
@@ -525,6 +523,38 @@ describe("ProcessBetQueue", () => {
         });
     });
 
+    describe("adjustRunningBets", () => {
+        it("should assign bet to running Bets data", () => {
+            // Arrange
+            const { action, amount } = payload;
+            const win = chance.natural();
+            const expectResult = { name: player.profile.name, playerId: player.UID, [action]: { amount, win } };
+
+            // Act
+            proceedBetQueue.adjustRunningBets(player, action, amount, win);
+
+            // Assert
+            expect(proceedBetQueue.gameData.runningBets[player.UID]).toStrictEqual(expectResult);
+        });
+    });
+
+    describe("getMaxWinPerRound", () => {
+        it("should return max win per round", () => {
+            // Arrange
+            const maxWinPerRound = chance.natural({ min: 1, max: 2000 });
+            const currencyMaxBet = chance.natural({ min: 1, max: 2000 });
+            proceedBetQueue.gameData.currencyGroupGames = [{ groupId: player.session.currencyGroupId, maxBet: currencyMaxBet }];
+            proceedBetQueue.gameData.gameConfigs.crashConfig.maxWinPerRound = maxWinPerRound;
+            const maxBet = Math.min(player.profile.maxBet, currencyMaxBet);
+
+            // Act
+            const actualResult = proceedBetQueue.getMaxWinPerRound(player);
+
+            // Assert
+            expect(actualResult).toBe(maxBet * maxWinPerRound);
+        });
+    });
+
     const initBetQueue = (placeBet) => {
         return new ProcessBetQueue({
             definition,
@@ -550,6 +580,7 @@ describe("ProcessBetQueue", () => {
                 currencyCode: "USD",
                 currencyName: "USD",
                 multiplier: 1000,
+                currencyGroupId: chance.guid(),
             },
             socketClient: {
                 emit: jest.fn(),
