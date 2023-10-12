@@ -61,7 +61,6 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         await this.queryLastResult();
         await this.updateExchangeRates();
         await this.proceedUnsettledBets();
-
         await this.initResultHash();
         await this.getSettingForNewRound();
         this.startCron();
