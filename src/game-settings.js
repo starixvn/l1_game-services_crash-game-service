@@ -2,7 +2,7 @@ export default {
     id: 73,
     name: "Spaceflight",
     durations: {
-        wholeRound: 14,
+        wholeRound: 15,
         placingBets: 10,
         lockingBet: 3,
         liveTime: 0,
