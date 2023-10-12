@@ -4,7 +4,7 @@ import { GameData } from "sc-game-base/src/core";
 import { stub } from "jest-micro-auto-stub";
 import { Chance } from "chance";
 import { calculateMultiplier } from "../../helpers/crash-point-helper";
-import { Actions, MinMultiplierValue, MultiplierValues } from "../../constants";
+import { Actions, MinMultiplierValue } from "../../constants";
 import { addMillisecond } from "../../helpers/date-helper";
 
 jest.mock("../../helpers/crash-point-helper", () => ({
@@ -16,6 +16,10 @@ jest.mock("../../helpers/date-helper", () => ({
     addMillisecond: jest.fn(),
 }));
 
+const liveGameLogsRepository = {
+    create: jest.fn(),
+};
+
 describe("liveGameCrons", () => {
     const gameData = new GameData();
     gameData.startTime = new Date();
@@ -24,7 +28,7 @@ describe("liveGameCrons", () => {
     const chance = new Chance();
     let cron;
     beforeEach(() => {
-        cron = new LiveGameCrons({ liveGamePublisher, logService, gameData });
+        cron = new LiveGameCrons({ liveGamePublisher, logService, gameData, liveGameLogsRepository });
     });
 
     afterEach(() => {
