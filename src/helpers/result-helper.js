@@ -40,13 +40,13 @@ const randomModes = {
     3: [random6, random5],
 };
 
-const generateResult = (randomMode, maxMultiplier = 2 ** 16) => {
+const generateResult = (randomMode, crashAtBasePercent = 3, maxMultiplier = 2 ** 16) => {
     const randomFunctions = randomModes[randomMode] || randomModes[1];
     const chance = new Chance();
     const randomFunction = chance.pickone(randomFunctions);
     const randomSeed = randomFunction(maxMultiplier - 1);
 
-    if (randomSeed % 33 === 0) {
+    if (chance.bool({ likelihood: crashAtBasePercent })) {
         return MinRandomValue;
     }
 

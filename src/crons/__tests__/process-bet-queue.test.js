@@ -58,8 +58,10 @@ describe("ProcessBetQueue", () => {
     /** @type {logger}*/
     const logService = stub(logger);
     /** @type {mongoose.Model}*/
-    const betsRepository = { findOne: jest.fn().mockReturnValue({ lean: jest.fn().mockReturnValue({ exec: jest.fn() }) }) };
-
+    const betsRepository = {
+        create: jest.fn(),
+        findOne: jest.fn().mockReturnValue({ lean: jest.fn().mockReturnValue({ exec: jest.fn() }) }),
+    };
     /** @type {mongoose.Model}*/
     const betLogsRepository = {
         create: jest.fn(),
@@ -487,6 +489,39 @@ describe("ProcessBetQueue", () => {
                 // Assert
                 expect(proceedBetQueue.updateUserStakeLevel).toBeCalledWith(player, balance.minBet, balance.maxBet);
             });
+        });
+    });
+
+    describe("insertBet", () => {
+        const mockDate = new Date();
+
+        beforeEach(() => {
+            jest.spyOn(global, "Date").mockImplementation(() => mockDate);
+        });
+
+        it("should call betsRepository.create", async () => {
+            // Arrange
+            const rate = chance.floating({ min: 1 });
+
+            const expectResult = {
+                uid: player.UID,
+                name: player.profile.name,
+                time: mockDate,
+                freeBet: payload.freeBet,
+                roundId,
+                amount: payload.amount,
+                siteId: player.session.siteId,
+                currency: player.session.currencyName,
+                rate: rate,
+                operatorId: player.session.operatorId,
+                playerId: player.session.playerId,
+            };
+
+            // Act
+            await proceedBetQueue.insertBet(player, roundId, payload, rate);
+
+            // Assert
+            expect(proceedBetQueue.betsRepository.create).toBeCalledWith(expectResult);
         });
     });
 

@@ -4,10 +4,12 @@ export default class RoundResultConsumer extends Core.BaseEventConsumers.RoundRe
     generateResult() {
         const resultFromAdmin = this.gameData.settlementResultFromAdmin;
         const { randomMode, crashConfig } = this.gameData.gameConfigs;
-        const { maxMultiplier } = crashConfig;
+        const { maxMultiplier, crashAtBase } = crashConfig;
 
         const result =
-            this.gameData.roundId === resultFromAdmin.roundId ? resultFromAdmin.result : this.definition.generateResult(randomMode);
+            this.gameData.roundId === resultFromAdmin.roundId
+                ? resultFromAdmin.result
+                : this.definition.generateResult(randomMode, crashAtBase);
 
         return result < maxMultiplier ? result : maxMultiplier;
     }
