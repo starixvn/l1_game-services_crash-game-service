@@ -103,7 +103,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
 
         if (this.gameData.remainingTime === -1) {
             this.startDelaySettleRound();
-            this.liveGameCrons.start();
+            this.gameData.result !== 1 && this.liveGameCrons.start();
         }
 
         if (this.gameData.remainingTime < -1) {
