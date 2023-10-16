@@ -78,9 +78,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         }
 
         if (this.isStartingTime(this.gameData.remainingTime, durations)) {
-            this.resetForNewRound();
-            this.bot && (await this.bot.reset());
-            this.appConfigs.enabledBoostedOdds && (await this.updatePromotionOddsAndNotify());
+            await this.resetForNewRound();
         }
 
         if (this.gameData.remainingTime === durations.placingBets && this.resultsRepository) {
@@ -103,7 +101,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
 
         if (this.gameData.remainingTime === -1) {
             this.startDelaySettleRound();
-            this.gameData.result !== 1 && this.liveGameCrons.start();
+            this.gameData.result > 1 && this.liveGameCrons.start();
         }
 
         if (this.gameData.remainingTime < -1) {
@@ -166,8 +164,11 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         }
     }
 
-    resetForNewRound() {
+    async resetForNewRound() {
         super.resetForNewRound();
         this.gameData.runningBets = {};
+
+        this.bot && (await this.bot.reset());
+        this.appConfigs.enabledBoostedOdds && (await this.updatePromotionOddsAndNotify());
     }
 }
