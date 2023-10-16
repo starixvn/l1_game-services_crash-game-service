@@ -315,7 +315,7 @@ describe("gameCrons", () => {
             jest.useRealTimers();
         });
 
-        it("sets a timeout to settle the round after the specified delay", () => {
+        it("should sets a timeout to settle the round after the specified delay", () => {
             // Act
             cron.startDelaySettleRound(gameData, definition);
 
@@ -323,7 +323,7 @@ describe("gameCrons", () => {
             expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 1000);
         });
 
-        it("calls the settleGameRoundConsumer.settleRound() method after the specified delay", () => {
+        it("should calls the settleGameRoundConsumer.settleRound() method after the specified delay", () => {
             // Act
             cron.startDelaySettleRound(gameData, definition);
             cron;
@@ -332,7 +332,7 @@ describe("gameCrons", () => {
             expect(cron.settleGameRoundConsumer.settleRound).toBeCalled();
         });
 
-        it("logs an error if settling the round fails", () => {
+        it("should logs an error if settling the round fails", () => {
             // Arrange
             cron.settleGameRoundConsumer.settleRound.mockImplementation(() => {
                 throw new Error("Settle round failed");
@@ -344,6 +344,19 @@ describe("gameCrons", () => {
             // Assert
             jest.runAllTimers();
             expect(logService.logError).toHaveBeenCalledWith(new Error("Settle round failed"));
+        });
+
+        it("should set start time to current time", () => {
+            // Arrange
+            const mockDate = new Date();
+            jest.spyOn(global, "Date").mockImplementation(() => mockDate);
+            cron.gameData.startTime = undefined;
+
+            // Act
+            cron.startDelaySettleRound(gameData, definition);
+
+            // Assert
+            expect(cron.gameData.startTime).toBe(mockDate);
         });
     });
 });
