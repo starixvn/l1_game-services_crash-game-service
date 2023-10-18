@@ -51,7 +51,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
                 ? await this.betLogsRepository.findOne({ uid: player.UID, roundId, freeBet, action: Actions.HalfCashOut }).lean().exec()
                 : undefined;
 
-        const amount = halfCashOutBetLog || action === Actions.halfCashOutBetLog ? bet.amount / 2 : bet.amount;
+        const amount = halfCashOutBetLog || action === Actions.HalfCashOut ? bet.amount / 2 : bet.amount;
 
         await this.settleCashOut(player, payload, amount, multiplier, halfCashOutBetLog?.winAmount);
     }
