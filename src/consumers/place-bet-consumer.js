@@ -8,7 +8,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     consume(player, payload) {
         Object.assign(payload, {
             amount: payload.amount >> 0,
-            autoCashOut: payload.autoCashOut >> 0 ?? 0,
+            autoCashOut: payload.autoCashOut ?? 0,
             clientSendTime: payload.clientSendTime,
             freeBet: payload.freeBet ?? false,
             roundId: payload.roundId ?? this.gameData.roundId,
@@ -43,7 +43,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     }
 
     validateBetRequest(player, amount, freeBet, roundId, autoCashOut) {
-        if (!amount) {
+        if (!amount || typeof autoCashOut !== "number") {
             return false;
         }
 
