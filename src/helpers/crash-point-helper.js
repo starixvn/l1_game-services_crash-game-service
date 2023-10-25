@@ -1,9 +1,9 @@
 import { roundFloat } from "./number-helper";
 
-const CrashTimeSeed = 4;
+const CrashTimeSeed = 6;
 
 function calculateMultiplier(timeInMilliseconds) {
-    const multiplier = (timeInMilliseconds / 1000) ** 2 / CrashTimeSeed ** 2 + 1;
+    const multiplier = (timeInMilliseconds / 1000) ** 2 / 2 ** CrashTimeSeed + 1;
 
     return roundFloat(multiplier);
 }
