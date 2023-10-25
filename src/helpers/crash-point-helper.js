@@ -9,7 +9,7 @@ function calculateMultiplier(timeInMilliseconds) {
 }
 
 function calculateCrashTimeInMillisecond(crashPoint) {
-    return CrashTimeSeed * Math.sqrt(crashPoint - 1) * 1000;
+    return Math.sqrt(2 ** CrashTimeSeed * crashPoint - 1) * 1000;
 }
 
 export { calculateMultiplier, calculateCrashTimeInMillisecond };
