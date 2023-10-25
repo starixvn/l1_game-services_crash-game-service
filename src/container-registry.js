@@ -8,8 +8,8 @@ import ProcessBetQueue from "./crons/process-bet-queue";
 import { LiveGamePublisher, PlaceBetPublisher } from "./event-publishers";
 import { BetLogs, Bets, Results, Rounds, tempBetLogs, tempBets } from "./models";
 import RoundQuery from "./query-apis/round-query";
-import BaseSocketRouter from "./routers/base-socket-router";
 import liveGameLogs from "./models/live-game-logs";
+import { SocketRouter, HttpRouter } from "./routers";
 
 const { asClass, asValue } = awilix;
 
@@ -71,7 +71,8 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
         super.registerRouters();
 
         this.container.register({
-            socketRouter: asClass(BaseSocketRouter).proxy(),
+            socketRouter: asClass(SocketRouter).proxy(),
+            httpRouter: asClass(HttpRouter),
         });
     }
 }

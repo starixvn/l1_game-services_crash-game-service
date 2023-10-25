@@ -1,6 +1,6 @@
 import { Routers } from "sc-game-base/src/core";
 
-export default class BaseSocketRouter extends Routers.BaseSocketRouter {
+export default class SocketRouter extends Routers.BaseSocketRouter {
     constructor({
         definition,
         gameData,
