@@ -53,7 +53,7 @@ export default class LiveGameCron {
         Object.keys(inGame).forEach((playerName) => {
             const playerInGame = inGame?.[playerName];
             const bet = playerInGame?.betTracks?.[Actions.Bet];
-            if (bet?.autoCashOut && multiplier >= bet.autoCashOut) {
+            if (!bet.isCashOut && bet?.autoCashOut && multiplier >= bet.autoCashOut) {
                 const receivedTime = addMillisecond(this.gameData.startTime, calculateCrashTimeInMillisecond(bet.autoCashOut));
 
                 const payload = {
@@ -63,10 +63,11 @@ export default class LiveGameCron {
                 };
 
                 const player = Object.values(this.gameData.realPlayers).find(
-                    (player) => player.UID === playerInGame.UID && player.socketClient && player.socketClient.connected
+                    (player) => player.profile.name === playerName && player.socketClient && player.socketClient.connected
                 );
 
                 player && playerInGame.betQueue.push({ player, payload });
+                bet.isCashOut = true;
             }
         });
     }
