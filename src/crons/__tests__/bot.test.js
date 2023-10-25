@@ -96,7 +96,7 @@ describe("getBotsToCashOut", () => {
                 1: {
                     totalBet: 100,
                     cashOut: true,
-                    multiplier: 2
+                    multiplier: 2,
                 },
                 2: {
                     totalBet: 200,
@@ -143,5 +143,35 @@ describe("getBotsToCashOut", () => {
             //Assert
             expect(result).toContain(bot.botsInRoom[1]);
         });
+    });
+});
+
+describe("placeBet", () => {
+    describe("when the remaining time is less than the locking bet duration", () => {
+        it("should not place a bet ", async () => {
+            const bot = initBot();
+            bot.gameData.gameConfigs =  { bot_maxbet: 100 } ;
+
+            await bot.placeBet({ id: 1, totalBet: 0 });
+
+            expect(userInfosRepository.findOneAndUpdate).not.toBeCalled();
+            expect(tempBetsRepository.create).not.toBeCalled();
+        });
+    });
+
+    it("should place a bet when the bot has enough red balance", async () => {
+        //Arrange
+        const bot = initBot();
+        bot.gameData.gameConfigs = { bot_maxbet: 100 };
+        bot.gameData.remainingTime = 12
+        userInfosRepository.findOneAndUpdate.mockReturnValueOnce({ red: 1000 });
+
+        //Act
+        await bot.placeBet(bot);
+
+        //Assert
+        expect(userInfosRepository.findOneAndUpdate).toBeCalled();
+        expect(tempBetsRepository.create).toBeCalled();
+
     });
 });

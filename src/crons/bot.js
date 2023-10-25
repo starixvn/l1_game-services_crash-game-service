@@ -111,6 +111,8 @@ export default class Bot extends Table.Crons.TableGameBot {
                         bot.multiplier = multiplier;
                         return this.insertBetLog(bot, { amount, winAmount, action, multiplier });
                     }
+
+                    return Promise.resolve();
                 })
             );
         }
