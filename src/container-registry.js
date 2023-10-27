@@ -10,6 +10,7 @@ import { BetLogs, Bets, Results, Rounds, tempBetLogs, tempBets } from "./models"
 import RoundQuery from "./query-apis/round-query";
 import liveGameLogs from "./models/live-game-logs";
 import { SocketRouter, HttpRouter } from "./routers";
+import RoundResultConsumer from "./consumers/round-result-consumer";
 
 const { asClass, asValue } = awilix;
 
@@ -35,6 +36,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             inGameConsumer: asClass(InGameConsumer).singleton(),
             placeBetConsumer: asClass(PlaceBetConsumer).singleton(),
             cashOutConsumer: asClass(CashOutConsumer).singleton(),
+            roundResultConsumer: asClass(RoundResultConsumer).singleton(),
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
         });
     }
