@@ -7,7 +7,7 @@ import GameCrons from "./crons/game-crons";
 import ProcessBetQueue from "./crons/process-bet-queue";
 import { LiveGamePublisher, PlaceBetPublisher } from "./event-publishers";
 import { BetLogs, Bets, Results, Rounds, tempBetLogs, tempBets } from "./models";
-import RoundQuery from "./query-apis/round-query";
+import { RoundQuery, HistoryQuery } from "./query-apis";
 import liveGameLogs from "./models/live-game-logs";
 import { SocketRouter, HttpRouter } from "./routers";
 import RoundResultConsumer from "./consumers/round-result-consumer";
@@ -66,6 +66,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
 
         this.container.register({
             roundQuery: asClass(RoundQuery).singleton(),
+            historyQuery: asClass(HistoryQuery).singleton(),
         });
     }
 
