@@ -43,7 +43,7 @@ export default class Bot extends Table.Crons.TableGameBot {
             },
             {
                 from: 7.01,
-                to: 10000,
+                to: Number.MAX_VALUE,
                 ratio: 0.05,
             },
         ];
