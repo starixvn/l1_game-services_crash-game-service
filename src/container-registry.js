@@ -1,31 +1,32 @@
 import awilix from "awilix";
 import { Table } from "sc-game-base";
 import { CashOutConsumer, InGameConsumer, PlaceBetConsumer, SettleGameRoundConsumer } from "./consumers";
+import RoundResultConsumer from "./consumers/round-result-consumer";
 import { LiveGameCrons } from "./crons";
 import Bot from "./crons/bot";
 import GameCrons from "./crons/game-crons";
 import ProcessBetQueue from "./crons/process-bet-queue";
 import { LiveGamePublisher, PlaceBetPublisher } from "./event-publishers";
 import { BetLogs, Bets, Results, Rounds, tempBetLogs, tempBets } from "./models";
-import { RoundQuery, HistoryQuery } from "./query-apis";
 import liveGameLogs from "./models/live-game-logs";
-import { SocketRouter, HttpRouter } from "./routers";
-import RoundResultConsumer from "./consumers/round-result-consumer";
+import { HistoryQuery, RoundQuery } from "./query-apis";
+import { HttpRouter, SocketRouter } from "./routers";
 
 const { asClass, asValue } = awilix;
 
 export default class ContainerRegistry extends Table.TableContainerRegistry {
     registerModels() {
+        const definition = this.container.resolve("definition");
         super.registerModels();
 
         this.container.register({
-            roundsRepository: asValue(Rounds),
-            betsRepository: asValue(Bets),
-            resultsRepository: asValue(Results),
-            betLogsRepository: asValue(BetLogs),
-            tempBetsRepository: asValue(tempBets),
-            tempBetLogsRepository: asValue(tempBetLogs),
-            liveGameLogsRepository: asValue(liveGameLogs),
+            roundsRepository: asValue(Rounds(definition.configName)),
+            betsRepository: asValue(Bets(definition.configName)),
+            resultsRepository: asValue(Results(definition.configName)),
+            betLogsRepository: asValue(BetLogs(definition.configName)),
+            tempBetsRepository: asValue(tempBets(definition.configName)),
+            tempBetLogsRepository: asValue(tempBetLogs(definition.configName)),
+            liveGameLogsRepository: asValue(liveGameLogs(definition.configName)),
         });
     }
 

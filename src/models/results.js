@@ -1,4 +1,6 @@
-import { Core } from "sc-game-base";
 import mongoose from "mongoose";
+import { Core } from "sc-game-base";
 
-export default mongoose.model("crashgame_results", Core.Models.ResultSchema);
+export default function (gameConfigName) {
+    return mongoose.model(`${gameConfigName}_results`, Core.Models.ResultSchema);
+}

@@ -22,8 +22,10 @@ const schema = new mongoose.Schema({
     autoCashOut: { type: Number },
 });
 
-const tempBets = mongoose.model("crashgame_tmpbets", new mongoose.Schema(schema));
+export function tempBets(gameConfigName) {
+    return mongoose.model(`${gameConfigName}_tmpbets`, schema);
+}
 
-export default mongoose.model("crashgame_bets", schema);
-export { tempBets };
-
+export default function (gameConfigName) {
+    return mongoose.model(`${gameConfigName}_bets`, schema);
+}

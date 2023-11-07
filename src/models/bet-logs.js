@@ -22,8 +22,10 @@ const Schema = new mongoose.Schema({
     roundId: { type: Number, default: 0, required: true },
 });
 
-const tempBetLogs = mongoose.model("crashgame_tmpbetlogs", new mongoose.Schema(Schema));
+export function tempBetLogs(gameConfigName) {
+    return mongoose.model(`${gameConfigName}_tmpbetlogs`, Schema);
+}
 
-export default mongoose.model("crashgame_betlogs", Schema);
-export { tempBetLogs };
-
+export default function (gameConfigName) {
+    return mongoose.model(`${gameConfigName}_betlogs`, Schema);
+}

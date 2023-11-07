@@ -9,4 +9,6 @@ const Schema = new mongoose.Schema({
     exchangeRateId: { type: Number, required: true },
 });
 
-export default mongoose.model(modelName, Schema);
+export default function (gameConfigName) {
+    return mongoose.model(`${gameConfigName}_rounds`, Schema);
+}

@@ -6,4 +6,6 @@ const Schema = new mongoose.Schema({
     roundId: { type: Number, default: 0, required: true },
 });
 
-export default mongoose.model("crashgame_livegamelogs", Schema);
+export default function (gameConfigName) {
+    return mongoose.model(`${gameConfigName}_livegamelogs`, Schema);
+}
