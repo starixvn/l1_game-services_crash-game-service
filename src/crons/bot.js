@@ -106,6 +106,7 @@ export default class Bot extends Table.Crons.TableGameBot {
                                 name: bot.name,
                                 playerId: bot.id,
                                 [action]: { amount, win: winAmount, multiplier },
+                                rate: this.botRate,
                             },
                         });
                         bot.multiplier = multiplier;
@@ -190,7 +191,7 @@ export default class Bot extends Table.Crons.TableGameBot {
 
     generatePlaceBetPayload(playerId, choice, amount, balance) {
         return {
-            playerChip: { playerId, name: this.botsInRoom[playerId].name, betChoice: choice, amount, red: balance },
+            playerChip: { playerId, name: this.botsInRoom[playerId].name, betChoice: choice, amount, red: balance, rate: this.botRate },
         };
     }
 }

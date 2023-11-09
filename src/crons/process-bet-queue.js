@@ -68,11 +68,15 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
         await this.insertBetLog(player, roundId, betLog);
         this.adjustRunningBets(player, action, amount, finalWinAmount);
-        this.placeBetPublisher.publishSuccessCashOut(player.UID, {
-            name: player.profile.name,
-            playerId: player.UID,
-            [action]: { amount, win: finalWinAmount, multiplier },
-        });
+        this.placeBetPublisher.publishSuccessCashOut(
+            player.UID,
+            {
+                name: player.profile.name,
+                playerId: player.UID,
+                [action]: { amount, win: finalWinAmount, multiplier },
+            },
+            this.calculateCurrencyRate(player.session)
+        );
     }
 
     publishCashOutFailed(player) {
