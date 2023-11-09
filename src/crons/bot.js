@@ -187,4 +187,10 @@ export default class Bot extends Table.Crons.TableGameBot {
 
         await this.tempBetLogsRepository.create(newBet);
     }
+
+    generatePlaceBetPayload(playerId, choice, amount, balance) {
+        return {
+            playerChip: { playerId, name: this.botsInRoom[playerId].name, betChoice: choice, amount, red: balance },
+        };
+    }
 }

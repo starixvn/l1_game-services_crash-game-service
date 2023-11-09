@@ -68,7 +68,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
         await this.insertBetLog(player, roundId, betLog);
         this.adjustRunningBets(player, action, amount, finalWinAmount);
-        this.placeBetPublisher.publishSuccessBet(player.UID, {
+        this.placeBetPublisher.publishSuccessCashOut(player.UID, {
             name: player.profile.name,
             playerId: player.UID,
             [action]: { amount, win: finalWinAmount, multiplier },
@@ -94,6 +94,13 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         if (!bet.freeBet && (player.profile.minBet !== balance.minBet || player.profile.maxBet !== balance.maxBet)) {
             await this.updateUserStakeLevel(player, balance.minBet, balance.maxBet);
         }
+    }
+
+    generatePlacingBetResult(player, balance, bet, rate) {
+        const result = super.generatePlacingBetResult(player, balance, bet, rate);
+
+        result.user.name = player.profile.name;
+        return result;
     }
 
     async insertBetLog(player, roundId, bet) {
