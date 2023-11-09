@@ -47,7 +47,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
 
         this.container.register({
             liveGamePublisher: asClass(LiveGamePublisher).singleton(),
-            placeBetConsumer: asClass(PlaceBetPublisher).singleton(),
+            placeBetPublisher: asClass(PlaceBetPublisher).singleton(),
         });
     }
 
