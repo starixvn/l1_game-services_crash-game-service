@@ -1,7 +1,6 @@
-import { logger } from "sc-common";
+import { Actions } from "../constants";
 import LiveGamePublisher from "../event-publishers/live-game-publisher";
 import { calculateCrashTimeInMillisecond, calculateMultiplier } from "../helpers/crash-point-helper";
-import { Actions } from "../constants";
 import { addMillisecond } from "../helpers/date-helper";
 
 export default class LiveGameCron {
@@ -52,8 +51,9 @@ export default class LiveGameCron {
 
         Object.keys(inGame).forEach((playerName) => {
             const playerInGame = inGame?.[playerName];
-            const bet = playerInGame?.betTracks?.[Actions.Bet];
-            if (!bet.isCashOut && bet?.autoCashOut && multiplier >= bet.autoCashOut) {
+            const betTracks = playerInGame?.betTracks;
+            const bet = betTracks?.[Actions.Bet];
+            if (!bet.isCashOut && bet?.autoCashOut && multiplier >= bet.autoCashOut && !betTracks[Actions.CashOut] && !betTracks[Actions.HalfCashOut]) {
                 const receivedTime = addMillisecond(this.gameData.startTime, calculateCrashTimeInMillisecond(bet.autoCashOut));
 
                 const payload = {

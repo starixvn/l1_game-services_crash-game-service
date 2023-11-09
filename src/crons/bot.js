@@ -105,7 +105,7 @@ export default class Bot extends Table.Crons.TableGameBot {
                             otherPlayer: {
                                 name: bot.name,
                                 playerId: bot.id,
-                                [action]: { amount, win: winAmount },
+                                [action]: { amount, win: winAmount, multiplier },
                             },
                         });
                         bot.multiplier = multiplier;

@@ -71,7 +71,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         this.placeBetPublisher.publishSuccessBet(player.UID, {
             name: player.profile.name,
             playerId: player.UID,
-            [action]: { amount, win: finalWinAmount },
+            [action]: { amount, win: finalWinAmount, multiplier },
         });
     }
 
