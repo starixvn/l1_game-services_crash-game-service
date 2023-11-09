@@ -6,7 +6,7 @@ import { LiveGameCrons } from "./crons";
 import Bot from "./crons/bot";
 import GameCrons from "./crons/game-crons";
 import ProcessBetQueue from "./crons/process-bet-queue";
-import { LiveGamePublisher, PlaceBetPublisher } from "./event-publishers";
+import { LiveGamePublisher, PlaceBetPublisher, RoundResultPublisher } from "./event-publishers";
 import { BetLogs, Bets, Results, Rounds, tempBetLogs, tempBets } from "./models";
 import liveGameLogs from "./models/live-game-logs";
 import { HistoryQuery, RoundQuery } from "./query-apis";
@@ -48,6 +48,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
         this.container.register({
             liveGamePublisher: asClass(LiveGamePublisher).singleton(),
             placeBetPublisher: asClass(PlaceBetPublisher).singleton(),
+            roundResultPublisher: asClass(RoundResultPublisher).singleton()
         });
     }
 
