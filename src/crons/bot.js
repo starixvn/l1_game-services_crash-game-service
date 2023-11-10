@@ -51,9 +51,9 @@ export default class Bot extends Table.Crons.TableGameBot {
 
     getRemovalBotIds(totalRemoval) {
         const botsNotHaveBet = Object.values(this.botsInRoom).filter((bot) => bot.totalBet === 0);
-        const botIds = Object.keys(botsNotHaveBet);
+        const botIds = botsNotHaveBet.map((x) => x.id);
 
-        return botIds?.length > totalRemoval ? this.chance.pickset(Object.keys(botsNotHaveBet), totalRemoval) : botIds;
+        return botIds?.length > totalRemoval ? this.chance.pickset(botIds, totalRemoval) : botIds;
     }
 
     async placeBet(bot) {
