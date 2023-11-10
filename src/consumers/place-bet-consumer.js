@@ -1,6 +1,6 @@
+import { helpers } from "sc-common";
 import { BaseEventConsumers } from "sc-game-base/src/core";
 import { Actions, MinMultiplierValue } from "../constants";
-import { helpers } from "sc-common";
 import noticeHelper from "../helpers/notice-helper";
 import { roundFloat } from "../helpers/number-helper";
 
@@ -93,8 +93,13 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         const minBet = Math.max(player.profile.minBet, settings.minBet);
         const maxBet = Math.min(player.profile.maxBet, settings.maxBet);
         const roundedAutoCashOut = roundFloat(autoCashOut);
+        const playerIngame = this.gameData.ingame[player.profile.name];
 
         return [
+            {
+                failure: !!playerIngame?.betTracks[Actions.Bet],
+                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
+            },
             {
                 failure: freeBet && !configs.enableFreeBet,
                 notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
