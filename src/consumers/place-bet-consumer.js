@@ -32,6 +32,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 betTracks: {},
                 betQueue: [],
                 operatorId: player.session.operatorId,
+                playerData: { ...player },
             };
 
             this.gameData.ingame[name] = newPlayer;

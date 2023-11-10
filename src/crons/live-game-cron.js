@@ -62,15 +62,11 @@ export default class LiveGameCron {
                     action: Actions.CashOut,
                 };
 
-                const player = Object.values(this.gameData.realPlayers).find(
-                    (player) => player.profile.name === playerName && player.socketClient && player.socketClient.connected
-                );
-
                 betTracks[Actions.CashOut] = {
                     time: new Date(),
                 };
 
-                player && playerInGame.betQueue.push({ player, payload });
+                playerInGame.betQueue.push({ player: playerInGame.playerData, payload });
             }
         });
     }
