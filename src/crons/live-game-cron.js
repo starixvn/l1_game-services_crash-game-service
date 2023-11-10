@@ -53,7 +53,7 @@ export default class LiveGameCron {
             const playerInGame = inGame?.[playerName];
             const betTracks = playerInGame?.betTracks;
             const bet = betTracks?.[Actions.Bet];
-            if (!bet.isCashOut && bet?.autoCashOut && multiplier >= bet.autoCashOut && !betTracks[Actions.CashOut] && !betTracks[Actions.HalfCashOut]) {
+            if (bet?.autoCashOut && multiplier >= bet.autoCashOut && !betTracks[Actions.CashOut] && !betTracks[Actions.HalfCashOut]) {
                 const receivedTime = addMillisecond(this.gameData.startTime, calculateCrashTimeInMillisecond(bet.autoCashOut));
 
                 const payload = {
@@ -66,8 +66,11 @@ export default class LiveGameCron {
                     (player) => player.profile.name === playerName && player.socketClient && player.socketClient.connected
                 );
 
+                betTracks[Actions.CashOut] = {
+                    time: new Date(),
+                };
+
                 player && playerInGame.betQueue.push({ player, payload });
-                bet.isCashOut = true;
             }
         });
     }
