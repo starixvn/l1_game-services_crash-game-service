@@ -114,7 +114,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 notice: this.getNoticeObj(helpers.noticeHelper.maxBet, { maxBet }),
             },
             {
-                failure: autoCashOut && (roundedAutoCashOut < MinMultiplierValue || roundedAutoCashOut > configs.maxMultiplier),
+                failure: autoCashOut && (roundedAutoCashOut < MinMultiplierValue || roundedAutoCashOut > configs.crashConfig.maxMultiplier),
                 notice: this.getNoticeObj(noticeHelper.invalidValueCashOut, { autoCashOut }),
             },
         ];

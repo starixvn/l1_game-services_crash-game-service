@@ -1,12 +1,12 @@
-import { Core } from "sc-game-base";
-import { BaseEventPublisher } from "sc-game-base/src/core/event-publishers";
-import { PlaceBetConsumer } from "../place-bet-consumer";
-import gameSettings from "../../../src/game-settings";
-import { helpers } from "sc-common";
 import Chance from "chance";
 import { stub } from "jest-micro-auto-stub";
-import noticeHelper from "../../helpers/notice-helper";
+import { helpers } from "sc-common";
+import { Core } from "sc-game-base";
+import { BaseEventPublisher } from "sc-game-base/src/core/event-publishers";
+import gameSettings from "../../../src/game-settings";
 import { Actions } from "../../constants";
+import noticeHelper from "../../helpers/notice-helper";
+import { PlaceBetConsumer } from "../place-bet-consumer";
 
 const player = {
     socketId: "scoketId1",
@@ -29,13 +29,16 @@ describe("PlaceBetConsumer", () => {
     };
     const definition = new Core.GameDefinition(gameSettings);
     const gameData = {
-        gameConfigs: { odds: {}, enableFreeBet: false, maxMultiplier: 5000 },
+        gameConfigs: { odds: {}, enableFreeBet: false },
         exchangeRates: { code: {} },
         currencyGroupGames: [{ groupId: player.session.currencyGroupId, minBet: 4, maxBet: 18 }],
         players: {},
         ingame: {},
         roundId: 1,
         remainingTime: 30,
+        crashConfig: {
+            maxMultiplier: 5000,
+        },
     };
 
     let consumer;

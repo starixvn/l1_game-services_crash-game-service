@@ -27,9 +27,9 @@ const gameConfig = {
     randomMode: 2,
     displayName: "Space Flight",
     gameId: 73,
-    maxMultiplier: 2000,
     crashConfig: {
         maxWinPerRound: 1000,
+        maxMultiplier: 2000,
     },
 };
 

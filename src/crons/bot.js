@@ -191,7 +191,7 @@ export default class Bot extends Table.Crons.TableGameBot {
 
     generatePlaceBetPayload(playerId, choice, amount, balance) {
         return {
-            playerChip: { playerId, name: this.botsInRoom[playerId].name, betChoice: choice, amount, red: balance, rate: this.botRate },
+            playerChip: { playerId, name: this.gameData.players[playerId].name, betChoice: choice, amount, red: balance, rate: this.botRate },
         };
     }
 }
