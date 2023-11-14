@@ -217,9 +217,15 @@ describe("PlaceBetConsumer", () => {
                 consumer.gameData = { currencyGroupGames: [{ groupId: player.session.currencyGroupId, minBet: 4, maxBet: 18 }] };
                 spyOn(consumer, "composeValidationCriteria").and.returnValue([{ failure: false, notice: { code: 1 } }]);
                 const amount = 3;
-
+                const autoCashOut = 2;
                 // Act
-                const actualValue = consumer.validateBetRequest(player, amount, false);
+                const actualValue = consumer.validateBetRequest(
+                    player,
+                    amount,
+                    false,
+                    2,
+                    autoCashOut
+                );
 
                 // Assert
                 expect(actualValue).toBeTrue();

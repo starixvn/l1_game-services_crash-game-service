@@ -8,7 +8,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     consume(player, payload) {
         Object.assign(payload, {
             amount: payload.amount >> 0,
-            autoCashOut: payload.autoCashOut ?? 0,
+            autoCashOut: roundFloat(+payload.autoCashOut),
             clientSendTime: payload.clientSendTime,
             freeBet: payload.freeBet ?? false,
             roundId: payload.roundId ?? this.gameData.roundId,
@@ -44,7 +44,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     }
 
     validateBetRequest(player, amount, freeBet, roundId, autoCashOut) {
-        if (!amount || typeof autoCashOut !== "number") {
+        if (!amount || !autoCashOut) {
             return false;
         }
 
@@ -93,7 +93,6 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         const configs = this.gameData.gameConfigs;
         const minBet = Math.max(player.profile.minBet, settings.minBet);
         const maxBet = Math.min(player.profile.maxBet, settings.maxBet);
-        const roundedAutoCashOut = roundFloat(autoCashOut);
         const playerIngame = this.gameData.ingame[player.profile.name];
 
         return [
@@ -114,7 +113,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 notice: this.getNoticeObj(helpers.noticeHelper.maxBet, { maxBet }),
             },
             {
-                failure: autoCashOut && (roundedAutoCashOut < MinMultiplierValue || roundedAutoCashOut > configs.crashConfig.maxMultiplier),
+                failure: autoCashOut && (autoCashOut < MinMultiplierValue || autoCashOut > configs.crashConfig.maxMultiplier),
                 notice: this.getNoticeObj(noticeHelper.invalidValueCashOut, { autoCashOut }),
             },
         ];
@@ -129,10 +128,8 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
             playerInGame.betTracks[action] = {
                 amount,
                 time: receivedTime,
+                autoCashOut,
             };
-            if (autoCashOut > 0) {
-                playerInGame.betTracks[action].autoCashOut = roundFloat(autoCashOut);
-            }
         }
     }
 }
