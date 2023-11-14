@@ -19,7 +19,7 @@ export default class HttpRouter extends Table.Routers.TableHttpRouter {
         try {
             if (!params || !params.result) {
                 this.logService.logError("receives a result cheating call with invalid params.");
-                res.send({ error: true });
+                res.send(false);
 
                 return;
             }
@@ -28,10 +28,10 @@ export default class HttpRouter extends Table.Routers.TableHttpRouter {
 
             this.gameData.settlementResultFromAdmin = { result: params.result, roundId: params.roundId ?? this.gameData.roundId + 1 };
 
-            res.send({ error: false });
+            res.send(true);
         } catch (error) {
             this.logService.logError(error);
-            res.send({ error: true });
+            res.send(false);
         }
     }
 }
