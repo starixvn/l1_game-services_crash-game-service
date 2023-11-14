@@ -128,7 +128,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
             playerInGame.betTracks[action] = {
                 amount,
                 time: receivedTime,
-                autoCashOut,
+                autoCashOut: autoCashOut > 0 ? autoCashOut : undefined,
             };
         }
     }
