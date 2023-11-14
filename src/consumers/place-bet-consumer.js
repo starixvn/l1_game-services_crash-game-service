@@ -44,7 +44,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     }
 
     validateBetRequest(player, amount, freeBet, roundId, autoCashOut) {
-        if (!amount || !autoCashOut) {
+        if (!amount) {
             return false;
         }
 
