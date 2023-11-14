@@ -8,7 +8,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     consume(player, payload) {
         Object.assign(payload, {
             amount: payload.amount >> 0,
-            autoCashOut: roundFloat(+payload.autoCashOut),
+            autoCashOut: roundFloat(payload.autoCashOut ?? 0),
             clientSendTime: payload.clientSendTime,
             freeBet: payload.freeBet ?? false,
             roundId: payload.roundId ?? this.gameData.roundId,
