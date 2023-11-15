@@ -6,7 +6,7 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
     consume(player, payload) {
         Object.assign(payload, {
             roundId: payload.roundId ?? this.gameData.roundId,
-            m: payload.m,
+            m: payload.multiplier,
             clientSendTime: payload.clientSendTime,
             mode: payload.m ?? this.DisplayMode.Landscape,
             receivedTime: new Date(),
@@ -55,7 +55,7 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 notice: this.getNoticeObj(noticeHelper.invalidCashOut),
             },
             {
-                failure: betTracks?.[Actions.CashOut]?.time,
+                failure: !!betTracks?.[Actions.CashOut]?.time,
                 notice: this.getNoticeObj(noticeHelper.invalidCashOut),
             },
             {
