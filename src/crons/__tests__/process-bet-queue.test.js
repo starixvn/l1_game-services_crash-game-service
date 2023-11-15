@@ -83,7 +83,7 @@ describe("ProcessBetQueue", () => {
         freeBet: chance.bool(),
         amount: chance.natural(),
         action: chance.pickone(Object.values(Actions)),
-        roundId,
+        roundId: gameData.roundId,
         receivedTime: new Date(),
         time: new Date(),
     };
