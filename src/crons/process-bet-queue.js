@@ -33,8 +33,8 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     }
 
     async proceedCashOut(player, payload) {
-        const { receivedTime, freeBet, action } = payload;
-        const { roundId, startTime, result } = this.gameData;
+        const { receivedTime, freeBet, action, roundId } = payload;
+        const { startTime, result } = this.gameData;
         const timeFromStart = receivedTime - startTime;
         const multiplier = calculateMultiplier(timeFromStart);
 
