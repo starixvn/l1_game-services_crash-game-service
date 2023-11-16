@@ -117,7 +117,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         setTimeout(async () => {
             try {
                 this.liveGameCrons.stop();
-                this.liveGameCrons.proceedAutoCashOut(this.gameData.result);
+                await this.liveGameCrons.proceedAutoCashOut(this.gameData.result);
                 this.gameData.remainingTime = durations.wholeRound;
                 await this.settleGameRoundConsumer.settleRound(this.gameData);
             } catch (err) {

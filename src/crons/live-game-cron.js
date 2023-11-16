@@ -8,11 +8,12 @@ export default class LiveGameCron {
      * @param {LiveGamePublisher} dependencies.liveGamePublisher
      * @param {logger} dependencies.logService
      */
-    constructor({ liveGamePublisher, logService, gameData, liveGameLogsRepository }) {
+    constructor({ liveGamePublisher, logService, gameData, liveGameLogsRepository, processBetQueue }) {
         this.liveGamePublisher = liveGamePublisher;
         this.logService = logService;
         this.gameData = gameData;
         this.liveGameLogsRepository = liveGameLogsRepository;
+        this.processBetQueue = processBetQueue;
     }
 
     start() {
@@ -46,10 +47,10 @@ export default class LiveGameCron {
         }
     }
 
-    proceedAutoCashOut(multiplier) {
+    async proceedAutoCashOut(multiplier) {
         const inGame = this.gameData.ingame;
 
-        Object.keys(inGame).forEach((playerName) => {
+        for (const playerName of Object.keys(inGame)) {
             const playerInGame = inGame?.[playerName];
             const betTracks = playerInGame?.betTracks;
             const bet = betTracks?.[Actions.Bet];
@@ -66,8 +67,8 @@ export default class LiveGameCron {
                     time: new Date(),
                 };
 
-                playerInGame.betQueue.push({ player: playerInGame.playerData, payload });
+                await this.processBetQueue.proceedCashOut(playerInGame.playerData, payload);
             }
-        });
+        }
     }
 }

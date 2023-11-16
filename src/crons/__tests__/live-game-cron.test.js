@@ -20,6 +20,10 @@ const liveGameLogsRepository = {
     create: jest.fn(),
 };
 
+const processBetQueue = {
+    proceedCashOut: jest.fn(),
+};
+
 describe("liveGameCrons", () => {
     const gameData = new GameData();
     gameData.startTime = new Date();
@@ -28,7 +32,7 @@ describe("liveGameCrons", () => {
     const chance = new Chance();
     let cron;
     beforeEach(() => {
-        cron = new LiveGameCrons({ liveGamePublisher, logService, gameData, liveGameLogsRepository });
+        cron = new LiveGameCrons({ liveGamePublisher, logService, gameData, liveGameLogsRepository, processBetQueue });
     });
 
     afterEach(() => {
@@ -131,7 +135,7 @@ describe("liveGameCrons", () => {
 
     describe("proceedAutoCashOut", () => {
         describe("when exist valid autoCashOut value on bet", () => {
-            it("should push cashOut action to betQueue", () => {
+            it("should call processBetQueue.proceedCashOut", async () => {
                 // Arrange
                 const mockReceivedTime = new Date();
                 const playerName = "name01";
@@ -164,15 +168,15 @@ describe("liveGameCrons", () => {
                         betQueue: {
                             push: betQueuePushMock,
                         },
+                        playerData: realPlayer,
                     },
                 };
-                gameData.realPlayers[chance.guid()] = realPlayer;
 
                 // Act
-                cron.proceedAutoCashOut(multiplier);
+                await cron.proceedAutoCashOut(multiplier);
 
                 // Assert
-                expect(betQueuePushMock).toBeCalledWith({ player: realPlayer, payload: expectedPayload });
+                expect(processBetQueue.proceedCashOut).toBeCalledWith(realPlayer, expectedPayload);
             });
         });
     });
