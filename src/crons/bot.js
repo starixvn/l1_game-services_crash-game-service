@@ -84,7 +84,6 @@ export default class Bot extends Table.Crons.TableGameBot {
             const botsToCashOut = this.getBotsToCashOut();
 
             const { startTime, result } = this.gameData;
-
             await Promise.all(
                 botsToCashOut.map((bot) => {
                     if (bot.halfCashOut) {

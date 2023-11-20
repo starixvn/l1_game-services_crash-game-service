@@ -12,10 +12,12 @@ jest.mock("../../helpers/crash-point-helper", () => ({
 }));
 const tempBetsRepository = stubMongoose(mongoose.Model);
 const tempBetLogsRepository = stubMongoose(mongoose.Model);
+tempBetLogsRepository.create = jest.fn();
+
 const userInfosRepository = stubMongoose(mongoose.Model);
 const publisher = new BaseEventPublisher();
 const definition = new TableGameDefinition(gameSettings);
-const gameData = new TableGameData();
+let gameData = new TableGameData();
 
 function initBot() {
     return new Bot(definition, gameData, publisher, userInfosRepository, tempBetsRepository, tempBetLogsRepository);
@@ -23,7 +25,7 @@ function initBot() {
 
 afterEach(() => {
     jest.clearAllMocks();
-    gameData.remainingTIme = 0;
+    gameData = new TableGameData();
 });
 
 describe("getRemovalBotIds", () => {
@@ -150,7 +152,7 @@ describe("placeBet", () => {
     describe("when the remaining time is less than the locking bet duration", () => {
         it("should not place a bet ", async () => {
             const bot = initBot();
-            bot.gameData.gameConfigs =  { bot_maxbet: 100 } ;
+            bot.gameData.gameConfigs = { bot_maxbet: 100 };
 
             await bot.placeBet({ id: 1, totalBet: 0 });
 
@@ -163,15 +165,68 @@ describe("placeBet", () => {
         //Arrange
         const bot = initBot();
         bot.gameData.gameConfigs = { bot_maxbet: 100 };
-        bot.gameData.remainingTime = 12
+        bot.gameData.remainingTime = 12;
         userInfosRepository.findOneAndUpdate.mockReturnValueOnce({ red: 1000 });
-
+        const selectedBot = { totalBet: 1, cashOut: false, id: 1, name: "bot" };
+        bot.gameData.players[selectedBot.id] = selectedBot;
         //Act
-        await bot.placeBet(bot);
+        await bot.placeBet(selectedBot);
 
         //Assert
         expect(userInfosRepository.findOneAndUpdate).toBeCalled();
         expect(tempBetsRepository.create).toBeCalled();
+    });
+});
 
+describe("cashOut", () => {
+    describe("when remaining time < 0", () => {
+        it("should insert betlog and mark cashout for bots", async () => {
+            //Arrange
+            const bot = initBot();
+            bot.gameData.startTime = new Date(new Date() - 4000);
+            bot.gameData.result = 100;
+            bot.gameData.remainingTime = -4;
+
+            bot.botsInRoom = {
+                1: { totalBet: 1, cashOut: false },
+                2: { totalBet: 2, cashOut: false },
+                3: { totalBet: 2, cashOut: false },
+                4: { totalBet: 2, cashOut: false },
+                5: { totalBet: 2, cashOut: false },
+            };
+
+            bot.getBotsToCashOut = jest.fn().mockReturnValue([bot.botsInRoom[1], bot.botsInRoom[2]]);
+            calculateMultiplier.mockReturnValueOnce(5);
+            //Act
+            await bot.cashOut();
+
+            //Assert
+            expect(tempBetLogsRepository.create).toHaveBeenCalled();
+            expect(bot.botsInRoom[1].halfCashOut || bot.botsInRoom[1].cashOut).toEqual(true);
+        });
+
+        it("should call publisher.publishToAllUsersExceptSystem", async () => {
+            //Arrange
+            const bot = initBot();
+            bot.gameData.startTime = new Date(new Date() - 4000);
+            bot.gameData.result = 100;
+            bot.gameData.remainingTime = -4;
+
+            bot.botsInRoom = {
+                1: { totalBet: 1, cashOut: false },
+                2: { totalBet: 2, cashOut: false },
+                3: { totalBet: 2, cashOut: false },
+                4: { totalBet: 2, cashOut: false },
+                5: { totalBet: 2, cashOut: false },
+            };
+
+            bot.getBotsToCashOut = jest.fn().mockReturnValue([bot.botsInRoom[1], bot.botsInRoom[2]]);
+            calculateMultiplier.mockReturnValueOnce(5);
+            //Act
+            await bot.cashOut();
+
+            //Assert
+            expect(publisher.publishToAllUsersExceptSystem).toHaveBeenCalled();
+        });
     });
 });
