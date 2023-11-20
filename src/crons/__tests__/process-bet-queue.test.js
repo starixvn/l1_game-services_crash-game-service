@@ -3,14 +3,14 @@ import { stub, stubMongoose } from "jest-micro-auto-stub";
 import { cloneDeep } from "lodash";
 import mongoose from "mongoose";
 import logger from "sc-common/logger";
-import { calculateMultiplier } from "../../helpers/crash-point-helper";
+import { GameDefinition } from "sc-game-base/src/core";
 import BaseMetrics from "sc-game-base/src/core/base-metrics";
 import { PlaceBetPublisher } from "sc-game-base/src/core/event-publishers";
-import { GameData } from "sc-game-base/src/core";
-import { GameDefinition } from "sc-game-base/src/core";
-import ProcessBetQueue from "../process-bet-queue";
 import { Actions } from "../../constants";
+import CrashGameData from "../../game-data";
+import { calculateMultiplier } from "../../helpers/crash-point-helper";
 import noticeHelper from "../../helpers/notice-helper";
+import ProcessBetQueue from "../process-bet-queue";
 
 const chance = new Chance();
 
@@ -21,7 +21,7 @@ jest.mock("../../helpers/crash-point-helper", () => ({
 describe("ProcessBetQueue", () => {
     jest.mock("sc-game-base/src/core/event-publishers");
     const roundId = chance.natural();
-    const gameData = new GameData(10);
+    const gameData = new CrashGameData(10);
     gameData.exchangeRates = {
         exId: 1,
         code: {
@@ -293,6 +293,7 @@ describe("ProcessBetQueue", () => {
 
             it("should call calculateMultiplier", async () => {
                 // Act
+                gameData.betList[player.UID] = {};
                 await proceedBetQueue.proceedCashOut(player, payload);
 
                 // Assert

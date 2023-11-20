@@ -1,7 +1,7 @@
 import { stub, stubMongoose } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
-import { Table, Core } from "sc-game-base";
-import GameData from "sc-game-base/src/core/game-data";
+import { Core, Table } from "sc-game-base";
+import CrashGameData from "../../game-data";
 import { RoundQuery } from "../../query-apis/round-query";
 import { InGameConsumer } from "../in-game-consumer";
 
@@ -16,7 +16,10 @@ describe("in game consumer instance", () => {
             liveTime: 0,
         },
     };
-    const gameData = new GameData(0);
+    const gameData = new CrashGameData(0);
+    gameData.gameConfigs = {
+        crashConfig: { maxMultiplier: 2000, maxWinPerRound: 2000 },
+    };
 
     /** @type {mongoose.Model}*/
     const userInfosRepository = stubMongoose(mongoose.Model);
@@ -39,7 +42,14 @@ describe("in game consumer instance", () => {
     });
 
     describe("buildPayload tests", () => {
-        const basePayload = { roundId: 1, gameConfigs: {}, roundHistory: [], ownBets: {}, totalBets: {}, user: {} };
+        const basePayload = {
+            roundId: 1,
+            gameConfigs: {},
+            roundHistory: [],
+            ownBets: {},
+            totalBets: {},
+            user: {},
+        };
         beforeEach(() => {
             spyOn(Table.EventConsumers.TableInGameConsumer.prototype, "buildPayload").and.callFake(() => basePayload);
         });
@@ -59,6 +69,7 @@ describe("in game consumer instance", () => {
             const expectedResult = {
                 ...basePayload,
                 otherPlayers: "runningBets",
+                betList: {},
             };
 
             // act

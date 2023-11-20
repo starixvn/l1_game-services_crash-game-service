@@ -1,7 +1,8 @@
 import { stubMongoose } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
 import { BaseEventPublisher } from "sc-game-base/src/core/event-publishers";
-import { TableGameData, TableGameDefinition } from "sc-game-base/src/table";
+import { TableGameDefinition } from "sc-game-base/src/table";
+import CrashGameData from "../../game-data";
 import gameSettings from "../../game-settings";
 import { calculateMultiplier } from "../../helpers/crash-point-helper";
 import Bot from "../bot";
@@ -17,7 +18,7 @@ tempBetLogsRepository.create = jest.fn();
 const userInfosRepository = stubMongoose(mongoose.Model);
 const publisher = new BaseEventPublisher();
 const definition = new TableGameDefinition(gameSettings);
-let gameData = new TableGameData();
+let gameData = new CrashGameData();
 
 function initBot() {
     return new Bot(definition, gameData, publisher, userInfosRepository, tempBetsRepository, tempBetLogsRepository);
@@ -25,7 +26,7 @@ function initBot() {
 
 afterEach(() => {
     jest.clearAllMocks();
-    gameData = new TableGameData();
+    gameData = new CrashGameData();
 });
 
 describe("getRemovalBotIds", () => {
@@ -186,13 +187,17 @@ describe("cashOut", () => {
             bot.gameData.startTime = new Date(new Date() - 4000);
             bot.gameData.result = 100;
             bot.gameData.remainingTime = -4;
+            gameData.betList = {
+                1: {},
+                2: {},
+            };
 
             bot.botsInRoom = {
-                1: { totalBet: 1, cashOut: false },
-                2: { totalBet: 2, cashOut: false },
-                3: { totalBet: 2, cashOut: false },
-                4: { totalBet: 2, cashOut: false },
-                5: { totalBet: 2, cashOut: false },
+                1: { id: 1, nam: "bot1", totalBet: 1, cashOut: false },
+                2: { id: 2, nam: "bot2", totalBet: 2, cashOut: false },
+                3: { id: 3, nam: "bot3", totalBet: 2, cashOut: false },
+                4: { id: 4, nam: "bot4", totalBet: 2, cashOut: false },
+                5: { id: 5, nam: "bot5", totalBet: 2, cashOut: false },
             };
 
             bot.getBotsToCashOut = jest.fn().mockReturnValue([bot.botsInRoom[1], bot.botsInRoom[2]]);
@@ -211,13 +216,17 @@ describe("cashOut", () => {
             bot.gameData.startTime = new Date(new Date() - 4000);
             bot.gameData.result = 100;
             bot.gameData.remainingTime = -4;
+            gameData.betList = {
+                1: {},
+                2: {},
+            };
 
             bot.botsInRoom = {
-                1: { totalBet: 1, cashOut: false },
-                2: { totalBet: 2, cashOut: false },
-                3: { totalBet: 2, cashOut: false },
-                4: { totalBet: 2, cashOut: false },
-                5: { totalBet: 2, cashOut: false },
+                1: { id: 1, nam: "bot1", totalBet: 1, cashOut: false },
+                2: { id: 2, nam: "bot2", totalBet: 2, cashOut: false },
+                3: { id: 3, nam: "bot3", totalBet: 2, cashOut: false },
+                4: { id: 4, nam: "bot4", totalBet: 2, cashOut: false },
+                5: { id: 5, nam: "bot5", totalBet: 2, cashOut: false },
             };
 
             bot.getBotsToCashOut = jest.fn().mockReturnValue([bot.botsInRoom[1], bot.botsInRoom[2]]);

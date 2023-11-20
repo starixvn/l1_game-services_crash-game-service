@@ -3,8 +3,8 @@ import { Models } from "jest-auto-fixture";
 import { stub, stubMongoose } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
 import { RoundResultPublisher, UserBetResultPublisher } from "sc-game-base/src/core/event-publishers";
-import GameData from "sc-game-base/src/core/game-data";
 import GameDefinition from "sc-game-base/src/core/game-definition";
+import CrashGameData from "../../game-data";
 import { SettleGameRoundConsumer } from "../settle-game-round-consumer";
 
 describe("SettleGameRoundConsumer", () => {
@@ -12,7 +12,7 @@ describe("SettleGameRoundConsumer", () => {
     const defaultDefinition = new GameDefinition({ id: 1, name: "game name" }, jest.fn(), jest.fn());
     const roundId = chance.natural();
 
-    const defaultGameData = new GameData(30);
+    const defaultGameData = new CrashGameData(30);
     defaultGameData.gameConfigs = Models.GameConfig({});
 
     let gameData, definition, consumer;

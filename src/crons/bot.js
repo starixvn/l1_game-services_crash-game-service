@@ -2,13 +2,13 @@ import Chance from "chance";
 import { helpers } from "sc-common";
 import { Constants, Table } from "sc-game-base";
 import { Actions, Chips } from "../constants";
+import CrashGameData from "../game-data";
 import { calculateMultiplier } from "../helpers/crash-point-helper";
 import { roundFloat } from "../helpers/number-helper";
-
 export default class Bot extends Table.Crons.TableGameBot {
     /**
      * @param {Table.TableGameDefinition} definition
-     * @param {Table.TableGameData} gameData
+     * @param {CrashGameData} gameData
      * @param {Core.BaseEventPublishers.BaseEventPublisher} publisher
      * @param {mongoose.Model} userInfosRepository
      * @param {mongoose.Model} tempBetsRepository
@@ -75,6 +75,7 @@ export default class Bot extends Table.Crons.TableGameBot {
 
                 this.updateBotInRoomData(bot, amount, user.red);
                 this.updateBalanceAndPublishBetPayload(bot.id, null, amount, user.red);
+                this.gameData.addPlayerToBetList(bot.id, { name: bot.name, amount, rate: this.botRate });
             }
         }
     }
@@ -109,6 +110,7 @@ export default class Bot extends Table.Crons.TableGameBot {
                             },
                         });
                         bot.multiplier = multiplier;
+                        this.gameData.updatePlayerAction(bot.id, action, { amount, win: winAmount, multiplier });
                         return this.insertBetLog(bot, { amount, winAmount, action, multiplier });
                     }
 

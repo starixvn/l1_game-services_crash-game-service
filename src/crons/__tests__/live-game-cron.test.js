@@ -1,11 +1,11 @@
-import LiveGameCrons from "../live-game-cron";
-import LiveGamePublisher from "../../event-publishers/live-game-publisher";
-import { GameData } from "sc-game-base/src/core";
-import { stub } from "jest-micro-auto-stub";
 import { Chance } from "chance";
-import { calculateMultiplier } from "../../helpers/crash-point-helper";
+import { stub } from "jest-micro-auto-stub";
 import { Actions, MinMultiplierValue } from "../../constants";
+import LiveGamePublisher from "../../event-publishers/live-game-publisher";
+import CrashGameData from "../../game-data";
+import { calculateMultiplier } from "../../helpers/crash-point-helper";
 import { addMillisecond } from "../../helpers/date-helper";
+import LiveGameCrons from "../live-game-cron";
 
 jest.mock("../../helpers/crash-point-helper", () => ({
     calculateMultiplier: jest.fn(),
@@ -25,7 +25,7 @@ const processBetQueue = {
 };
 
 describe("liveGameCrons", () => {
-    const gameData = new GameData();
+    const gameData = new CrashGameData();
     gameData.startTime = new Date();
     const liveGamePublisher = stub(LiveGamePublisher);
     const logService = {};

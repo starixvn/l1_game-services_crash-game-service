@@ -1,14 +1,14 @@
+import { stubMongoose } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
-import { stubMongoose, stub } from "jest-micro-auto-stub";
-import GameCrons from "../game-crons";
-import Bot from "../bot";
-import { SettleGameRoundConsumer } from "../../consumers/settle-game-round-consumer";
-import { GameStatusPublisher, RunningRoundInfoPublisher } from "sc-game-base/src/core/event-publishers";
-import LiveGameCrons from "../live-game-cron";
 import { Core } from "sc-game-base";
-import { GameData, GameDefinition } from "sc-game-base/src/core";
-import { logger } from "sc-common";
+import { GameDefinition } from "sc-game-base/src/core";
+import { GameStatusPublisher, RunningRoundInfoPublisher } from "sc-game-base/src/core/event-publishers";
+import { SettleGameRoundConsumer } from "../../consumers/settle-game-round-consumer";
+import CrashGameData from "../../game-data";
 import gameSettings from "../../game-settings";
+import Bot from "../bot";
+import GameCrons from "../game-crons";
+import LiveGameCrons from "../live-game-cron";
 
 jest.mock("sc-game-base/src/core/event-publishers");
 jest.mock("../../consumers/settle-game-round-consumer");
@@ -17,7 +17,7 @@ jest.mock("../../helpers/crash-point-helper", () => ({
 }));
 
 const { durations } = gameSettings;
-const gameData = new GameData(3);
+const gameData = new CrashGameData(3);
 const definition = new GameDefinition({ id: 1, name: "game name", durations }, jest.fn, jest.fn, jest.fn);
 const bot = new Bot(gameData, definition);
 const settleGameRoundConsumer = new SettleGameRoundConsumer({});
