@@ -101,8 +101,9 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     }
 
     generatePlacingBetResult(player, balance, bet, rate) {
+        const { amount } = bet;
         const result = super.generatePlacingBetResult(player, balance, bet, rate);
-
+        result.ownChip = { amount };
         result.user.name = player.profile.name;
         return result;
     }
