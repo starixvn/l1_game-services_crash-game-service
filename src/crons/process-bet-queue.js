@@ -107,7 +107,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             this.calculateCurrencyRate(player.session)
         );
 
-        this.gameData.updatePlayerAction(player.UID, action, { amount, win: finalWinAmount, multiplier });
+        this.gameData.updatePlayerAction(player.UID, action, { amount, win: winAmount, multiplier });
     }
 
     publishCashOutFailed(player) {
