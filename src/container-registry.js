@@ -7,7 +7,7 @@ import Bot from "./crons/bot";
 import GameCrons from "./crons/game-crons";
 import ProcessBetQueue from "./crons/process-bet-queue";
 import { LiveGamePublisher, PlaceBetPublisher, RoundResultPublisher } from "./event-publishers";
-import { BetLogs, Bets, Results, Rounds, tempBetLogs, tempBets } from "./models";
+import { BetLogs, Bets, Results, Rounds, tempBetLogs, tempBets, umInfo } from "./models";
 import liveGameLogs from "./models/live-game-logs";
 import { HistoryQuery, RoundQuery } from "./query-apis";
 import { HttpRouter, SocketRouter } from "./routers";
@@ -27,6 +27,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             tempBetsRepository: asValue(tempBets(definition.configName)),
             tempBetLogsRepository: asValue(tempBetLogs(definition.configName)),
             liveGameLogsRepository: asValue(liveGameLogs(definition.configName)),
+            umInfoRepository: asValue(umInfo()),
         });
     }
 
@@ -48,7 +49,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
         this.container.register({
             liveGamePublisher: asClass(LiveGamePublisher).singleton(),
             placeBetPublisher: asClass(PlaceBetPublisher).singleton(),
-            roundResultPublisher: asClass(RoundResultPublisher).singleton()
+            roundResultPublisher: asClass(RoundResultPublisher).singleton(),
         });
     }
 
