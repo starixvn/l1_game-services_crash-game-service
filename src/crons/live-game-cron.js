@@ -54,7 +54,7 @@ export default class LiveGameCron {
             const playerInGame = inGame?.[playerName];
             const betTracks = playerInGame?.betTracks;
             const bet = betTracks?.[Actions.Bet];
-            if (bet?.autoCashOut && multiplier >= bet.autoCashOut && !betTracks[Actions.CashOut] && !betTracks[Actions.HalfCashOut]) {
+            if (bet?.autoCashOut && multiplier >= bet.autoCashOut && !betTracks[Actions.CashOut]) {
                 const receivedTime = addMillisecond(this.gameData.startTime, calculateCrashTimeInMillisecond(bet.autoCashOut));
 
                 const payload = {

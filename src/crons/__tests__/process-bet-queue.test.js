@@ -214,6 +214,7 @@ describe("ProcessBetQueue", () => {
         beforeEach(() => {
             proceedBetQueue.proceedBet = jest.fn();
             proceedBetQueue.proceedCashOut = jest.fn();
+            proceedBetQueue.proceedHalfCashOut = jest.fn();
         });
 
         describe("when action is bet", () => {
@@ -251,7 +252,7 @@ describe("ProcessBetQueue", () => {
                 await proceedBetQueue.proceedActions(player, cashOutPayload);
 
                 // Assert
-                expect(proceedBetQueue.proceedCashOut).toBeCalledWith(player, cashOutPayload);
+                expect(proceedBetQueue.proceedHalfCashOut).toBeCalledWith(player, cashOutPayload);
             });
         });
     });
@@ -371,7 +372,7 @@ describe("ProcessBetQueue", () => {
                     });
 
                     describe("when NOT exist halfCashOut bet logs", () => {
-                        const betLog = { winAmount: chance.natural() };
+                        const betLog = { winAmount: chance.natural(), amount: bet.amount / 2 };
 
                         beforeEach(() => {
                             betLogsRepository.findOne().lean().exec.mockResolvedValueOnce(betLog);

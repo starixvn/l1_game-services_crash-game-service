@@ -185,6 +185,10 @@ describe("SettleGameRoundConsumer", () => {
         });
 
         it("should call calculateWinAmount", () => {
+            // Arrange
+            const winAmount = chance.natural();
+            consumer.calculateWinAmount.mockReturnValueOnce(winAmount);
+
             // Act
             consumer.calculateBetResult(bet, betLogs);
 
@@ -225,11 +229,12 @@ describe("SettleGameRoundConsumer", () => {
 
             it("should return Bet Result with netWin is greater than 0", () => {
                 // Act
+                const expectResult = +(winAmount - betAmount).toFixed(2);
                 const { netWin } = consumer.calculateBetResult({ amount: betAmount }, betLogs);
 
                 // Assert
                 expect(netWin).toBeGreaterThan(0);
-                expect(netWin).toBe(winAmount - betAmount);
+                expect(netWin).toBe(expectResult);
             });
 
             it("should return Bet Result with totalLost is 0", () => {
@@ -259,11 +264,12 @@ describe("SettleGameRoundConsumer", () => {
 
             it("should return Bet Result with totalLost is greater than 0", () => {
                 // Act
+                const expectedResult = +(betAmount - winAmount).toFixed(2);
                 const { totalLost } = consumer.calculateBetResult({ amount: betAmount }, betLogs);
 
                 // Assert
                 expect(totalLost).toBeGreaterThan(0);
-                expect(totalLost).toBe(betAmount - winAmount);
+                expect(totalLost).toBe(expectedResult);
             });
         });
     });

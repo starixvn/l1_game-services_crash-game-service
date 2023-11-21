@@ -66,10 +66,10 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
         const winLoss = winAmount - amount;
 
         return {
-            totalBetAmount: amount,
-            totalWin: winAmount,
-            netWin: winLoss > 0 ? winLoss : 0,
-            totalLost: winLoss < 0 ? -winLoss : 0,
+            totalBetAmount: +amount.toFixed(2),
+            totalWin: +winAmount.toFixed(2),
+            netWin: +(winLoss > 0 ? winLoss : 0).toFixed(2),
+            totalLost: +(winLoss < 0 ? -winLoss : 0).toFixed(2),
         };
     }
 }

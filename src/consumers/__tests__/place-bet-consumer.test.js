@@ -29,16 +29,19 @@ describe("PlaceBetConsumer", () => {
     };
     const definition = new Core.GameDefinition(gameSettings);
     const gameData = {
-        gameConfigs: { odds: {}, enableFreeBet: false },
+        gameConfigs: {
+            odds: {},
+            enableFreeBet: false,
+            crashConfig: {
+                maxMultiplier: 5000,
+            },
+        },
         exchangeRates: { code: {} },
         currencyGroupGames: [{ groupId: player.session.currencyGroupId, minBet: 4, maxBet: 18 }],
         players: {},
         ingame: {},
         roundId: 1,
         remainingTime: 30,
-        crashConfig: {
-            maxMultiplier: 5000,
-        },
     };
 
     let consumer;
@@ -146,7 +149,7 @@ describe("PlaceBetConsumer", () => {
                 const actualValue = consumer.composeBetAmountValidationCriteria(player, amount, false, 1);
 
                 // Assert
-                expect(actualValue[1]).toStrictEqual(expectedValue);
+                expect(actualValue[2]).toStrictEqual(expectedValue);
             });
         });
 
@@ -160,7 +163,7 @@ describe("PlaceBetConsumer", () => {
                 const actualValue = consumer.composeBetAmountValidationCriteria(player, amount, false, 1);
 
                 // Assert
-                expect(actualValue[2]).toStrictEqual(expectedValue);
+                expect(actualValue[3]).toStrictEqual(expectedValue);
             });
         });
 
@@ -175,7 +178,7 @@ describe("PlaceBetConsumer", () => {
                 const actualValue = consumer.composeBetAmountValidationCriteria(player, amount, false, autoCashOut);
 
                 // Assert
-                expect(actualValue[3]).toStrictEqual(expectedValue);
+                expect(actualValue[4]).toStrictEqual(expectedValue);
             });
         });
 
@@ -190,7 +193,7 @@ describe("PlaceBetConsumer", () => {
                 const actualValue = consumer.composeBetAmountValidationCriteria(player, amount, false, autoCashOut);
 
                 // Assert
-                expect(actualValue[3]).toStrictEqual(expectedValue);
+                expect(actualValue[4]).toStrictEqual(expectedValue);
             });
         });
     });
@@ -219,13 +222,7 @@ describe("PlaceBetConsumer", () => {
                 const amount = 3;
                 const autoCashOut = 2;
                 // Act
-                const actualValue = consumer.validateBetRequest(
-                    player,
-                    amount,
-                    false,
-                    2,
-                    autoCashOut
-                );
+                const actualValue = consumer.validateBetRequest(player, amount, false, 2, autoCashOut);
 
                 // Assert
                 expect(actualValue).toBeTrue();
