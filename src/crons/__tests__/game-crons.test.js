@@ -6,6 +6,7 @@ import { GameStatusPublisher, RunningRoundInfoPublisher } from "sc-game-base/src
 import { SettleGameRoundConsumer } from "../../consumers/settle-game-round-consumer";
 import CrashGameData from "../../game-data";
 import gameSettings from "../../game-settings";
+import UmInfoWatcher from "../../watchers/um-info-watcher";
 import Bot from "../bot";
 import GameCrons from "../game-crons";
 import LiveGameCrons from "../live-game-cron";
@@ -15,6 +16,7 @@ jest.mock("../../consumers/settle-game-round-consumer");
 jest.mock("../../helpers/crash-point-helper", () => ({
     calculateCrashTimeInMillisecond: jest.fn().mockReturnValue(1000),
 }));
+jest.mock("../../watchers/um-info-watcher");
 
 const { durations } = gameSettings;
 const gameData = new CrashGameData(3);
@@ -24,6 +26,7 @@ const settleGameRoundConsumer = new SettleGameRoundConsumer({});
 const runningRoundInfoPublisher = new RunningRoundInfoPublisher();
 const gameStatusPublisher = new GameStatusPublisher();
 const liveGameCrons = new LiveGameCrons({});
+const umInfoWatcher = new UmInfoWatcher(gameData);
 
 /** @type {logger}*/
 const logService = {
@@ -89,6 +92,7 @@ const createBaseGameCron = function () {
         betsRepository,
         betLogsRepository,
         resultsRepository: {},
+        umInfoWatcher
     });
 };
 let cron;

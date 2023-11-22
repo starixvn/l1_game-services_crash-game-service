@@ -1,4 +1,5 @@
 import { EventConsumers } from "sc-game-base/src/table";
+import { Actions } from "../constants";
 
 export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRoundConsumer {
     constructor({
@@ -38,6 +39,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
     async settleBets({ roundId, time }) {
         const bets = await this.queryBets(roundId);
         const betLogs = await this.queryBetLogs(roundId);
+        await this.addRefundBetLogForPlayersOnUM(bets, betLogs);
 
         if (bets && bets.length) {
             await Promise.all(
@@ -53,6 +55,44 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
                     await this.userBetResultPublisher.publish(bet.uid, betResult);
                 })
             );
+        }
+    }
+
+    async addRefundBetLogForPlayersOnUM(bets, betLogs) {
+        const playersOnUM = Object.values(this.gameData.ingame).filter((x) => x.isUm);
+        if (playersOnUM.length > 0) {
+            const refundBetLogs = [];
+            for (const player of playersOnUM) {
+                const { playerData } = player;
+                const bet = bets.find(x.playerId === playerData.session.playerId && x.operatorId === playerData.session.operatorId);
+                const halfCashOutBetLog = betLogs.find(
+                    (x) =>
+                        x.action === Actions.HalfCashOut &&
+                        x.playerId === playerData.session.playerId &&
+                        x.operatorId === playerData.session.operatorId
+                );
+
+                const refundAmount = halfCashOutBetLog ? halfCashOutBetLog.amount : bet.amount;
+                refundBetLogs.push({
+                    uid: bet.uid,
+                    name: bet.name,
+                    time: new Date(),
+                    action: Actions.Refund,
+                    amount: refundAmount,
+                    winAmount: refundAmount,
+                    clientSentTime: new Date(),
+                    receivedTime: new Date(),
+                    roundId: bet.roundId,
+                    siteId: bet.siteId,
+                    currency: bet.currency,
+                    rate: bet.rate,
+                    operatorId: bet.operatorId,
+                    playerId: bet.playerId,
+                });
+            }
+
+            await this.betLogsRepository.insertMany(refundBetLogs);
+            betLogs.push(...refundBetLogs);
         }
     }
 

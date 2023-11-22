@@ -11,10 +11,24 @@ import { BetLogs, Bets, Results, Rounds, tempBetLogs, tempBets, umInfo } from ".
 import liveGameLogs from "./models/live-game-logs";
 import { HistoryQuery, RoundQuery } from "./query-apis";
 import { HttpRouter, SocketRouter } from "./routers";
+import UmInfoWatcher from "./watchers/um-info-watcher";
 
 const { asClass, asValue } = awilix;
 
 export default class ContainerRegistry extends Table.TableContainerRegistry {
+    register(appConfigs, definition, gameData) {
+        super.register(appConfigs, definition, gameData);
+        this.registerWatchers();
+
+        return this.container;
+    }
+
+    registerWatchers() {
+        this.container.register({
+            umInfoWatcher: asClass(UmInfoWatcher).singleton(),
+        });
+    }
+
     registerModels() {
         const definition = this.container.resolve("definition");
         super.registerModels();

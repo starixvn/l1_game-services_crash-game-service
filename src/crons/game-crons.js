@@ -49,11 +49,13 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
             resultsRepository,
             promotionRepository,
             appConfigs,
+            umInfoWatcher,
         });
 
         this.liveGameCrons = liveGameCrons;
         this.betsRepository = betsRepository;
         this.betLogsRepository = betLogsRepository;
+        this.umInfoWatcher = umInfoWatcher;
     }
 
     async start() {
@@ -64,6 +66,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         await this.initResultHash();
         await this.getSettingForNewRound();
         this.startCron();
+        this.umInfoWatcher.initChangeStream();
     }
 
     async proceed() {

@@ -1,3 +1,5 @@
+import { Actions } from "../constants";
+
 export default class UmInfoWatcher {
     constructor(gameData, umInfoRepository, logService) {
         this.umInfoRepository = umInfoRepository;
@@ -22,8 +24,8 @@ export default class UmInfoWatcher {
             const { fullDocument } = data;
             const { partnerId } = fullDocument;
 
-            const allPlayers = Object.values(this.gameData.ingame);
-            const refundPlayers = partnerId ? allPlayers.filter((x) => x.operatorId === partnerId) : allPlayers;
+            const notCashOutPlayers = Object.values(this.gameData.ingame).filter(x => !x.betTracks[Actions.CashOut]);
+            const refundPlayers = partnerId ? notCashOutPlayers.filter((x) => x.operatorId === partnerId) : notCashOutPlayers;
 
             for (const player of refundPlayers) {
                 player.isUm = true;
