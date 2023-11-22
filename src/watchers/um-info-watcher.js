@@ -43,6 +43,5 @@ export default class UmInfoWatcher {
         setTimeout(() => {
             this.initChangeStream([], { startAfter: resumeToken });
         }, 1000);
-        this.emit(WatcherEvent.CLOSE, "Change stream is CLOSED");
     }
 }
