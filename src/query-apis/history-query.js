@@ -9,7 +9,7 @@ export default class HistoryQuery extends QueryApis.HistoryQuery {
         return this.betLogsRepository
             .find(
                 { roundId, uid: player.UID },
-                { _id: false, time: true, multiplier: true, amount: true, winAmount: true, action: true },
+                { _id: false, time: true, multiplier: true, amount: true, winAmount: true, action: true, reachMaxWin: true },
                 { sort: { _id: -1 } }
             )
             .lean()

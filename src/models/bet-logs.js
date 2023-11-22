@@ -9,6 +9,7 @@ const Schema = new mongoose.Schema({
     winAmount: { type: Number, default: 0 },
     multiplier: { type: Number, default: 0 },
     receivedTime: { type: Date, required: true },
+    reachMaxWin: { type: Boolean, default: false },
 
     time: { type: Date },
 

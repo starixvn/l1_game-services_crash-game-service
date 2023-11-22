@@ -91,8 +91,9 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         const cashOutWin = roundFloat(amount * multiplier);
         const maxWinPerRound = this.getMaxWinPerRound(player) - halfCashOutWinAmount;
         const winAmount = Math.min(cashOutWin, maxWinPerRound);
+        const reachMaxWin = winAmount === maxWinPerRound;
 
-        const betLog = { ...payload, winAmount, multiplier, amount };
+        const betLog = { ...payload, winAmount, multiplier, amount, reachMaxWin };
 
         await this.insertBetLog(player, roundId, betLog);
         this.adjustRunningBets(player, action, amount, winAmount);
@@ -102,7 +103,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
                 name: player.profile.name,
                 playerId: player.UID,
                 [action]: { amount, win: winAmount, multiplier },
-                reachMaxWin: winAmount === maxWinPerRound,
+                reachMaxWin,
             },
             this.calculateCurrencyRate(player.session)
         );
