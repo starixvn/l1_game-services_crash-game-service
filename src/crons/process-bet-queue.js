@@ -75,9 +75,9 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     }
 
     validateCashOut(multiplier, bet, player) {
-        const { result } = this.gameData;
+        const { result, roundId } = this.gameData;
 
-        if (!bet || multiplier >= result) {
+        if (!bet || multiplier >= result || roundId !== bet.roundId) {
             this.publishCashOutFailed(player);
 
             return false;

@@ -327,10 +327,25 @@ describe("ProcessBetQueue", () => {
                 });
             });
 
-            describe("when multiplier is smaller than result", () => {
+            describe("when gameData.roundId NOT match bet.roundId", () => {
+                it("should publishGameFailedBet", async () => {
+                    // Arrange
+                    gameData.result = chance.floating({ min: multiplier });
+                    bet.roundId = gameData.roundId - 1;
+
+                    // Act
+                    await proceedBetQueue.proceedCashOut(player, payload);
+
+                    // Assert
+                    expect(proceedBetQueue.publishCashOutFailed).toBeCalledWith(player);
+                });
+            });
+
+            describe("when cashOut request is valid", () => {
                 beforeEach(() => {
                     gameData.result = chance.floating({ min: multiplier });
                     proceedBetQueue.settleCashOut = jest.fn();
+                    bet.roundId = gameData.roundId;
                 });
 
                 it("should NOT publishGameFailed", async () => {
