@@ -108,12 +108,19 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
                         x.operatorId === bet.operatorId
                 )
             ) {
+                const halfCashOutBetLog = betLogs.find(
+                    (x) =>
+                        x.action === Actions.HalfCashOut &&
+                        x.playerId === playerData.session.playerId &&
+                        x.operatorId === playerData.session.operatorId
+                );
+                
                 crashBetLogs.push({
                     uid: bet.uid,
                     name: bet.name,
                     time: crashTime,
                     action: Actions.Crash,
-                    amount: 0,
+                    amount: halfCashOutBetLog ? halfCashOutBetLog.amount : bet.amount,
                     winAmount: 0,
                     clientSentTime: new Date(),
                     receivedTime: new Date(),
