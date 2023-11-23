@@ -297,7 +297,7 @@ describe("SettleGameRoundConsumer", () => {
             gameData.ingame = {};
         });
         describe("when operator1 is under UM", () => {
-            it.only("should only refund to users belong to operator1", async () => {
+            it("should only refund to users belong to operator1", async () => {
                 //Arrange
                 const bets = [player1, player2];
                 const betLogs = [];

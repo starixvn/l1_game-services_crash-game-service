@@ -3,6 +3,7 @@ const Actions = {
     CashOut: "cashOut",
     HalfCashOut: "halfCashOut",
     Refund: "refund",
+    Crash: "crash",
 };
 
 const MinMultiplierValue = 1.01;

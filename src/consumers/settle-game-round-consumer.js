@@ -40,6 +40,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
         const bets = await this.queryBets(roundId);
         const betLogs = await this.queryBetLogs(roundId);
         await this.addRefundBetLogForPlayersOnUM(bets, betLogs);
+        await this.addCrashBetLog(bets, betLogs, time);
 
         if (bets && bets.length) {
             await Promise.all(
@@ -94,6 +95,40 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
             await this.betLogsRepository.insertMany(refundBetLogs);
             betLogs.push(...refundBetLogs);
         }
+    }
+
+    async addCrashBetLog(bets, betLogs, crashTime) {
+        const crashBetLogs = [];
+        for (const bet of bets) {
+            if (
+                !betLogs.some(
+                    (x) =>
+                        (x.action === Actions.CashOut || x.action === Actions.Refund) &&
+                        x.playerId === bet.playerId &&
+                        x.operatorId === bet.operatorId
+                )
+            ) {
+                crashBetLogs.push({
+                    uid: bet.uid,
+                    name: bet.name,
+                    time: crashTime,
+                    action: Actions.Crash,
+                    amount: 0,
+                    winAmount: 0,
+                    clientSentTime: new Date(),
+                    receivedTime: new Date(),
+                    roundId: bet.roundId,
+                    siteId: bet.siteId,
+                    currency: bet.currency,
+                    rate: bet.rate,
+                    operatorId: bet.operatorId,
+                    playerId: bet.playerId,
+                });
+            }
+        }
+
+        await this.betLogsRepository.insertMany(crashBetLogs);
+        betLogs.push(...crashBetLogs);
     }
 
     calculateWinAmount(betLog = []) {
