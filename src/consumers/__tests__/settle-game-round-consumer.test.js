@@ -31,6 +31,7 @@ describe("SettleGameRoundConsumer", () => {
 
     /** @type {mongoose.Model}*/
     const betLogsRepository = stubMongoose(mongoose.Model);
+    betLogsRepository.insertMany = jest.fn();
 
     /** @type {mongoose.Model}*/
     const tempBetsRepository = stubMongoose(mongoose.Model);
@@ -270,6 +271,61 @@ describe("SettleGameRoundConsumer", () => {
                 // Assert
                 expect(totalLost).toBeGreaterThan(0);
                 expect(totalLost).toBe(expectedResult);
+            });
+        });
+    });
+
+    describe("addRefundBetLogForPlayersOnUM", () => {
+        const player1 = {
+            uid: chance.guid(),
+            name: chance.string(),
+            playerId: chance.natural(),
+            siteId: chance.string(),
+            operatorId: "operator1",
+            amount: 20,
+        };
+        const player2 = {
+            uid: chance.guid(),
+            name: chance.string(),
+            playerId: chance.natural(),
+            siteId: chance.string(),
+            operatorId: "operator2",
+            amount: 10,
+        };
+
+        afterEach(() => {
+            gameData.ingame = {};
+        });
+        describe("when operator1 is under UM", () => {
+            it.only("should only refund to users belong to operator1", async () => {
+                //Arrange
+                const bets = [player1, player2];
+                const betLogs = [];
+                gameData.ingame = {
+                    [player1.name]: {
+                        playerData: {
+                            session: {
+                                playerId: player1.playerId,
+                                operatorId: player1.operatorId,
+                            },
+                        },
+                        isUm: true,
+                    },
+                    [player2.name]: {
+                        playerData: {
+                            session: {
+                                playerId: player2.playerId,
+                                operatorId: player2.operatorId,
+                            },
+                        },
+                    },
+                };
+                //Act
+                await consumer.addRefundBetLogForPlayersOnUM(bets, betLogs);
+
+                //Assert
+                expect(betLogs.length).toBe(1);
+                expect(betLogsRepository.insertMany).toHaveBeenCalled();
             });
         });
     });

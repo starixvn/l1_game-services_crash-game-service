@@ -64,7 +64,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
             const refundBetLogs = [];
             for (const player of playersOnUM) {
                 const { playerData } = player;
-                const bet = bets.find(x.playerId === playerData.session.playerId && x.operatorId === playerData.session.operatorId);
+                const bet = bets.find((x) => x.playerId === playerData.session.playerId && x.operatorId === playerData.session.operatorId);
                 const halfCashOutBetLog = betLogs.find(
                     (x) =>
                         x.action === Actions.HalfCashOut &&
