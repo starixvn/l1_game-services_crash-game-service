@@ -35,34 +35,42 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     }
 
     async proceedCashOut(player, payload) {
-        const { freeBet, roundId } = payload;
-        const multiplier = this.calculateCashOutMultiplier(payload);
-        const bet = await this.betsRepository.findOne({ uid: player.UID, roundId, freeBet: !!freeBet }).lean().exec();
+        const { multiplier, bet } = await this.getCashOutBet(payload, player);
         const isValidCashOut = this.validateCashOut(multiplier, bet, player);
 
-        if (isValidCashOut) {
-            const halfCashOutBetLog = await this.betLogsRepository
-                .findOne({ uid: player.UID, roundId, freeBet, action: Actions.HalfCashOut })
-                .lean()
-                .exec();
-
-            const amount = bet.amount - (halfCashOutBetLog?.amount ?? 0);
-
-            await this.settleCashOut(player, payload, amount, multiplier, halfCashOutBetLog?.winAmount);
+        if (!isValidCashOut) {
+            return;
         }
+
+        const halfCashOutBetLog = await this.betLogsRepository
+            .findOne({ uid: player.UID, roundId, freeBet, action: Actions.HalfCashOut })
+            .lean()
+            .exec();
+
+        const amount = bet.amount - (halfCashOutBetLog?.amount ?? 0);
+
+        await this.settleCashOut(player, payload, amount, multiplier, halfCashOutBetLog?.winAmount);
     }
 
     async proceedHalfCashOut(player, payload) {
+        const { multiplier, bet } = await this.getCashOutBet(payload, player);
+        const isValidCashOut = this.validateCashOut(multiplier, bet);
+
+        if (!isValidCashOut) {
+            return;
+        }
+
+        const amount = bet.amount / 2;
+
+        await this.settleCashOut(player, payload, amount, multiplier);
+    }
+
+    async getCashOutBet(payload, player) {
         const { freeBet, roundId } = payload;
         const multiplier = this.calculateCashOutMultiplier(payload);
         const bet = await this.betsRepository.findOne({ uid: player.UID, roundId, freeBet: !!freeBet }).lean().exec();
-        const isValidCashOut = this.validateCashOut(multiplier, bet);
 
-        if (isValidCashOut) {
-            const amount = bet.amount / 2;
-
-            await this.settleCashOut(player, payload, amount, multiplier);
-        }
+        return { multiplier, bet };
     }
 
     calculateCashOutMultiplier(payload) {
