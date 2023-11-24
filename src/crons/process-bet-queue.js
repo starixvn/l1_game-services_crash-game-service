@@ -35,7 +35,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     }
 
     async proceedCashOut(player, payload) {
-        const { multiplier, bet } = await this.getCashOutBet(payload, player);
+        const { multiplier, bet, roundId, freeBet } = await this.getCashOutBet(payload, player);
         const isValidCashOut = this.validateCashOut(multiplier, bet, player);
 
         if (!isValidCashOut) {
@@ -70,7 +70,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         const multiplier = this.calculateCashOutMultiplier(payload);
         const bet = await this.betsRepository.findOne({ uid: player.UID, roundId, freeBet: !!freeBet }).lean().exec();
 
-        return { multiplier, bet };
+        return { multiplier, bet, roundId, freeBet };
     }
 
     calculateCashOutMultiplier(payload) {
