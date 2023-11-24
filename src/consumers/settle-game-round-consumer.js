@@ -39,8 +39,9 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
     async settleBets({ roundId, time }) {
         const bets = await this.queryBets(roundId);
         const betLogs = await this.queryBetLogs(roundId);
-        await this.addRefundBetLogForPlayersOnUM(bets, betLogs);
-        await this.addCrashBetLog(bets, betLogs, time);
+        const refundBetlogs = await this.addRefundBetLogForPlayersOnUM(bets, betLogs);
+        const crashBetLogs = await this.addCrashBetLog(bets, betLogs, time);
+        betLogs.push(...refundBetlogs, ...crashBetLogs);
 
         if (bets && bets.length) {
             await Promise.all(
@@ -61,40 +62,39 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
 
     async addRefundBetLogForPlayersOnUM(bets, betLogs) {
         const playersOnUM = Object.values(this.gameData.ingame).filter((x) => x.isUm);
-        if (playersOnUM.length > 0) {
-            const refundBetLogs = [];
-            for (const player of playersOnUM) {
-                const { playerData } = player;
-                const bet = bets.find((x) => x.playerId === playerData.session.playerId && x.operatorId === playerData.session.operatorId);
-                const halfCashOutBetLog = betLogs.find(
-                    (x) =>
-                        x.action === Actions.HalfCashOut &&
-                        x.playerId === playerData.session.playerId &&
-                        x.operatorId === playerData.session.operatorId
-                );
+        const refundBetLogs = [];
 
-                const refundAmount = halfCashOutBetLog ? halfCashOutBetLog.amount : bet.amount;
-                refundBetLogs.push({
-                    uid: bet.uid,
-                    name: bet.name,
-                    time: new Date(),
-                    action: Actions.Refund,
-                    amount: refundAmount,
-                    winAmount: refundAmount,
-                    clientSentTime: new Date(),
-                    receivedTime: new Date(),
-                    roundId: bet.roundId,
-                    siteId: bet.siteId,
-                    currency: bet.currency,
-                    rate: bet.rate,
-                    operatorId: bet.operatorId,
-                    playerId: bet.playerId,
-                });
-            }
+        for (const player of playersOnUM) {
+            const { playerData } = player;
+            const bet = bets.find((x) => x.playerId === playerData.session.playerId && x.operatorId === playerData.session.operatorId);
+            const halfCashOutBetLog = betLogs.find(
+                (x) =>
+                    x.action === Actions.HalfCashOut &&
+                    x.playerId === playerData.session.playerId &&
+                    x.operatorId === playerData.session.operatorId
+            );
 
-            await this.betLogsRepository.insertMany(refundBetLogs);
-            betLogs.push(...refundBetLogs);
+            const refundAmount = halfCashOutBetLog ? halfCashOutBetLog.amount : bet.amount;
+            refundBetLogs.push({
+                uid: bet.uid,
+                name: bet.name,
+                time: new Date(),
+                action: Actions.Refund,
+                amount: refundAmount,
+                winAmount: refundAmount,
+                clientSentTime: new Date(),
+                receivedTime: new Date(),
+                roundId: bet.roundId,
+                siteId: bet.siteId,
+                currency: bet.currency,
+                rate: bet.rate,
+                operatorId: bet.operatorId,
+                playerId: bet.playerId,
+            });
         }
+
+        await this.betLogsRepository.insertMany(refundBetLogs);
+        return refundBetLogs;
     }
 
     async addCrashBetLog(bets, betLogs, crashTime) {
@@ -109,10 +109,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
                 )
             ) {
                 const halfCashOutBetLog = betLogs.find(
-                    (x) =>
-                        x.action === Actions.HalfCashOut &&
-                        x.playerId === bet.playerId &&
-                        x.operatorId === bet.operatorId
+                    (x) => x.action === Actions.HalfCashOut && x.playerId === bet.playerId && x.operatorId === bet.operatorId
                 );
 
                 crashBetLogs.push({
@@ -135,7 +132,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
         }
 
         await this.betLogsRepository.insertMany(crashBetLogs);
-        betLogs.push(...crashBetLogs);
+        return crashBetLogs;
     }
 
     calculateWinAmount(betLog = []) {

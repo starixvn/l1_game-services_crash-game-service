@@ -44,11 +44,11 @@ const createTestData = async () => {
 };
 
 const createHashResult = async (hash) => {
-    await Results.insertMany(hashResults);
+    await Results(gameConfig.name).insertMany(hashResults);
 };
 
 const createRounds = async () => {
-    return Rounds.insertMany(roundDatas);
+    return Rounds(gameConfig.name).insertMany(roundDatas);
 };
 
 const getUserId = async (memberId) => {
@@ -59,7 +59,7 @@ const getUserId = async (memberId) => {
 const createUserBetData = async () => {
     const userId = await getUserId(normalUser.playerId);
     const betData = userBetData({ uid: userId, name: normalUser.playerName, playerId: normalUser.playerId });
-    return Bets.insertMany(betData);
+    return Bets(gameConfig.name).insertMany(betData);
 };
 
 createTestData();

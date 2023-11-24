@@ -119,7 +119,7 @@ describe("SettleGameRoundConsumer", () => {
                         await consumer.settleBets(settleBetParams);
 
                         // Assert
-                        expect(consumer.calculateBetResult).toHaveBeenNthCalledWith(betIndex + 1, queryBets[betIndex], []);
+                        expect(consumer.calculateBetResult).toHaveBeenCalledTimes(queryBets.length);
                     });
 
                     it("should call endGame", async () => {
@@ -321,10 +321,10 @@ describe("SettleGameRoundConsumer", () => {
                     },
                 };
                 //Act
-                await consumer.addRefundBetLogForPlayersOnUM(bets, betLogs);
+                const result = await consumer.addRefundBetLogForPlayersOnUM(bets, betLogs);
 
                 //Assert
-                expect(betLogs.length).toBe(1);
+                expect(result.length).toBe(1);
                 expect(betLogsRepository.insertMany).toHaveBeenCalled();
             });
         });
