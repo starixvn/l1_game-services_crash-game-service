@@ -75,22 +75,15 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
             );
 
             const refundAmount = halfCashOutBetLog ? halfCashOutBetLog.amount : bet.amount;
-            refundBetLogs.push({
-                uid: bet.uid,
-                name: bet.name,
-                time: new Date(),
-                action: Actions.Refund,
-                amount: refundAmount,
-                winAmount: refundAmount,
-                clientSentTime: new Date(),
-                receivedTime: new Date(),
-                roundId: bet.roundId,
-                siteId: bet.siteId,
-                currency: bet.currency,
-                rate: bet.rate,
-                operatorId: bet.operatorId,
-                playerId: bet.playerId,
-            });
+
+            refundBetLogs.push(
+                this.createBetLog(bet, {
+                    time: new Date(),
+                    amount: refundAmount,
+                    winAmount: refundAmount,
+                    action: Actions.Refund,
+                })
+            );
         }
 
         await this.betLogsRepository.insertMany(refundBetLogs);
@@ -112,27 +105,38 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
                     (x) => x.action === Actions.HalfCashOut && x.playerId === bet.playerId && x.operatorId === bet.operatorId
                 );
 
-                crashBetLogs.push({
-                    uid: bet.uid,
-                    name: bet.name,
-                    time: crashTime,
-                    action: Actions.Crash,
-                    amount: halfCashOutBetLog ? halfCashOutBetLog.amount : bet.amount,
-                    winAmount: 0,
-                    clientSentTime: new Date(),
-                    receivedTime: new Date(),
-                    roundId: bet.roundId,
-                    siteId: bet.siteId,
-                    currency: bet.currency,
-                    rate: bet.rate,
-                    operatorId: bet.operatorId,
-                    playerId: bet.playerId,
-                });
+                crashBetLogs.push(
+                    this.createBetLog(bet, {
+                        time: crashTime,
+                        amount: halfCashOutBetLog ? halfCashOutBetLog.amount : bet.amount,
+                        winAmount: 0,
+                        action: Actions.Crash,
+                    })
+                );
             }
         }
 
         await this.betLogsRepository.insertMany(crashBetLogs);
         return crashBetLogs;
+    }
+
+    createBetLog(bet, { time, amount, winAmount, action }) {
+        return {
+            uid: bet.uid,
+            name: bet.name,
+            time,
+            action,
+            amount,
+            winAmount,
+            clientSentTime: new Date(),
+            receivedTime: new Date(),
+            roundId: bet.roundId,
+            siteId: bet.siteId,
+            currency: bet.currency,
+            rate: bet.rate,
+            operatorId: bet.operatorId,
+            playerId: bet.playerId,
+        };
     }
 
     calculateWinAmount(betLog = []) {
