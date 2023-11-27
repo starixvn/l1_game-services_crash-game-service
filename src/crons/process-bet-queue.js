@@ -166,6 +166,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             receivedTime: bet.receivedTime,
             roundId,
             multiplier: bet.multiplier,
+            reachMaxWin: bet.reachMaxWin
         };
 
         if (player.session) {
