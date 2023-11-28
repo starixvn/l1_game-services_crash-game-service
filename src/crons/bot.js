@@ -1,5 +1,4 @@
 import Chance from "chance";
-import { helpers } from "sc-common";
 import { Constants, Table } from "sc-game-base";
 import { Actions, Chips } from "../constants";
 import CrashGameData from "../game-data";
@@ -47,6 +46,9 @@ export default class Bot extends Table.Crons.TableGameBot {
                 ratio: 0.05,
             },
         ];
+
+        this.smallTicketRatio = 70;
+        this.smallTickets = 0;
     }
 
     getRemovalBotIds(totalRemoval) {
@@ -57,11 +59,11 @@ export default class Bot extends Table.Crons.TableGameBot {
     }
 
     async placeBet(bot) {
-        const maxBet = this.gameData.gameConfigs.bot_maxbet;
-        const minBet = this.getMinBet();
-        const amount = this.convertAmountToChip(helpers.numberHelper.getRandomNumberStep5(minBet, maxBet, true));
-
         if (this.gameData.remainingTime > this.definition.durations.lockingBet) {
+            const maxBet = this.gameData.gameConfigs.bot_maxbet;
+            const minBet = this.getMinBet();
+            const amount = this.getBetAmount(minBet, maxBet);
+
             const user = await this.userInfosRepository.findOneAndUpdate(
                 { id: bot.id, red: { $gt: amount } },
                 { $inc: { red: -amount } },
@@ -78,6 +80,16 @@ export default class Bot extends Table.Crons.TableGameBot {
                 this.gameData.addPlayerToBetList(bot.id, { name: bot.name, amount, rate: this.botRate });
             }
         }
+    }
+
+    getBetAmount(minBet, maxBet) {
+        const isSmallTicket = this.totalTickets === 0 ? true : (this.smallTickets * 100) / this.totalTickets <= this.smallTicketRatio;
+        if (isSmallTicket) {
+            this.smallTickets++;
+            return this.chance.natural({ min: minBet, maxBet: Math.min(minBet * 50, maxBet * 0.3) });
+        }
+
+        return this.chance.natural({ min: minBet, max: maxBet });
     }
 
     async cashOut() {
@@ -148,6 +160,11 @@ export default class Bot extends Table.Crons.TableGameBot {
         bot.cashOut = false;
         bot.halfCashOut = false;
         bot.multiplier = 0;
+    }
+
+    resetAllBotData() {
+        super.resetAllBotData();
+        this.smallTickets = 0;
     }
 
     convertAmountToChip(amount) {
