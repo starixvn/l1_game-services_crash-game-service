@@ -28,6 +28,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         betsRepository,
         betLogsRepository,
         umInfoWatcher,
+        settleCashOutConsumer,
     }) {
         super({
             definition,
@@ -56,6 +57,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         this.betsRepository = betsRepository;
         this.betLogsRepository = betLogsRepository;
         this.umInfoWatcher = umInfoWatcher;
+        this.settleCashOutConsumer = settleCashOutConsumer;
     }
 
     async start() {
@@ -121,7 +123,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         setTimeout(async () => {
             try {
                 this.liveGameCrons.stop();
-                await this.liveGameCrons.proceedAutoCashOut(this.gameData.result);
+                await this.settleCashOutConsumer.proceedAutoCashOut(this.gameData.result);
                 this.gameData.remainingTime = durations.wholeRound;
                 await this.settleGameRoundConsumer.settleRound(this.gameData);
             } catch (err) {

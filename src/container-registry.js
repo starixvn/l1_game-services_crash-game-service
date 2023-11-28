@@ -1,6 +1,6 @@
 import awilix from "awilix";
 import { Table } from "sc-game-base";
-import { CashOutConsumer, InGameConsumer, PlaceBetConsumer, SettleGameRoundConsumer } from "./consumers";
+import { CashOutConsumer, InGameConsumer, PlaceBetConsumer, SettleCashOutConsumer, SettleGameRoundConsumer } from "./consumers";
 import RoundResultConsumer from "./consumers/round-result-consumer";
 import { LiveGameCrons } from "./crons";
 import Bot from "./crons/bot";
@@ -54,6 +54,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             cashOutConsumer: asClass(CashOutConsumer).singleton(),
             roundResultConsumer: asClass(RoundResultConsumer).singleton(),
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
+            settleCashOutConsumer: asClass(SettleCashOutConsumer).singleton(),
         });
     }
 

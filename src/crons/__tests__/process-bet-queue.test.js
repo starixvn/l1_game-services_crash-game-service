@@ -11,6 +11,7 @@ import CrashGameData from "../../game-data";
 import { calculateMultiplier } from "../../helpers/crash-point-helper";
 import noticeHelper from "../../helpers/notice-helper";
 import ProcessBetQueue from "../process-bet-queue";
+import { SettleCashOutConsumer } from "../../consumers";
 
 const chance = new Chance();
 
@@ -57,6 +58,7 @@ describe("ProcessBetQueue", () => {
         choicesMapper: { red2: 1 },
     });
     const placeBetPublisher = stub(PlaceBetPublisher);
+    const settleCashOutConsumer = stub(SettleCashOutConsumer);
     /** @type {logger}*/
     const logService = stub(logger);
     /** @type {mongoose.Model}*/
@@ -66,6 +68,7 @@ describe("ProcessBetQueue", () => {
     };
     /** @type {mongoose.Model}*/
     const betLogsRepository = {
+        find: jest.fn().mockReturnValue({ lean: jest.fn().mockReturnValue({ exec: jest.fn() }) }),
         create: jest.fn(),
         findOne: jest.fn().mockReturnValue({ lean: jest.fn().mockReturnValue({ exec: jest.fn() }) }),
     };
@@ -215,6 +218,7 @@ describe("ProcessBetQueue", () => {
             proceedBetQueue.proceedBet = jest.fn();
             proceedBetQueue.proceedCashOut = jest.fn();
             proceedBetQueue.proceedHalfCashOut = jest.fn();
+            betLogsRepository.find().lean().exec.mockResolvedValueOnce([]);
         });
 
         describe("when action is bet", () => {
@@ -258,6 +262,10 @@ describe("ProcessBetQueue", () => {
     });
 
     describe("proceedCashOut", () => {
+        beforeEach(() => {
+            betLogsRepository.find().lean().exec.mockReturnValueOnce([]);
+        });
+
         it("should find current round bet", async () => {
             // Act
             await proceedBetQueue.proceedCashOut(player, payload);
@@ -284,7 +292,7 @@ describe("ProcessBetQueue", () => {
             const multiplier = chance.floating({ min: 2, max: 100 });
 
             beforeEach(() => {
-                betsRepository.findOne().lean().exec.mockReturnValueOnce(bet);
+                betsRepository.findOne().lean().exec.mockResolvedValueOnce(bet);
                 calculateMultiplier.mockReturnValueOnce(multiplier);
                 proceedBetQueue.isCashOutHalfAmount = jest.fn();
                 proceedBetQueue.publishCashOutFailed = jest.fn();
@@ -358,25 +366,12 @@ describe("ProcessBetQueue", () => {
 
                 describe("when action is Cash Out", () => {
                     describe("when NOT exist halfCashOut bet logs", () => {
-                        it("should call betLogsRepository.findOne", async () => {
-                            // Act
-                            await proceedBetQueue.proceedCashOut(player, { ...payload, action: Actions.CashOut });
-
-                            // Assert
-                            expect(betLogsRepository.findOne).toBeCalledWith({
-                                uid: player.UID,
-                                roundId: gameData.roundId,
-                                freeBet: payload.freeBet,
-                                action: Actions.HalfCashOut,
-                            });
-                        });
-
                         it("should call settleCashOut with bet amount", async () => {
                             // Act
                             await proceedBetQueue.proceedCashOut(player, { ...payload, action: Actions.CashOut });
 
                             // Assert
-                            expect(proceedBetQueue.settleCashOut).toBeCalledWith(
+                            expect(settleCashOutConsumer.settleCashOut).toBeCalledWith(
                                 player,
                                 { ...payload, action: Actions.CashOut },
                                 bet.amount,
@@ -390,7 +385,7 @@ describe("ProcessBetQueue", () => {
                         const betLog = { winAmount: chance.natural(), amount: bet.amount / 2 };
 
                         beforeEach(() => {
-                            betLogsRepository.findOne().lean().exec.mockResolvedValueOnce(betLog);
+                            betLogsRepository.find().lean().exec.mockResolvedValueOnce([betLog]);
                         });
 
                         it("should call settleCashOut with half of bet amount and current win amount", async () => {
@@ -401,7 +396,7 @@ describe("ProcessBetQueue", () => {
                             await proceedBetQueue.proceedCashOut(player, { ...payload, action: Actions.CashOut });
 
                             // Assert
-                            expect(proceedBetQueue.settleCashOut).toBeCalledWith(
+                            expect(settleCashOutConsumer.settleCashOut).toBeCalledWith(
                                 player,
                                 { ...payload, action: Actions.CashOut },
                                 expectAmount,
@@ -583,6 +578,7 @@ describe("ProcessBetQueue", () => {
             betLogsRepository,
             userInfosRepository,
             baseMetrics,
+            settleCashOutConsumer,
         });
     };
 

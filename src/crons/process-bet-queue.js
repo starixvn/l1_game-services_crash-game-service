@@ -2,9 +2,35 @@ import { Core } from "sc-game-base";
 import { Actions } from "../constants";
 import { calculateMultiplier } from "../helpers/crash-point-helper";
 import noticeHelper from "../helpers/notice-helper";
-import { roundFloat } from "../helpers/number-helper";
 
 export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
+    constructor({
+        definition,
+        gameData,
+        placeBetPublisher,
+        placeBet,
+        logService,
+        betsRepository,
+        betLogsRepository,
+        userInfosRepository,
+        baseMetrics,
+        settleCashOutConsumer,
+    }) {
+        super({
+            definition,
+            gameData,
+            placeBetPublisher,
+            placeBet,
+            logService,
+            betsRepository,
+            betLogsRepository,
+            userInfosRepository,
+            baseMetrics,
+        });
+
+        this.settleCashOutConsumer = settleCashOutConsumer;
+    }
+
     dequeueBets() {
         if (this.gameData.ingame) {
             Object.values(this.gameData.ingame).forEach((playerInGame) => {
@@ -35,26 +61,23 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     }
 
     async proceedCashOut(player, payload) {
-        const { multiplier, bet, roundId, freeBet } = await this.getCashOutBet(payload, player);
-        const isValidCashOut = this.validateCashOut(multiplier, bet, player);
+        const { multiplier, bet, betLogs } = await this.getCashOutBet(payload, player);
+        const isValidCashOut = this.validateCashOut(multiplier, bet, player, betLogs);
 
         if (!isValidCashOut) {
             return;
         }
 
-        const halfCashOutBetLog = await this.betLogsRepository
-            .findOne({ uid: player.UID, roundId, freeBet, action: Actions.HalfCashOut })
-            .lean()
-            .exec();
+        const halfCashOutBetLog = betLogs.find((log) => log.action === Actions.HalfCashOut);
 
         const amount = bet.amount - (halfCashOutBetLog?.amount ?? 0);
 
-        await this.settleCashOut(player, payload, amount, multiplier, halfCashOutBetLog?.winAmount);
+        await this.settleCashOutConsumer.settleCashOut(player, payload, amount, multiplier, halfCashOutBetLog?.winAmount);
     }
 
     async proceedHalfCashOut(player, payload) {
-        const { multiplier, bet } = await this.getCashOutBet(payload, player);
-        const isValidCashOut = this.validateCashOut(multiplier, bet);
+        const { multiplier, bet, betLogs } = await this.getCashOutBet(payload, player);
+        const isValidCashOut = this.validateCashOut(multiplier, bet, player, betLogs);
 
         if (!isValidCashOut) {
             return;
@@ -62,15 +85,16 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
         const amount = bet.amount / 2;
 
-        await this.settleCashOut(player, payload, amount, multiplier);
+        await this.settleCashOutConsumer.settleCashOut(player, payload, amount, multiplier);
     }
 
     async getCashOutBet(payload, player) {
         const { freeBet, roundId } = payload;
         const multiplier = this.calculateCashOutMultiplier(payload);
         const bet = await this.betsRepository.findOne({ uid: player.UID, roundId, freeBet: !!freeBet }).lean().exec();
+        const betLogs = await this.betLogsRepository.find({ uid: player.UID, roundId, freeBet: !!freeBet }).lean().exec();
 
-        return { multiplier, bet, roundId, freeBet };
+        return { multiplier, bet, roundId, freeBet, betLogs };
     }
 
     calculateCashOutMultiplier(payload) {
@@ -82,10 +106,11 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         return calculateMultiplier(timeFromStart);
     }
 
-    validateCashOut(multiplier, bet, player) {
+    validateCashOut(multiplier, bet, player, betLogs) {
         const { result, roundId } = this.gameData;
+        const cashOutBetLogs = betLogs.find((log) => log.action === Actions.CashOut);
 
-        if (!bet || multiplier >= result || roundId !== bet.roundId) {
+        if (!bet || multiplier >= result || roundId !== bet.roundId || !!cashOutBetLogs) {
             this.publishCashOutFailed(player);
 
             return false;
@@ -93,32 +118,6 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
         return true;
     }
-
-    async settleCashOut(player, payload, amount, multiplier, halfCashOutWinAmount = 0) {
-        const { action, roundId } = payload;
-        const cashOutWin = roundFloat(amount * multiplier);
-        const maxWinPerRound = this.getMaxWinPerRound(player) - halfCashOutWinAmount;
-        const winAmount = Math.min(cashOutWin, maxWinPerRound);
-        const reachMaxWin = winAmount === maxWinPerRound;
-
-        const betLog = { ...payload, winAmount, multiplier, amount, reachMaxWin };
-
-        await this.insertBetLog(player, roundId, betLog);
-        this.adjustRunningBets(player, action, amount, winAmount);
-        this.placeBetPublisher.publishSuccessCashOut(
-            player.UID,
-            {
-                name: player.profile.name,
-                playerId: player.UID,
-                [action]: { amount, win: winAmount, multiplier },
-                reachMaxWin,
-            },
-            this.calculateCurrencyRate(player.session)
-        );
-
-        this.gameData.updatePlayerAction(player.UID, action, { amount, win: winAmount, multiplier });
-    }
-
     publishCashOutFailed(player) {
         this.placeBetPublisher.publishGameFailedBet(player.UID, {
             endBet: -1,
@@ -165,8 +164,6 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             clientSentTime: bet.clientSentTime,
             receivedTime: bet.receivedTime,
             roundId,
-            multiplier: bet.multiplier,
-            reachMaxWin: bet.reachMaxWin
         };
 
         if (player.session) {
@@ -205,13 +202,5 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
     adjustRunningBets(player, action, amount, win) {
         this.gameData.runningBets[player.UID] = { name: player.profile.name, playerId: player.UID, [action]: { amount, win } };
-    }
-
-    getMaxWinPerRound(player) {
-        const { maxWinPerRound } = this.gameData.gameConfigs.crashConfig;
-        const settings = this.gameData.currencyGroupGames.find((x) => x.groupId.toString() === player.session.currencyGroupId);
-        const maxBet = Math.min(player.profile.maxBet, settings.maxBet);
-
-        return maxWinPerRound * maxBet;
     }
 }
