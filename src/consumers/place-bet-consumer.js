@@ -81,8 +81,8 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
             },
             {
                 failure:
-                    this.gameData.remainingTime <= this.definition.durations.lockingBet ||
-                    this.gameData.remainingTime > this.definition.durations.placingBets,
+                    this.gameData.remainingTime < this.definition.durations.lockingBet ||
+                    this.gameData.remainingTime >= this.definition.durations.placingBets,
                 notice: this.getNoticeObj(helpers.noticeHelper.placeBetNextRound),
             },
         ];
