@@ -39,9 +39,12 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
     async settleBets({ roundId, time }) {
         const bets = await this.queryBets(roundId);
         const betLogs = await this.queryBetLogs(roundId);
+
         const refundBetlogs = await this.addRefundBetLogForPlayersOnUM(bets, betLogs);
+        betLogs.push(...refundBetlogs);
+
         const crashBetLogs = await this.addCrashBetLog(bets, betLogs, time);
-        betLogs.push(...refundBetlogs, ...crashBetLogs);
+        betLogs.push(...crashBetLogs);
 
         if (bets && bets.length) {
             await Promise.all(
