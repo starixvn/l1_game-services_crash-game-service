@@ -48,7 +48,6 @@ export default class Bot extends Table.Crons.TableGameBot {
         ];
 
         this.smallTicketRatio = 70;
-        this.smallTickets = 0;
     }
 
     getRemovalBotIds(totalRemoval) {
@@ -83,9 +82,9 @@ export default class Bot extends Table.Crons.TableGameBot {
     }
 
     getBetAmount(minBet, maxBet) {
-        const isSmallTicket = this.totalTickets === 0 ? true : (this.smallTickets * 100) / this.totalTickets <= this.smallTicketRatio;
+        const isSmallTicket = this.totalTickets === 0 ? true : (this.totalSmallTickets * 100) / this.totalTickets <= this.smallTicketRatio;
         if (isSmallTicket) {
-            this.smallTickets++;
+            this.totalSmallTickets++;
             return this.chance.natural({ min: minBet, maxBet: Math.min(minBet * 50, maxBet * 0.3) });
         }
 
@@ -160,11 +159,6 @@ export default class Bot extends Table.Crons.TableGameBot {
         bot.cashOut = false;
         bot.halfCashOut = false;
         bot.multiplier = 0;
-    }
-
-    resetAllBotData() {
-        super.resetAllBotData();
-        this.smallTickets = 0;
     }
 
     convertAmountToChip(amount) {
