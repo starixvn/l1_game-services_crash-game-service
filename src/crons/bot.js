@@ -62,7 +62,7 @@ export default class Bot extends Table.Crons.TableGameBot {
             const maxBet = this.gameData.gameConfigs.bot_maxbet;
             const minBet = this.getMinBet();
             const amount = this.getBetAmount(minBet, maxBet);
-
+            
             const user = await this.userInfosRepository.findOneAndUpdate(
                 { id: bot.id, red: { $gt: amount } },
                 { $inc: { red: -amount } },
@@ -85,7 +85,7 @@ export default class Bot extends Table.Crons.TableGameBot {
         const isSmallTicket = this.totalTickets === 0 ? true : (this.totalSmallTickets * 100) / this.totalTickets <= this.smallTicketRatio;
         if (isSmallTicket) {
             this.totalSmallTickets++;
-            return this.chance.natural({ min: minBet, maxBet: Math.min(minBet * 50, maxBet * 0.3) });
+            return this.chance.natural({ min: minBet, max: Math.min(minBet * 50, maxBet * 0.3) });
         }
 
         return this.chance.natural({ min: minBet, max: maxBet });
