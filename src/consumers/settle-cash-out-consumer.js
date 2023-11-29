@@ -11,68 +11,75 @@ export class SettleCashOutConsumer {
      * @param {logger} dependencies.logService
      * @param {mongoose.Model} dependencies.betLogsRepository
      */
-    constructor({ gameData, placeBetPublisher, logService, betLogsRepository }) {
+    constructor(gameData, placeBetPublisher, logService, betLogsRepository) {
         this.gameData = gameData;
         this.placeBetPublisher = placeBetPublisher;
-        this.placeBet = placeBet;
         this.logService = logService;
         this.betLogsRepository = betLogsRepository;
     }
     async proceedAutoCashOut(multiplier) {
-        const inGame = this.gameData.ingame;
+        try {
+            const inGame = this.gameData.ingame;
 
-        for (const playerName of Object.keys(inGame)) {
-            const playerInGame = inGame?.[playerName];
-            const betTracks = playerInGame?.betTracks;
-            const bet = betTracks?.[Actions.Bet];
-            if (bet?.autoCashOut && multiplier >= bet.autoCashOut && !betTracks[Actions.CashOut] && !playerInGame.isUm) {
-                const receivedTime = addMillisecond(this.gameData.startTime, calculateCrashTimeInMillisecond(bet.autoCashOut));
-                const cashOutAmount = betTracks[Actions.HalfCashOut] ? bet.amount / 2 : bet.amount;
+            for (const playerName of Object.keys(inGame)) {
+                const playerInGame = inGame?.[playerName];
+                const betTracks = playerInGame?.betTracks;
+                const bet = betTracks?.[Actions.Bet];
+                if (bet?.autoCashOut && multiplier >= bet.autoCashOut && !betTracks[Actions.CashOut] && !playerInGame.isUm) {
+                    const receivedTime = addMillisecond(this.gameData.startTime, calculateCrashTimeInMillisecond(bet.autoCashOut));
+                    const cashOutAmount = betTracks[Actions.HalfCashOut] ? bet.amount / 2 : bet.amount;
 
-                const payload = {
-                    roundId: this.gameData.roundId,
-                    receivedTime,
-                    action: Actions.CashOut,
-                };
+                    const payload = {
+                        roundId: this.gameData.roundId,
+                        receivedTime,
+                        action: Actions.CashOut,
+                    };
 
-                betTracks[Actions.CashOut] = {
-                    time: new Date(),
-                };
+                    betTracks[Actions.CashOut] = {
+                        time: new Date(),
+                    };
 
-                await this.settleCashOut(
-                    playerInGame.playerData,
-                    payload,
-                    cashOutAmount,
-                    bet.autoCashOut,
-                    betTracks[Actions.HalfCashOut]?.win
-                );
+                    await this.settleCashOut(
+                        playerInGame.playerData,
+                        payload,
+                        cashOutAmount,
+                        bet.autoCashOut,
+                        betTracks[Actions.HalfCashOut]?.win
+                    );
+                }
             }
+        } catch (err) {
+            this.logService.logError(err);
         }
     }
 
     async settleCashOut(player, payload, amount, multiplier, halfCashOutWinAmount = 0) {
-        const { action, roundId } = payload;
-        const cashOutWin = roundFloat(amount * multiplier);
-        const maxWinPerRound = this.getMaxWinPerRound(player) - halfCashOutWinAmount;
-        const winAmount = Math.min(cashOutWin, maxWinPerRound);
-        const reachMaxWin = winAmount === maxWinPerRound;
+        try {
+            const { action, roundId } = payload;
+            const cashOutWin = roundFloat(amount * multiplier);
+            const maxWinPerRound = this.getMaxWinPerRound(player) - halfCashOutWinAmount;
+            const winAmount = Math.min(cashOutWin, maxWinPerRound);
+            const reachMaxWin = winAmount === maxWinPerRound;
 
-        const betLog = { ...payload, winAmount, multiplier, amount, reachMaxWin };
+            const betLog = { ...payload, winAmount, multiplier, amount, reachMaxWin };
 
-        await this.insertBetLog(player, roundId, betLog);
-        this.adjustRunningBets(player, action, amount, winAmount);
-        this.placeBetPublisher.publishSuccessCashOut(
-            player.UID,
-            {
-                name: player.profile.name,
-                playerId: player.UID,
-                [action]: { amount, win: winAmount, multiplier },
-                reachMaxWin,
-            },
-            this.calculateCurrencyRate(player.session)
-        );
+            await this.insertBetLog(player, roundId, betLog);
+            this.adjustRunningBets(player, action, amount, winAmount);
+            this.placeBetPublisher.publishSuccessCashOut(
+                player.UID,
+                {
+                    name: player.profile.name,
+                    playerId: player.UID,
+                    [action]: { amount, win: winAmount, multiplier },
+                    reachMaxWin,
+                },
+                this.calculateCurrencyRate(player.session)
+            );
 
-        this.gameData.updatePlayerAction(player.UID, action, { amount, win: winAmount, multiplier });
+            this.gameData.updatePlayerAction(player.UID, action, { amount, win: winAmount, multiplier });
+        } catch (err) {
+            this.logService.logError(err);
+        }
     }
 
     adjustRunningBets(player, action, amount, win) {
@@ -85,10 +92,6 @@ export class SettleCashOutConsumer {
         const maxBet = Math.min(player.profile.maxBet, settings.maxBet);
 
         return maxWinPerRound * maxBet;
-    }
-
-    calculateCurrencyRate(session) {
-        return session.multiplier * this.gameData.exchangeRates.code[session.currencyCode];
     }
 
     async insertBetLog(player, roundId, bet) {
@@ -119,5 +122,9 @@ export class SettleCashOutConsumer {
         }
 
         await this.betLogsRepository.create(newBetLog);
+    }
+
+    calculateCurrencyRate(session) {
+        return session.multiplier * this.gameData.exchangeRates.code[session.currencyCode];
     }
 }

@@ -111,7 +111,7 @@ describe("PlaceBetConsumer", () => {
             it("when place bet in lock bet time ", () => {
                 // arrange
                 gameData.gameConfigs.enabled = true;
-                gameData.remainingTime = 3;
+                gameData.remainingTime = 2;
                 // act
                 const criterions = consumer.composeBettingTimeValidationCriteria(1);
 

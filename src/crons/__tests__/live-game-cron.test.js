@@ -1,10 +1,8 @@
 import { Chance } from "chance";
 import { stub } from "jest-micro-auto-stub";
-import { Actions, MinMultiplierValue } from "../../constants";
 import LiveGamePublisher from "../../event-publishers/live-game-publisher";
 import CrashGameData from "../../game-data";
 import { calculateMultiplier } from "../../helpers/crash-point-helper";
-import { addMillisecond } from "../../helpers/date-helper";
 import LiveGameCrons from "../live-game-cron";
 
 jest.mock("../../helpers/crash-point-helper", () => ({
@@ -12,16 +10,12 @@ jest.mock("../../helpers/crash-point-helper", () => ({
     calculateCrashTimeInMillisecond: jest.fn(),
 }));
 
-jest.mock("../../helpers/date-helper", () => ({
-    addMillisecond: jest.fn(),
-}));
-
 const liveGameLogsRepository = {
     create: jest.fn(),
 };
 
-const processBetQueue = {
-    proceedCashOut: jest.fn(),
+const settleCashOutConsumer = {
+    proceedAutoCashOut: jest.fn(),
 };
 
 describe("liveGameCrons", () => {
@@ -32,7 +26,7 @@ describe("liveGameCrons", () => {
     const chance = new Chance();
     let cron;
     beforeEach(() => {
-        cron = new LiveGameCrons({ liveGamePublisher, logService, gameData, liveGameLogsRepository, processBetQueue });
+        cron = new LiveGameCrons({ liveGamePublisher, logService, gameData, liveGameLogsRepository, settleCashOutConsumer });
     });
 
     afterEach(() => {
@@ -129,55 +123,7 @@ describe("liveGameCrons", () => {
             cron.proceed();
 
             // Assert
-            expect(cron.proceedAutoCashOut).toBeCalledWith(m);
-        });
-    });
-
-    describe("proceedAutoCashOut", () => {
-        describe("when exist valid autoCashOut value on bet", () => {
-            it("should call processBetQueue.proceedCashOut", async () => {
-                // Arrange
-                const mockReceivedTime = new Date();
-                const playerName = "name01";
-                const UID = "uid";
-                const autoCashOut = MinMultiplierValue;
-                const multiplier = autoCashOut + 0.1;
-                const betQueuePushMock = jest.fn();
-                addMillisecond.mockReturnValueOnce(mockReceivedTime);
-
-                const expectedPayload = {
-                    roundId: gameData.roundId,
-                    receivedTime: mockReceivedTime,
-                    action: Actions.CashOut,
-                };
-                const realPlayer = {
-                    UID,
-                    socketClient: {
-                        connected: true,
-                    },
-                };
-
-                gameData.ingame = {
-                    [playerName]: {
-                        UID,
-                        betTracks: {
-                            [Actions.Bet]: {
-                                autoCashOut,
-                            },
-                        },
-                        betQueue: {
-                            push: betQueuePushMock,
-                        },
-                        playerData: realPlayer,
-                    },
-                };
-
-                // Act
-                await cron.proceedAutoCashOut(multiplier);
-
-                // Assert
-                expect(processBetQueue.proceedCashOut).toBeCalledWith(realPlayer, expectedPayload);
-            });
+            expect(cron.settleCashOutConsumer.proceedAutoCashOut).toBeCalledWith(m);
         });
     });
 });

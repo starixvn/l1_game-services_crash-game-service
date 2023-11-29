@@ -381,11 +381,11 @@ describe("ProcessBetQueue", () => {
                         });
                     });
 
-                    describe("when NOT exist halfCashOut bet logs", () => {
-                        const betLog = { winAmount: chance.natural(), amount: bet.amount / 2 };
+                    describe("when exist halfCashOut bet logs", () => {
+                        const betLog = { winAmount: chance.natural(), amount: bet.amount / 2, action: Actions.HalfCashOut };
 
                         beforeEach(() => {
-                            betLogsRepository.find().lean().exec.mockResolvedValueOnce([betLog]);
+                            proceedBetQueue.getCashOutBet = jest.fn().mockResolvedValueOnce({ multiplier, bet, betLogs: [betLog] });
                         });
 
                         it("should call settleCashOut with half of bet amount and current win amount", async () => {
@@ -547,23 +547,6 @@ describe("ProcessBetQueue", () => {
 
             // Assert
             expect(proceedBetQueue.gameData.runningBets[player.UID]).toStrictEqual(expectResult);
-        });
-    });
-
-    describe("getMaxWinPerRound", () => {
-        it("should return max win per round", () => {
-            // Arrange
-            const maxWinPerRound = chance.natural({ min: 1, max: 2000 });
-            const currencyMaxBet = chance.natural({ min: 1, max: 2000 });
-            proceedBetQueue.gameData.currencyGroupGames = [{ groupId: player.session.currencyGroupId, maxBet: currencyMaxBet }];
-            proceedBetQueue.gameData.gameConfigs.crashConfig.maxWinPerRound = maxWinPerRound;
-            const maxBet = Math.min(player.profile.maxBet, currencyMaxBet);
-
-            // Act
-            const actualResult = proceedBetQueue.getMaxWinPerRound(player);
-
-            // Assert
-            expect(actualResult).toBe(maxBet * maxWinPerRound);
         });
     });
 
