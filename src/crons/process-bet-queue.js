@@ -92,7 +92,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         const { freeBet, roundId } = payload;
         const multiplier = this.calculateCashOutMultiplier(payload);
         const bet = await this.betsRepository.findOne({ uid: player.UID, roundId, freeBet: !!freeBet }).lean().exec();
-        const betLogs = await this.betLogsRepository.find({ uid: player.UID, roundId, freeBet: !!freeBet }).lean().exec();
+        const betLogs = await this.betLogsRepository.find({ uid: player.UID, roundId }).lean().exec();
 
         return { multiplier, bet, roundId, freeBet, betLogs };
     }
