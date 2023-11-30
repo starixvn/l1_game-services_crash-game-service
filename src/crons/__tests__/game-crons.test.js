@@ -18,10 +18,14 @@ jest.mock("../../helpers/crash-point-helper", () => ({
 }));
 jest.mock("../../watchers/um-info-watcher");
 
+/** @type {mongoose.Model}*/
+const userInfosRepository = stubMongoose(mongoose.Model);
+userInfosRepository.updateMany = jest.fn();
+
 const { durations } = gameSettings;
 const gameData = new CrashGameData(3);
 const definition = new GameDefinition({ id: 1, name: "game name", durations }, jest.fn, jest.fn, jest.fn);
-const bot = new Bot(gameData, definition);
+const bot = new Bot(gameData, definition, null, userInfosRepository);
 const settleGameRoundConsumer = new SettleGameRoundConsumer({});
 const runningRoundInfoPublisher = new RunningRoundInfoPublisher();
 const gameStatusPublisher = new GameStatusPublisher();
@@ -92,7 +96,7 @@ const createBaseGameCron = function () {
         betsRepository,
         betLogsRepository,
         resultsRepository: {},
-        umInfoWatcher
+        umInfoWatcher,
     });
 };
 let cron;
@@ -106,11 +110,9 @@ describe("gameCrons", () => {
         cron.updatePromotionOddsAndNotify = jest.fn();
         cron.isStartingTime = jest.fn();
         cron.gameData.disabled = true;
-        cron.bot = {
-            reset: jest.fn(),
-            run: jest.fn(),
-            cashOut: jest.fn(),
-        };
+        cron.bot.reset = jest.fn();
+        cron.bot.run = jest.fn();
+        cron.bot.cashOut = jest.fn();
     });
 
     it("should inherit Core.Crons.BaseGameCron", () => {
