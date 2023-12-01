@@ -19,19 +19,14 @@ export class SettleCashOutConsumer {
     }
     async proceedAutoCashOut(multiplier) {
         try {
-            const { ingame, result } = this.gameData;
+            const players = Object.values(this.gameData.ingame).filter((playerInGame) => !playerInGame.isUm);
 
-            for (const playerName of Object.keys(ingame)) {
-                const playerInGame = ingame?.[playerName];
-                const betTracks = playerInGame?.betTracks;
-                const bet = betTracks?.[Actions.Bet];
-                if (
-                    bet?.autoCashOut &&
-                    multiplier >= bet.autoCashOut &&
-                    bet.autoCashOut < result &&
-                    !betTracks[Actions.CashOut] &&
-                    !playerInGame.isUm
-                ) {
+            for (const player of players) {
+                const betTracks = player?.betTracks;
+                const isValid = this.validateAutoCashOut(betTracks, multiplier);
+
+                if (isValid) {
+                    const bet = betTracks?.[Actions.Bet];
                     const receivedTime = addMillisecond(this.gameData.startTime, calculateCrashTimeInMillisecond(bet.autoCashOut));
                     const cashOutAmount = betTracks[Actions.HalfCashOut] ? bet.amount / 2 : bet.amount;
 
@@ -57,6 +52,13 @@ export class SettleCashOutConsumer {
         } catch (err) {
             this.logService.logError(err);
         }
+    }
+
+    validateAutoCashOut(betTracks, multiplier) {
+        const { result } = this.gameData;
+        const bet = betTracks?.[Actions.Bet];
+
+        return bet?.autoCashOut <= multiplier && bet?.autoCashOut < result && !betTracks?.[Actions.CashOut];
     }
 
     async settleCashOut(player, payload, amount, multiplier, halfCashOutWinAmount = 0) {

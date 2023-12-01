@@ -57,7 +57,10 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
 
                     await bet.save();
                     await this.callEndGame(bet, roundId, time, betResult);
-                    await this.userBetResultPublisher.publish(bet.uid, betResult);
+                    await this.userBetResultPublisher.publish(bet.uid, {
+                        ...betResult,
+                        reachMaxWin: betLog?.some((log) => log.reachMaxWin),
+                    });
                 })
             );
         }
