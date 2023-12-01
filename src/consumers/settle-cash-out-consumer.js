@@ -1,6 +1,4 @@
 import { Actions } from "../constants";
-import { calculateCrashTimeInMillisecond } from "../helpers/crash-point-helper";
-import { addMillisecond } from "../helpers/date-helper";
 import { roundFloat } from "../helpers/number-helper";
 
 export class SettleCashOutConsumer {
@@ -27,12 +25,11 @@ export class SettleCashOutConsumer {
 
                 if (isValid) {
                     const bet = betTracks?.[Actions.Bet];
-                    const receivedTime = addMillisecond(this.gameData.startTime, calculateCrashTimeInMillisecond(bet.autoCashOut));
                     const cashOutAmount = betTracks[Actions.HalfCashOut] ? bet.amount / 2 : bet.amount;
 
                     const payload = {
                         roundId: this.gameData.roundId,
-                        receivedTime,
+                        receivedTime: new Date(),
                         action: Actions.CashOut,
                     };
 

@@ -141,7 +141,10 @@ describe("SettleGameRoundConsumer", () => {
                         await consumer.settleBets(settleBetParams);
 
                         // Assert
-                        expect(userBetResultPublisher.publish).toHaveBeenNthCalledWith(betIndex + 1, queryBets[betIndex].uid, betResult);
+                        expect(userBetResultPublisher.publish).toHaveBeenNthCalledWith(betIndex + 1, queryBets[betIndex].uid, {
+                            ...betResult,
+                            reachMaxWin: false,
+                        });
                     });
                 });
             });

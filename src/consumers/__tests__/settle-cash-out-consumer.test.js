@@ -18,6 +18,7 @@ describe("SettleCashOutConsumer", () => {
     const gameData = new GameData();
     gameData.updatePlayerAction = jest.fn();
     gameData.gameConfigs.crashConfig = {};
+    gameData.result = 100;
 
     const placeBetPublisher = stub(PlaceBetPublisher);
     const logService = {
@@ -62,7 +63,7 @@ describe("SettleCashOutConsumer", () => {
         });
 
         describe("when exist valid autoCashOut value on bet", () => {
-            it("should call processBetQueue.proceedCashOut", async () => {
+            it("should call settleCashOut", async () => {
                 // Arrange
                 const mockReceivedTime = new Date();
                 const autoCashOut = MinMultiplierValue;
