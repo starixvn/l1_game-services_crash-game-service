@@ -41,7 +41,7 @@ export class SettleCashOutConsumer {
                     };
 
                     await this.settleCashOut(
-                        playerInGame.playerData,
+                        player.playerData,
                         payload,
                         cashOutAmount,
                         bet.autoCashOut,
