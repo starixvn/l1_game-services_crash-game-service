@@ -73,6 +73,8 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
         for (const player of playersOnUM) {
             const { playerData } = player;
             const bet = bets.find((x) => x.playerId === playerData.session.playerId && x.operatorId === playerData.session.operatorId);
+            console.log(bet);
+            console.log(playerData);
             const halfCashOutBetLog = betLogs.find(
                 (x) =>
                     x.action === Actions.HalfCashOut &&
