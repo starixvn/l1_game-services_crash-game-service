@@ -75,8 +75,7 @@ export class SettleCashOutConsumer {
                 {
                     name: player.profile.name,
                     playerId: player.UID,
-                    [action]: { amount, win: winAmount, multiplier },
-                    reachMaxWin,
+                    [action]: { amount, win: winAmount, cashOutWin, multiplier, reachMaxWin },
                 },
                 this.calculateCurrencyRate(player.session)
             );

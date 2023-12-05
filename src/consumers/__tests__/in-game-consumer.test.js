@@ -46,7 +46,6 @@ describe("in game consumer instance", () => {
             roundId: 1,
             gameConfigs: {},
             roundHistory: [],
-            ownBets: {},
             totalBets: {},
             user: {},
         };
@@ -68,8 +67,8 @@ describe("in game consumer instance", () => {
             gameData.runningBets = "runningBets";
             const expectedResult = {
                 ...basePayload,
+                ownBets: undefined,
                 otherPlayers: "runningBets",
-                ownBets: {},
             };
 
             // act

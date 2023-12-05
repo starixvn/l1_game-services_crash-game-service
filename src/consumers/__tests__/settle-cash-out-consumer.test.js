@@ -153,8 +153,7 @@ describe("SettleCashOutConsumer", () => {
                 {
                     name: realPlayer.profile.name,
                     playerId: realPlayer.UID,
-                    [payload.action]: { amount, win: winAmount, multiplier },
-                    reachMaxWin,
+                    [payload.action]: { amount, win: winAmount, multiplier, reachMaxWin: false, cashOutWin: winAmount },
                 },
                 currencyRate
             );
