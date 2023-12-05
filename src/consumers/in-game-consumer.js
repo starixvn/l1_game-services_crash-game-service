@@ -10,7 +10,7 @@ export class InGameConsumer extends EventConsumers.TableInGameConsumer {
         return {
             ...basePayload,
             otherPlayers: runningBets,
-            betList: this.gameData.betList,
+            ownBets: this.gameData.betList[realPlayer.UID],
         };
     }
 }

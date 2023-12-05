@@ -135,7 +135,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
         this.adjustRunningBets(player, bet.action, bet.amount);
 
-        this.gameData.addPlayerToBetList(player.UID, { name: player.profile.name, amount: bet.amount, rate });
+        this.gameData.addPlayerToBetList(player.UID, { name: player.profile.name, amount: bet.amount, rate, autoCashOut: bet.autoCashOut });
 
         if (!bet.freeBet && (player.profile.minBet !== balance.minBet || player.profile.maxBet !== balance.maxBet)) {
             await this.updateUserStakeLevel(player, balance.minBet, balance.maxBet);
