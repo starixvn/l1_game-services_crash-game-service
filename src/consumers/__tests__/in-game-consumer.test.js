@@ -69,6 +69,7 @@ describe("in game consumer instance", () => {
             const expectedResult = {
                 ...basePayload,
                 otherPlayers: "runningBets",
+                ownBets: {},
             };
 
             // act
