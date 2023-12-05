@@ -70,7 +70,7 @@ describe("SettleCashOutConsumer", () => {
                 const amount = 100;
                 const multiplier = autoCashOut + 0.1;
                 const betQueuePushMock = jest.fn();
-                addMillisecond.mockReturnValueOnce(mockReceivedTime);
+                jest.spyOn(global, "Date").mockImplementation(() => mockReceivedTime);
 
                 const expectedPayload = {
                     roundId: gameData.roundId,
@@ -120,7 +120,6 @@ describe("SettleCashOutConsumer", () => {
         beforeEach(() => {
             consumer.getMaxWinPerRound = jest.fn().mockReturnValueOnce(maxWinPerRound);
             consumer.insertBetLog = jest.fn();
-            consumer.adjustRunningBets = jest.fn();
             consumer.calculateCurrencyRate = jest.fn().mockReturnValueOnce(currencyRate);
         });
 

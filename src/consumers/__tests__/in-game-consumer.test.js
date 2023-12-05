@@ -27,6 +27,7 @@ describe("in game consumer instance", () => {
     const publisher = stub(Core.BaseEventPublishers.BaseEventPublisher);
     const getBalance = jest.fn();
     const realPlayer = {
+        UID: "123",
         socketClient: {
             emit: jest.fn(),
         },
@@ -64,11 +65,12 @@ describe("in game consumer instance", () => {
         it("should return correct result when remaining time greater than finish first half", async () => {
             // arrange
             gameData.remainingTime = definition.durations.lockingBet;
-            gameData.runningBets = "runningBets";
             const expectedResult = {
                 ...basePayload,
                 ownBets: undefined,
-                otherPlayers: "runningBets",
+                otherPlayers: {
+                    [realPlayer.UID]: undefined,
+                },
             };
 
             // act

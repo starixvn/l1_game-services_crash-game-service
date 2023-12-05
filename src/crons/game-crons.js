@@ -173,7 +173,6 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
 
     async resetForNewRound() {
         super.resetForNewRound();
-        this.gameData.runningBets = {};
         this.gameData.betList = {};
         this.bot && (await this.bot.reset());
         this.appConfigs.enabledBoostedOdds && (await this.updatePromotionOddsAndNotify());

@@ -32,8 +32,6 @@ describe("ProcessBetQueue", () => {
         },
     };
 
-    gameData.runningBets = {};
-
     gameData.startTime = new Date();
 
     gameData.gameConfigs = {
@@ -296,7 +294,6 @@ describe("ProcessBetQueue", () => {
                 calculateMultiplier.mockReturnValueOnce(multiplier);
                 proceedBetQueue.isCashOutHalfAmount = jest.fn();
                 proceedBetQueue.publishCashOutFailed = jest.fn();
-                proceedBetQueue.adjustRunningBets = jest.fn();
                 proceedBetQueue.getMaxWinPerRound = jest.fn();
             });
 
@@ -429,7 +426,6 @@ describe("ProcessBetQueue", () => {
             proceedBetQueue.calculateCurrencyRate = jest.fn().mockReturnValueOnce(rate);
             proceedBetQueue.insertBet = jest.fn();
             proceedBetQueue.notifyPlacingBetResult = jest.fn();
-            proceedBetQueue.adjustRunningBets = jest.fn();
             proceedBetQueue.updateUserStakeLevel = jest.fn();
         });
 
@@ -455,14 +451,6 @@ describe("ProcessBetQueue", () => {
 
             // Assert
             expect(proceedBetQueue.notifyPlacingBetResult).toBeCalledWith(player, balance, payload, rate);
-        });
-
-        it("should call adjustRunningBets", async () => {
-            // Act
-            await proceedBetQueue.handleSuccessBet(player, balance, roundId, payload);
-
-            // Assert
-            expect(proceedBetQueue.adjustRunningBets).toBeCalledWith(player, payload.action, payload.amount);
         });
 
         describe("when bet is free bet", () => {
@@ -532,21 +520,6 @@ describe("ProcessBetQueue", () => {
 
             // Assert
             expect(proceedBetQueue.betsRepository.create).toBeCalledWith(expectResult);
-        });
-    });
-
-    describe("adjustRunningBets", () => {
-        it("should assign bet to running Bets data", () => {
-            // Arrange
-            const { action, amount } = payload;
-            const win = chance.natural();
-            const expectResult = { name: player.profile.name, playerId: player.UID, [action]: { amount, win } };
-
-            // Act
-            proceedBetQueue.adjustRunningBets(player, action, amount, win);
-
-            // Assert
-            expect(proceedBetQueue.gameData.runningBets[player.UID]).toStrictEqual(expectResult);
         });
     });
 

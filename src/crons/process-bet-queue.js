@@ -133,8 +133,6 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
         this.notifyPlacingBetResult(player, balance, bet, rate);
 
-        this.adjustRunningBets(player, bet.action, bet.amount);
-
         this.gameData.addPlayerToBetList(player.UID, { name: player.profile.name, amount: bet.amount, rate, autoCashOut: bet.autoCashOut });
 
         if (!bet.freeBet && (player.profile.minBet !== balance.minBet || player.profile.maxBet !== balance.maxBet)) {
@@ -199,9 +197,5 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         }
 
         await this.betsRepository.create(newBet);
-    }
-
-    adjustRunningBets(player, action, amount, win) {
-        this.gameData.runningBets[player.UID] = { name: player.profile.name, playerId: player.UID, [action]: { amount, win } };
     }
 }

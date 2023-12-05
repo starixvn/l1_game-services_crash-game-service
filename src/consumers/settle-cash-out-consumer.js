@@ -69,7 +69,6 @@ export class SettleCashOutConsumer {
             const betLog = { ...payload, winAmount, multiplier, amount, reachMaxWin };
 
             await this.insertBetLog(player, roundId, betLog);
-            this.adjustRunningBets(player, action, amount, winAmount);
             this.placeBetPublisher.publishSuccessCashOut(
                 player.UID,
                 {
@@ -84,10 +83,6 @@ export class SettleCashOutConsumer {
         } catch (err) {
             this.logService.logError(err);
         }
-    }
-
-    adjustRunningBets(player, action, amount, win) {
-        this.gameData.runningBets[player.UID] = { name: player.profile.name, playerId: player.UID, [action]: { amount, win } };
     }
 
     getMaxWinPerRound(player) {
