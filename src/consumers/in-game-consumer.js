@@ -6,10 +6,9 @@ export class InGameConsumer extends EventConsumers.TableInGameConsumer {
         basePayload.gameConfigs.maxMultiplier = this.gameData.gameConfigs.crashConfig.maxMultiplier;
         basePayload.gameConfigs.maxWinPerRound = this.gameData.gameConfigs.crashConfig.maxWinPerRound;
 
-        const { runningBets } = this.gameData;
         return {
             ...basePayload,
-            otherPlayers: runningBets,
+            otherPlayers: { ...this.gameData.betList, [realPlayer.UID]: undefined },
             ownBets: this.gameData.betList[realPlayer.UID],
         };
     }
