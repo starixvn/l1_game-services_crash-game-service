@@ -6,8 +6,8 @@ export default class GameData extends Table.TableGameData {
         this.betList = {};
     }
 
-    addPlayerToBetList(playerId, { name, amount, rate }) {
-        this.betList[playerId] = { time: new Date(), playerId, name, amount, rate };
+    addPlayerToBetList(playerId, { name, amount, rate, autoCashOut }) {
+        this.betList[playerId] = { time: new Date(), playerId, name, amount, rate, autoCashOut };
     }
 
     updatePlayerAction(playerId, action, data) {
