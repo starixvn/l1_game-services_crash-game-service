@@ -6,12 +6,13 @@ export default class LiveGameCron {
      * @param {LiveGamePublisher} dependencies.liveGamePublisher
      * @param {logger} dependencies.logService
      */
-    constructor({ liveGamePublisher, logService, gameData, liveGameLogsRepository, settleCashOutConsumer }) {
+    constructor({ liveGamePublisher, logService, gameData, liveGameLogsRepository, settleCashOutConsumer, bot }) {
         this.liveGamePublisher = liveGamePublisher;
         this.logService = logService;
         this.gameData = gameData;
         this.liveGameLogsRepository = liveGameLogsRepository;
         this.settleCashOutConsumer = settleCashOutConsumer;
+        this.bot = bot;
     }
 
     start() {
@@ -36,9 +37,11 @@ export default class LiveGameCron {
             const liveTime = currentTime - this.gameData.startTime;
             const multiplier = calculateMultiplier(liveTime);
 
+            this.bot?.cashOut(multiplier);
             this.liveGamePublisher.publish(multiplier, liveTime);
             this.settleCashOutConsumer.proceedAutoCashOut(multiplier);
             this.liveGameLogsRepository.create({ multiplier, time: currentTime, roundId: this.gameData.roundId });
+            console.log(`${multiplier} ${liveTime}`);
         } catch (err) {
             this.stop();
             this.logService.logError(err);

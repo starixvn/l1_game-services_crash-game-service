@@ -50,6 +50,15 @@ export default class Bot extends Table.Crons.TableGameBot {
         this.smallTicketRatio = 70;
     }
 
+    getCashOutPoint() {
+        const weights = this.cashOutDistributions.map((setting) => setting.ratio);
+        const cashOutStrategy = this.chance.weighted(this.cashOutDistributions, weights);
+
+        const cashOutPoint = roundFloat(this.chance.floating({ min: cashOutStrategy.from, max: cashOutStrategy.to }));
+
+        return cashOutPoint;
+    }
+
     getRemovalBotIds(totalRemoval) {
         const botsNotHaveBet = Object.values(this.botsInRoom).filter((bot) => bot.totalBet === 0);
         const botIds = botsNotHaveBet.map((x) => x.id);
@@ -62,7 +71,7 @@ export default class Bot extends Table.Crons.TableGameBot {
             const maxBet = this.gameData.gameConfigs.bot_maxbet;
             const minBet = this.getMinBet();
             const amount = this.getBetAmount(minBet, maxBet);
-            
+
             const user = await this.userInfosRepository.findOneAndUpdate(
                 { id: bot.id, red: { $gt: amount } },
                 { $inc: { red: -amount } },
@@ -91,9 +100,9 @@ export default class Bot extends Table.Crons.TableGameBot {
         return this.chance.natural({ min: minBet, max: maxBet });
     }
 
-    async cashOut() {
+    async cashOut(multiplier) {
         if (this.gameData.remainingTime < 0) {
-            const botsToCashOut = this.getBotsToCashOut();
+            const botsToCashOut = this.getBotsToCashOut(multiplier);
 
             const { startTime, result } = this.gameData;
             await Promise.all(
@@ -122,6 +131,7 @@ export default class Bot extends Table.Crons.TableGameBot {
                         });
                         bot.multiplier = multiplier;
                         this.gameData.updatePlayerAction(bot.id, action, { amount, win: winAmount, multiplier });
+                        console.log("cashout");
                         return this.insertBetLog(bot, { amount, winAmount, action, multiplier });
                     }
 
@@ -131,26 +141,17 @@ export default class Bot extends Table.Crons.TableGameBot {
         }
     }
 
-    getBotsToCashOut() {
-        const multiplier = calculateMultiplier(new Date() - this.gameData.startTime);
-        const range = this.cashOutDistributions.find((x) => x.from <= multiplier && x.to >= multiplier);
-        const botsHaveBet = Object.values(this.botsInRoom).filter((bot) => bot.totalBet > 0);
+    getBotsToCashOut(multiplier) {
+        const botsHaveBet = Object.values(this.botsInRoom).filter((bot) => !bot.cashOut && bot.totalBet > 0);
 
-        const maxCashOutBot = Math.floor(botsHaveBet.length * range.ratio);
-        const botsHaveCashOut = botsHaveBet.filter((bot) => bot.cashOut && bot.multiplier >= range.from && bot.multiplier <= range.to);
-
-        if (botsHaveCashOut.length < maxCashOutBot) {
-            const botsToCashOut = botsHaveBet.filter((bot) => !bot.cashOut);
-            return this.chance.pickset(botsToCashOut, this.chance.integer({ min: 0, max: maxCashOutBot - botsHaveCashOut.length }));
-        }
-
-        return [];
+        return botsHaveBet.filter((bot) => bot.expectCashOut && bot.expectCashOut <= multiplier);
     }
 
     updateBotInRoomData(bot, amount, balance) {
         bot.totalBet += amount;
         bot.red = balance;
         bot.remainTickets--;
+        bot.expectCashOut = this.getCashOutPoint();
     }
 
     resetBot(bot) {
@@ -159,6 +160,7 @@ export default class Bot extends Table.Crons.TableGameBot {
         bot.cashOut = false;
         bot.halfCashOut = false;
         bot.multiplier = 0;
+        bot.expectCashOut = 0;
     }
 
     convertAmountToChip(amount) {
