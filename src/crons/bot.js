@@ -54,9 +54,7 @@ export default class Bot extends Table.Crons.TableGameBot {
         const weights = this.cashOutDistributions.map((setting) => setting.ratio);
         const cashOutStrategy = this.chance.weighted(this.cashOutDistributions, weights);
 
-        const cashOutPoint = roundFloat(this.chance.floating({ min: cashOutStrategy.from, max: cashOutStrategy.to }));
-
-        return cashOutPoint;
+        return roundFloat(this.chance.floating({ min: cashOutStrategy.from, max: cashOutStrategy.to }));
     }
 
     getRemovalBotIds(totalRemoval) {
