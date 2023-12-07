@@ -45,7 +45,6 @@ export default class Bot extends Table.Crons.TableGameBot {
                 to: 2000,
                 ratio: 0.05,
             },
-            ,
         ];
 
         this.smallTicketRatio = 70;
