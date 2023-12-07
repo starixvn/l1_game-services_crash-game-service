@@ -183,4 +183,53 @@ describe("SettleCashOutConsumer", () => {
             expect(actualResult).toBe(maxBet * maxWinPerRound);
         });
     });
+
+    describe("insertBetLog", () => {
+        const roundId = chance.natural();
+        const payload = { roundId, action: chance.pickone(Object.values(Actions)) };
+
+        beforeEach(() => {
+            consumer.calculateCurrencyRate = jest.fn();
+        });
+
+        it("should call calculateCurrencyRate", async () => {
+            // Act
+            await consumer.insertBetLog(realPlayer, roundId, payload);
+
+            // Assert
+            expect(consumer.calculateCurrencyRate).toBeCalledWith(realPlayer.session);
+        });
+
+        it("should call betLogsRepository.create", async () => {
+            // Arrange
+            const rate = chance.floating({ min: 1 });
+            const mockDate = new Date();
+            jest.spyOn(global, "Date").mockReturnValueOnce(mockDate);
+            consumer.calculateCurrencyRate.mockReturnValueOnce(rate);
+
+            // Act
+            await consumer.insertBetLog(realPlayer, roundId, payload);
+
+            // Assert
+            expect(betLogsRepository.create).toBeCalledWith({
+                uid: realPlayer.UID,
+                name: realPlayer.profile.name,
+                time: mockDate,
+                action: payload.action,
+                amount: payload.amount,
+                winAmount: payload.winAmount,
+                freeBet: payload.freeBet,
+                clientSentTime: payload.clientSentTime,
+                receivedTime: payload.receivedTime,
+                roundId,
+                multiplier: payload.multiplier,
+                reachMaxWin: payload.reachMaxWin,
+                siteId: realPlayer.session.siteId,
+                currency: realPlayer.session.currencyName,
+                rate,
+                operatorId: realPlayer.session.operatorId,
+                playerId: realPlayer.session.playerId,
+            });
+        });
+    });
 });

@@ -14,7 +14,5 @@ export default class RoundResultPublisher extends Core.BaseEventPublishers.Round
         } else {
             this.publishToAllUsers(payload);
         }
-
-        this.publishToAllAdmins(payload);
     }
 }

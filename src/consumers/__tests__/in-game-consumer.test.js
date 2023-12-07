@@ -69,7 +69,7 @@ describe("in game consumer instance", () => {
                 ...basePayload,
                 ownBets: undefined,
                 betList: {
-                    [realPlayer.UID]: undefined,
+                    [realPlayer.UID]: null,
                 },
             };
 
