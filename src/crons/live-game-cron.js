@@ -41,7 +41,6 @@ export default class LiveGameCron {
             this.liveGamePublisher.publish(multiplier, liveTime);
             this.settleCashOutConsumer.proceedAutoCashOut(multiplier);
             this.liveGameLogsRepository.create({ multiplier, time: currentTime, roundId: this.gameData.roundId });
-            console.log(`${multiplier} ${liveTime}`);
         } catch (err) {
             this.stop();
             this.logService.logError(err);

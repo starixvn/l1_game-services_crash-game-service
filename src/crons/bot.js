@@ -132,7 +132,6 @@ export default class Bot extends Table.Crons.TableGameBot {
                         });
                         bot.multiplier = multiplier;
                         this.gameData.updatePlayerAction(bot.id, action, { amount, win: winAmount, multiplier });
-                        console.log("cashout");
                         return this.insertBetLog(bot, { amount, winAmount, action, multiplier });
                     }
 
