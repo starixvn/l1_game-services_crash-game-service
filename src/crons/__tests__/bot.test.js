@@ -121,27 +121,27 @@ describe("getBotsToCashOut", () => {
         });
     });
 
-    describe("when botsHaveCashOut length is less than maxCashOutBot", () => {
+    describe("when bot expect cashOut valid", () => {
         it("should return the correct number of bots to cash out ", () => {
             //Arrange
+            const multiplier = 1.5;
             const bot = initBot();
             bot.gameData.startTime = new Date(new Date() - 4000);
 
             bot.botsInRoom = {
-                1: { totalBet: 1, cashOut: false },
-                2: { totalBet: 2, cashOut: false },
-                3: { totalBet: 2, cashOut: false },
-                4: { totalBet: 2, cashOut: false },
-                5: { totalBet: 2, cashOut: false },
+                1: { totalBet: 1, cashOut: false, expectCashOut: 1.4 },
+                2: { totalBet: 2, cashOut: false, expectCashOut: 12 },
+                3: { totalBet: 2, cashOut: false, expectCashOut: 1.6 },
+                4: { totalBet: 2, cashOut: false, expectCashOut: 4 },
+                5: { totalBet: 2, cashOut: false, expectCashOut: 3 },
             };
 
             bot.chance = {
                 pickset: jest.fn().mockReturnValue([bot.botsInRoom[1]]),
                 integer: jest.fn().mockReturnValue(1),
             };
-            calculateMultiplier.mockReturnValueOnce(3);
             //Act
-            const result = bot.getBotsToCashOut();
+            const result = bot.getBotsToCashOut(multiplier);
 
             //Assert
             expect(result).toContain(bot.botsInRoom[1]);
