@@ -1,4 +1,3 @@
-import { Chance } from "chance";
 import { generateRawResultForHash, generateResult } from "../result-helper";
 
 const chanceMock = { pickoneIndex: 0, boolVal: false };
