@@ -68,9 +68,7 @@ describe("in game consumer instance", () => {
             const expectedResult = {
                 ...basePayload,
                 ownBets: undefined,
-                betList: {
-                    [realPlayer.UID]: null,
-                },
+                betList: {},
             };
 
             // act
