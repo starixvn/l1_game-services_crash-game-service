@@ -79,7 +79,7 @@ export class SettleCashOutConsumer {
                 this.calculateCurrencyRate(player.session)
             );
 
-            this.gameData.updatePlayerAction(player.UID, action, { amount, win: winAmount, multiplier });
+            this.gameData.updatePlayerAction(player.UID, action, { amount, win: winAmount, multiplier, cashOutWin, reachMaxWin });
         } catch (err) {
             this.logService.logError(err);
         }

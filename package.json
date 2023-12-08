@@ -11,7 +11,7 @@
         "debug": "nodemon --es-module-specifier-resolution=node --watch ./ --inspect ./src/app.js",
         "prod": "node --max-old-space-size=8192 --es-module-specifier-resolution=node ./src/app.js",
         "reg": "npm set registry http://npm.lumigame.com",
-        "stats": "nodemon --es-module-specifier-resolution=node --watch ./tests ./tests/results.js"
+        "stats": "nodemon --es-module-specifier-resolution=node --watch ./tests ./tests/rtp/index.js"
     },
     "jestSonar": {
         "reportPath": "reports",

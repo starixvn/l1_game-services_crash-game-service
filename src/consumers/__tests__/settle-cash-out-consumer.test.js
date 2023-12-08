@@ -163,7 +163,13 @@ describe("SettleCashOutConsumer", () => {
             await consumer.settleCashOut(realPlayer, payload, amount, multiplier, halfCashOutWinAmount);
 
             // Assert
-            expect(gameData.updatePlayerAction).toBeCalledWith(realPlayer.UID, payload.action, { amount, win: winAmount, multiplier });
+            expect(gameData.updatePlayerAction).toBeCalledWith(realPlayer.UID, payload.action, {
+                amount,
+                win: winAmount,
+                multiplier,
+                cashOutWin: winAmount,
+                reachMaxWin: false,
+            });
         });
     });
 
