@@ -48,7 +48,7 @@ export default class Bot extends Table.Crons.TableGameBot {
         ];
 
         this.smallTicketRatio = 70;
-        this.betOneChipRatio = 70;
+        this.betOddAmount = 30;
     }
 
     getCashOutPoint() {
@@ -91,16 +91,16 @@ export default class Bot extends Table.Crons.TableGameBot {
 
     getBetAmount(minBet, maxBet) {
         const isSmallTicket = this.totalTickets === 0 ? true : (this.totalSmallTickets * 100) / this.totalTickets <= this.smallTicketRatio;
-        const isBetOneChip = this.chance.bool({ likelihood: 70 });
+        const isBetOddAmount = this.chance.bool({ likelihood: 30 });
 
         let amount = this.chance.natural({ min: minBet, max: maxBet });
 
         if (isSmallTicket) {
             this.totalSmallTickets++;
-            return this.chance.natural({ min: minBet, max: Math.min(minBet * 50, maxBet * 0.3) });
+            amount = this.chance.natural({ min: minBet, max: Math.min(minBet * 50, maxBet * 0.3) });
         }
 
-        return isBetOneChip ? this.convertAmountToChip(amount) : amount;
+        return isBetOddAmount ? amount : this.convertToEvenAmount(amount);
     }
 
     async cashOut(multiplier) {
@@ -171,7 +171,7 @@ export default class Bot extends Table.Crons.TableGameBot {
         bot.expectCashOut = 0;
     }
 
-    convertAmountToChip(amount) {
+    convertToEvenAmount(amount) {
         const chipList = Chips.filter((chip) => amount / chip > 1);
 
         return chipList.length > 0 ? chipList[0] : this.getMinBet();
