@@ -47,8 +47,18 @@ export default class Bot extends Table.Crons.TableGameBot {
             },
         ];
 
-        this.smallTicketRatio = 70;
+        this.maxBetStrategy = [
+            { weight: 40, getMaxBet: (minBet, maxBet) => Math.min(minBet * 50, 0.3 * maxBet) },
+            { weight: 30, getMaxBet: (minBet, maxBet) => Math.min(minBet * 10, 0.3 * maxBet) },
+            { weight: 30, getMaxBet: (minBet, maxBet) => maxBet },
+        ];
         this.betOddAmount = 30;
+    }
+
+    getBotMaxBet(minBet, maxBet) {
+        const weights = this.maxBetStrategy.map((setting) => setting.weight);
+
+        return this.chance.weighted(this.maxBetStrategy, weights).getMaxBet(minBet, maxBet);
     }
 
     getCashOutPoint() {
@@ -90,15 +100,10 @@ export default class Bot extends Table.Crons.TableGameBot {
     }
 
     getBetAmount(minBet, maxBet) {
-        const isSmallTicket = this.totalTickets === 0 ? true : (this.totalSmallTickets * 100) / this.totalTickets <= this.smallTicketRatio;
+        const botMaxBet = this.getBotMaxBet(minBet, maxBet);
         const isBetOddAmount = this.chance.bool({ likelihood: 30 });
 
-        let amount = this.chance.natural({ min: minBet, max: maxBet });
-
-        if (isSmallTicket) {
-            this.totalSmallTickets++;
-            amount = this.chance.natural({ min: minBet, max: Math.min(minBet * 50, maxBet * 0.3) });
-        }
+        const amount = this.chance.natural({ min: minBet, max: botMaxBet });
 
         return isBetOddAmount ? amount : this.convertToEvenAmount(amount);
     }
