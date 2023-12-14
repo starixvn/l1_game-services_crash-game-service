@@ -1,12 +1,13 @@
-import { Core, Table } from "sc-game-base";
 import appConfigs from "./app-configs";
+import { addIdentifiers, initSpanProcessor, initializer } from "sc-instrument";
+
+import { Core, Table } from "sc-game-base";
 import ContainerRegistry from "./container-registry";
 import CrashGameData from "./game-data";
 import gameSettings from "./game-settings";
 import { logger } from "sc-common";
 import { gameConfigs as gameConfigsRepository } from "sc-base-database";
 import { generateRawResultForHash, generateResult, getSettlementResult } from "./helpers/result-helper";
-import { addIdentifiers, initSpanProcessor, initializer } from "sc-instrument";
 
 const run = async () => {
     const appName = process.env.APP_NAME;
