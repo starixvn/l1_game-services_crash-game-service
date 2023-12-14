@@ -3,9 +3,10 @@ import { SocketRouter } from "../";
 
 describe("socketRouter", () => {
     const socketClient = { on: jest.fn(), id: 99999 };
+    const cashOutConsumer = { consume: jest.fn() };
     let socketRouter;
     beforeEach(() => {
-        socketRouter = new SocketRouter({});
+        socketRouter = new SocketRouter({ cashOutConsumer });
         socketRouter.socketClient = socketClient;
     });
 
@@ -50,11 +51,16 @@ describe("socketRouter", () => {
             };
 
             beforeEach(() => {
-                socketClient.gameData = gameData;
+                socketRouter.gameData = gameData;
+                socketRouter.verify.mockReturnValueOnce(true);
             });
 
             it("should call cashOutConsumer.consume", () => {
-                // Arrange
+                // Act
+                socketRouter.handleCashOut(payload);
+
+                // Assert
+                expect(cashOutConsumer.consume).toBeCalledWith(socketClient, payload);
             });
         });
     });

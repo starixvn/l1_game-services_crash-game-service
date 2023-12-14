@@ -2,6 +2,7 @@ import { Core } from "sc-game-base";
 import { Actions } from "../constants";
 import { calculateMultiplier } from "../helpers/crash-point-helper";
 import noticeHelper from "../helpers/notice-helper";
+import { tracer } from "sc-instrument";
 
 export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     constructor({
@@ -35,12 +36,17 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         if (this.gameData.ingame) {
             Object.values(this.gameData.ingame).forEach((playerInGame) => {
                 if (!playerInGame.betProcessing && playerInGame.betQueue && playerInGame.betQueue.length > 0) {
+                    const self = this;
                     const { player, payload } = playerInGame.betQueue.shift();
 
                     playerInGame.betProcessing = true;
-                    this.proceedActions(player, payload)
-                        .then(() => (playerInGame.betProcessing = false))
-                        .catch(this.logService.logError);
+
+                    tracer.startActiveSpan("dequeueBet", async (span) => {
+                        self.proceedActions(player, payload)
+                            .then(() => (playerInGame.betProcessing = false))
+                            .catch(self.logService.logError)
+                            .finally(() => span.end());
+                    });
                 }
             });
         }

@@ -60,4 +60,9 @@ export default {
         secretKey: "6c1f0f28-70f2-46ae-b031-22624a6cd8df",
     },
     enableMsgpackParser: true,
+    otel: {
+        system: "VG",
+        enabled: true,
+        endpoint: "http://10.10.50.69:4318/v1/traces",
+    },
 };

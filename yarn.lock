@@ -1331,6 +1331,15 @@
     "@opentelemetry/sdk-trace-base" "1.15.2"
     "@opentelemetry/semantic-conventions" "1.15.2"
 
+"@opentelemetry/instrumentation-fastify@0.32.2":
+  version "0.32.2"
+  resolved "http://npm.lumigame.com/@opentelemetry/instrumentation-fastify/-/instrumentation-fastify-0.32.2.tgz#4af882938d3c05f7c7f5f860095e568728a2d838"
+  integrity sha512-DKa7SgxTtZ0O1ngGtAdwr/g8XguYw6KvLNME+J8rt6QpWQM+xytS0bg4atZAyt6aeYr/kO1sMrGXSlHEEYWIhg==
+  dependencies:
+    "@opentelemetry/core" "^1.8.0"
+    "@opentelemetry/instrumentation" "^0.41.2"
+    "@opentelemetry/semantic-conventions" "^1.0.0"
+
 "@opentelemetry/instrumentation-http@0.41.2":
   version "0.41.2"
   resolved "https://npm.lumigame.com/@opentelemetry/instrumentation-http/-/instrumentation-http-0.41.2.tgz#dad5a693eaad2113ce7ed089fa46ef98d79f2bfc"
@@ -1351,7 +1360,7 @@
     "@opentelemetry/semantic-conventions" "^1.0.0"
     tslib "^2.3.1"
 
-"@opentelemetry/instrumentation@0.41.2", "@opentelemetry/instrumentation@^0.41.0":
+"@opentelemetry/instrumentation@0.41.2", "@opentelemetry/instrumentation@^0.41.0", "@opentelemetry/instrumentation@^0.41.2":
   version "0.41.2"
   resolved "https://npm.lumigame.com/@opentelemetry/instrumentation/-/instrumentation-0.41.2.tgz#cae11fa64485dcf03dae331f35b315b64bc6189f"
   integrity sha512-rxU72E0pKNH6ae2w5+xgVYZLzc5mlxAbGzF4shxMVK8YC2QQsfN38B2GPbj0jvrKWWNUElfclQ+YTykkNg/grw==
@@ -6607,6 +6616,26 @@ sc-instrument@1.0.0:
     "@opentelemetry/context-async-hooks" "1.15.2"
     "@opentelemetry/core" "1.15.2"
     "@opentelemetry/exporter-trace-otlp-proto" "0.41.2"
+    "@opentelemetry/instrumentation-http" "0.41.2"
+    "@opentelemetry/instrumentation-mongoose" "0.33.0"
+    "@opentelemetry/propagator-b3" "1.15.2"
+    "@opentelemetry/propagator-jaeger" "1.15.2"
+    "@opentelemetry/resources" "1.15.2"
+    "@opentelemetry/sdk-node" "0.41.2"
+    "@opentelemetry/sdk-trace-base" "1.15.2"
+    "@opentelemetry/semantic-conventions" "1.15.2"
+    opentelemetry-instrumentation-socket.io "0.34.0"
+    socket.io "4.6.1"
+
+sc-instrument@^1.1.0:
+  version "1.1.0"
+  resolved "http://npm.lumigame.com/sc-instrument/-/sc-instrument-1.1.0.tgz#e87d5303c31c34c67b394791b94bce0d7ebbf295"
+  integrity sha512-JBQSOi/owVc9aEgYSqy/eTQBZiWTxVb51WCMlGyyEf1++1Hevjgi8mcKXzsW9gVfS+6oNs0DTLQZrppVlGezlw==
+  dependencies:
+    "@opentelemetry/context-async-hooks" "1.15.2"
+    "@opentelemetry/core" "1.15.2"
+    "@opentelemetry/exporter-trace-otlp-proto" "0.41.2"
+    "@opentelemetry/instrumentation-fastify" "0.32.2"
     "@opentelemetry/instrumentation-http" "0.41.2"
     "@opentelemetry/instrumentation-mongoose" "0.33.0"
     "@opentelemetry/propagator-b3" "1.15.2"

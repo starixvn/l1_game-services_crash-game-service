@@ -67,4 +67,9 @@ export default {
         secretKey: "30d15293-c7de-4c77-9293-b85d6c5bfe1a",
     },
     enableMsgpackParser: true,
+    otel: {
+        system: "SG",
+        enabled: true,
+        endpoint: "http://10.2.189.50:4318/v1/traces",
+    },
 };
