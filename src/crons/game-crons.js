@@ -11,24 +11,17 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         gameStatusPublisher,
         runningRoundInfoPublisher,
         logService,
-        gameConfigsRepository,
         roundsRepository,
-        archiveStatusesRepository,
-        notificationRepository,
-        exchangeRatesRepository,
-        currencyGroupGamesRepository,
-        partnerConfigRepository,
-        currencyGroupRepository,
-        currencyRepository,
         roundResultConsumer,
         resultsRepository,
-        promotionRepository,
         appConfigs,
         liveGameCrons,
         betsRepository,
         betLogsRepository,
         umInfoWatcher,
         settleCashOutConsumer,
+        gameManagementApiClientFactory,
+        roundIdConsumer,
     }) {
         super({
             definition,
@@ -38,19 +31,12 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
             gameStatusPublisher,
             runningRoundInfoPublisher,
             logService,
-            gameConfigsRepository,
             roundsRepository,
-            archiveStatusesRepository,
-            notificationRepository,
-            exchangeRatesRepository,
-            currencyGroupGamesRepository,
-            partnerConfigRepository,
-            currencyGroupRepository,
-            currencyRepository,
             roundResultConsumer,
             resultsRepository,
-            promotionRepository,
             appConfigs,
+            gameManagementApiClientFactory,
+            roundIdConsumer,
         });
 
         this.liveGameCrons = liveGameCrons;
@@ -62,7 +48,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
 
     async start() {
         this.bot && (await this.bot.resetInRoomTrackings());
-        await this.initRoundId();
+        await this.roundIdConsumer.initRoundId();
         await this.queryLastResult();
         await this.updateExchangeRates();
         await this.proceedUnsettledBets();

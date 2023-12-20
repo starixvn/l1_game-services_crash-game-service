@@ -1,33 +1,31 @@
+import gameSettings from "./game-settings";
 import appConfigs from "./app-configs";
-import { addIdentifiers, initSpanProcessor, initializer } from "sc-instrument";
+import { startTrace } from "sc-instrument";
 
+import GameManagementApiClientFactory from "sc-game-base/src/core/game-management-api";
 import { Core, Table } from "sc-game-base";
 import ContainerRegistry from "./container-registry";
 import CrashGameData from "./game-data";
-import gameSettings from "./game-settings";
 import { logger } from "sc-common";
-import { gameConfigs as gameConfigsRepository } from "sc-base-database";
 import { generateRawResultForHash, generateResult, getSettlementResult } from "./helpers/result-helper";
+import { getOrDefault } from "sc-game-base/src/core/game-management-api";
+
+startTrace(appConfigs.otel?.enabled, appConfigs.otel?.endpoint, appConfigs.otel?.system, appConfigs.sentry.env, gameSettings.name);
 
 const run = async () => {
     const appName = process.env.APP_NAME;
     const gameName = appName ? appName.replace("service", "").replaceAll("_", "") : "";
 
-    if (appConfigs.otel?.enabled) {
-        const { otel } = appConfigs;
-        initSpanProcessor(otel.endpoint, initializer);
-        addIdentifiers(`${otel.system} - ${appName}`, appConfigs.sentry.env, initializer);
-        initializer.start();
-    }
-
     if (appName) {
+        const gameManagementApiClient = new GameManagementApiClientFactory(appConfigs).instance();
+
         appConfigs.database.url = appConfigs.database.url.concat(`&appName=${gameName.toLowerCase()}`);
         appConfigs.sentry.logIdentifier = gameName.toLowerCase();
 
         const app = new Core.BaseGameApp(gameName, appConfigs);
         await app.run();
 
-        const gameConfigs = await gameConfigsRepository.findOne({ name: gameName.toLowerCase() }).lean().exec();
+        const gameConfigs = await getOrDefault(gameManagementApiClient.gameConfigs.getGameConfigs(gameName.toLowerCase()));
 
         if (gameConfigs) {
             gameSettings.id = gameConfigs.gameId;
@@ -42,7 +40,7 @@ const run = async () => {
             logger.logCritical(`${gameName} config doesn't exist`);
         }
     } else {
-        console.log("App Name is not defined, failed to boostrap the service");
+        console.log("App Name is not defined, failed to bootstrap the service");
     }
 };
 

@@ -1,9 +1,9 @@
 export default {
-    hostingPort: 5000,
+    hostingPort: 5001,
     apiSettings: {
         enabledApi: true,
-        apiUrl: "http://l1-proxy.lumigame.com/game-api",
-        authUrl: "http://l1-auth2.lumigame.com",
+        apiUrl: "https://api.lumigame.com",
+        authUrl: "https://auth.lumigame.com",
         client: {
             id: "game-server",
             secret: "gameserver@20luminet&",
@@ -13,8 +13,11 @@ export default {
         placeBetTimeout: 2000,
         enabledApiLogs: true,
     },
+    gameManagementApiSettings: {
+        BASE: "http://127.0.0.1:5000",
+    },
     authenticateSettings: {
-        url: "http://l1-auth2.lumigame.com",
+        url: "https://auth.lumigame.com",
         id: "game-services",
         secret: "gameservices@20luminet&",
         requestTimeout: 10000,

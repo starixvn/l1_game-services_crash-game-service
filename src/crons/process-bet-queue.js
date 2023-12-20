@@ -13,7 +13,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         logService,
         betsRepository,
         betLogsRepository,
-        userInfosRepository,
+        gameManagementApiClientFactory,
         baseMetrics,
         settleCashOutConsumer,
     }) {
@@ -25,7 +25,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             logService,
             betsRepository,
             betLogsRepository,
-            userInfosRepository,
+            gameManagementApiClientFactory,
             baseMetrics,
         });
 
@@ -137,18 +137,18 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         await this.insertBet(player, roundId, bet, rate);
         await this.insertBetLog(player, roundId, bet);
 
-        this.notifyPlacingBetResult(player, balance, bet, rate);
+        await this.notifyPlacingBetResult(player, balance, bet, rate);
 
         this.gameData.addPlayerToBetList(player.UID, { name: player.profile.name, amount: bet.amount, rate, autoCashOut: bet.autoCashOut });
 
         if (!bet.freeBet && (player.profile.minBet !== balance.minBet || player.profile.maxBet !== balance.maxBet)) {
-            await this.updateUserStakeLevel(player, balance.minBet, balance.maxBet);
+            this.updateUserStakeLevel(player, response.apiError.minBet, response.apiError.maxBet);
         }
     }
 
-    generatePlacingBetResult(player, balance, bet, rate) {
+    async generatePlacingBetResult(player, balance, bet, rate) {
         const { amount } = bet;
-        const result = super.generatePlacingBetResult(player, balance, bet, rate);
+        const result = await super.generatePlacingBetResult(player, balance, bet, rate);
         result.ownChip = { amount };
         result.user.name = player.profile.name;
         return result;

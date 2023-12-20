@@ -4,17 +4,19 @@ import { Actions, Chips } from "../constants";
 import CrashGameData from "../game-data";
 import { calculateMultiplier } from "../helpers/crash-point-helper";
 import { roundFloat } from "../helpers/number-helper";
+import { getOrDefault } from "sc-game-base/src/core/game-management-api";
+
 export default class Bot extends Table.Crons.TableGameBot {
     /**
      * @param {Table.TableGameDefinition} definition
      * @param {CrashGameData} gameData
      * @param {Core.BaseEventPublishers.BaseEventPublisher} publisher
-     * @param {mongoose.Model} userInfosRepository
+     * @param {GameManagementApiClientFactory} gameManagementApiClientFactory
      * @param {mongoose.Model} tempBetsRepository
      */
 
-    constructor(definition, gameData, publisher, userInfosRepository, tempBetsRepository, tempBetLogsRepository) {
-        super(definition, gameData, publisher, userInfosRepository, tempBetsRepository);
+    constructor(definition, gameData, publisher, gameManagementApiClientFactory, tempBetsRepository, tempBetLogsRepository) {
+        super(definition, gameData, publisher, gameManagementApiClientFactory, tempBetsRepository);
 
         this.tempBetLogsRepository = tempBetLogsRepository;
         this.chance = new Chance();
@@ -81,11 +83,7 @@ export default class Bot extends Table.Crons.TableGameBot {
             const minBet = this.getMinBet();
             const amount = this.getBetAmount(minBet, maxBet);
 
-            const user = await this.userInfosRepository.findOneAndUpdate(
-                { id: bot.id, red: { $gt: amount } },
-                { $inc: { red: -amount } },
-                { new: true, lean: true }
-            );
+            const user = await getOrDefault(this.gameManagementApiClient.users.updateBalance({ id: bot.id, deductionAmount: amount }));
 
             if (user) {
                 await this.insertBet(bot, amount);

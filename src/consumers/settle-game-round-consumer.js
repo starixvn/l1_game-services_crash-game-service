@@ -13,6 +13,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
         betLogsRepository,
         tempBetsRepository,
         tempBetLogsRepository,
+        gameManagementApiClientFactory,
     }) {
         super({
             definition,
@@ -23,6 +24,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
             roundsRepository,
             betsRepository,
             tempBetsRepository,
+            gameManagementApiClientFactory,
         });
 
         this.betLogsRepository = betLogsRepository;
