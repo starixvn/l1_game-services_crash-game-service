@@ -68,7 +68,6 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
 
     composeBettingTimeValidationCriteria(roundId, clientSendTime, receivedTime) {
         const configs = this.gameData.gameConfigs;
-        const deltaTime = receivedTime - clientSendTime;
 
         return [
             {
@@ -81,10 +80,6 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
             },
             {
                 failure: this.gameData.remainingTime > this.definition.durations.liveTime,
-                notice: this.getNoticeObj(noticeHelper.invalidCashOut),
-            },
-            {
-                failure: deltaTime < 0 || deltaTime > MaxDeltaTime,
                 notice: this.getNoticeObj(noticeHelper.invalidCashOut),
             },
         ];
