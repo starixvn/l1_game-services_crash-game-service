@@ -8,7 +8,7 @@ const Actions = {
 
 const MinMultiplierValue = 1.01;
 
-const MaxDeltaTime = 100;
+const MaxDeltaTime = 200;
 
 const Chips = [
     20_000_000, 5_000_000, 1_000_000, 500_000, 200_000, 100_000, 50_000, 20_000, 10_000, 2000, 1000, 500, 200, 100, 50, 20, 10, 5, 1,
