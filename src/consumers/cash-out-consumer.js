@@ -31,7 +31,8 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
 
         if (failedCriterion) {
             this.publisher.publishToUser(player.UID, { endBet: -1, notice: failedCriterion.notice });
-            console.log(JSON.stringify(criteria));
+            console.log(`DeltaTime :${receivedTime - clientSendTime}`);
+
             return false;
         }
 
