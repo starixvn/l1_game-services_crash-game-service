@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
 import { stub, stubMongoose } from "jest-micro-auto-stub";
-import { GameData } from "sc-game-base/src/core";
+import GameData from "../../game-data";
 import PlaceBetPublisher from "../../event-publishers/place-bet-publisher";
 import { SettleCashOutConsumer } from "../settle-cash-out-consumer";
 import { Actions, MinMultiplierValue } from "../../constants";
-import { addMillisecond } from "../../helpers/date-helper";
 import Chance from "chance";
 import { roundFloat } from "../../helpers/number-helper";
 
@@ -71,6 +70,13 @@ describe("SettleCashOutConsumer", () => {
                 const multiplier = autoCashOut + 0.1;
                 const betQueuePushMock = jest.fn();
                 jest.spyOn(global, "Date").mockImplementation(() => mockReceivedTime);
+                gameData.betList = {
+                    [UID]: {
+                        [Actions.HalfCashOut]: {
+                            win: 1.1,
+                        },
+                    },
+                };
 
                 const expectedPayload = {
                     roundId: gameData.roundId,

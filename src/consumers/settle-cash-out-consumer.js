@@ -42,7 +42,7 @@ export class SettleCashOutConsumer {
                         payload,
                         cashOutAmount,
                         bet.autoCashOut,
-                        betTracks[Actions.HalfCashOut]?.win
+                        this.gameData.betList[player.playerData.UID][Actions.HalfCashOut]?.win
                     );
                 }
             }
