@@ -151,7 +151,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
                         amount: amount,
                         winAmount: amount,
                         freeBet: bet.freeBet,
-                        clientSentTime: new Date(),
+                        clientSendTime: new Date(),
                         receivedTime: new Date(),
                         roundId: bet.roundId,
                         siteId: bet.siteId,

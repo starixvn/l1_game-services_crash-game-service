@@ -165,7 +165,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             amount: bet.amount,
             winAmount: bet.winAmount,
             freeBet: bet.freeBet,
-            clientSentTime: bet.clientSentTime,
+            clientSendTime: bet.clientSendTime,
             receivedTime: bet.receivedTime,
             roundId,
         };

@@ -12,7 +12,7 @@ const Schema = new mongoose.Schema({
     reachMaxWin: { type: Boolean, default: false },
 
     time: { type: Date },
-    clientSentTime: { type: Date },
+    clientSendTime: { type: Date },
 
     siteId: { type: String },
 

@@ -134,7 +134,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
             action,
             amount,
             winAmount,
-            clientSentTime: new Date(),
+            clientSendTime: new Date(),
             receivedTime: new Date(),
             roundId: bet.roundId,
             siteId: bet.siteId,

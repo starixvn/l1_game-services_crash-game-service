@@ -231,7 +231,7 @@ describe("SettleCashOutConsumer", () => {
                 amount: payload.amount,
                 winAmount: payload.winAmount,
                 freeBet: payload.freeBet,
-                clientSentTime: payload.clientSentTime,
+                clientSendTime: payload.clientSendTime,
                 receivedTime: payload.receivedTime,
                 roundId,
                 multiplier: payload.multiplier,
