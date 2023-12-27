@@ -83,7 +83,7 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 notice: this.getNoticeObj(noticeHelper.invalidCashOut),
             },
             {
-                failure: deltaTime < 0 || deltaTime > MaxDeltaTime,
+                failure: Math.abs(deltaTime) > MaxDeltaTime,
                 notice: this.getNoticeObj(noticeHelper.invalidCashOut),
             },
         ];
