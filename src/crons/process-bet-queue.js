@@ -204,4 +204,12 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
         await this.betsRepository.create(newBet);
     }
+
+    decreaseBetTracks(playerName) {
+        if (this.gameData.ingame?.[playerName]) {
+            const playerInGame = this.gameData.ingame[playerName];
+
+            delete playerInGame.betTracks[Actions.Bet];
+        }
+    }
 }
