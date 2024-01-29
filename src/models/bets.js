@@ -20,6 +20,7 @@ const schema = new mongoose.Schema({
     paid: { type: Boolean, default: false },
 
     autoCashOut: { type: Number },
+    clientSeed: { type: Number },
 });
 
 export function tempBets(gameConfigName) {

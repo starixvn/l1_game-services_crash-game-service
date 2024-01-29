@@ -1,6 +1,6 @@
 import { helpers } from "sc-common";
 import { BaseEventConsumers } from "sc-game-base/src/core";
-import { Actions, MinMultiplierValue } from "../constants";
+import { Actions, ClientSeedRange, MinMultiplierValue } from "../constants";
 import noticeHelper from "../helpers/notice-helper";
 import { roundFloat } from "../helpers/number-helper";
 
@@ -17,10 +17,10 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
             receivedTime: new Date(),
         });
 
-        const { amount, freeBet, roundId, autoCashOut } = payload;
+        const { amount, freeBet, roundId, autoCashOut, clientSeed } = payload;
         const name = player.profile.name;
 
-        if (!this.validateBetRequest(player, amount, freeBet, roundId, autoCashOut)) {
+        if (!this.validateBetRequest(player, amount, freeBet, roundId, autoCashOut, clientSeed)) {
             return;
         }
 
@@ -43,12 +43,12 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         this.gameData.ingame[name].betQueue.push({ player, payload });
     }
 
-    validateBetRequest(player, amount, freeBet, roundId, autoCashOut) {
+    validateBetRequest(player, amount, freeBet, roundId, autoCashOut, clientSeed) {
         if (!amount) {
             return false;
         }
 
-        const criteria = this.composeValidationCriteria(player, amount, freeBet, roundId, autoCashOut);
+        const criteria = this.composeValidationCriteria(player, amount, freeBet, roundId, autoCashOut, clientSeed);
         const failedCriterion = criteria.find((criterion) => criterion.failure);
 
         if (failedCriterion) {
@@ -60,11 +60,12 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         return true;
     }
 
-    composeValidationCriteria(player, amount, freeBet, roundId, autoCashOut) {
+    composeValidationCriteria(player, amount, freeBet, roundId, autoCashOut, clientSeed) {
         const bettingTimeValidationCriteria = this.composeBettingTimeValidationCriteria(roundId) ?? [];
         const betAmountValidationCriteria = this.composeBetAmountValidationCriteria(player, amount, freeBet, autoCashOut) || [];
+        const clientSeedValidationCriteria = this.composeClientSeedValidationCriteria(clientSeed);
 
-        return bettingTimeValidationCriteria.concat(betAmountValidationCriteria);
+        return bettingTimeValidationCriteria.concat(betAmountValidationCriteria, clientSeedValidationCriteria);
     }
 
     composeBettingTimeValidationCriteria(roundId) {
@@ -115,6 +116,17 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
             {
                 failure: autoCashOut && (autoCashOut < MinMultiplierValue || autoCashOut > configs.crashConfig.maxMultiplier),
                 notice: this.getNoticeObj(noticeHelper.invalidValueCashOut, { autoCashOut }),
+            },
+        ];
+    }
+
+    composeClientSeedValidationCriteria(clientSeed) {
+        const parsedSeed = parseFloat(clientSeed);
+
+        return [
+            {
+                failure: !Number.isInteger(parsedSeed) || parsedSeed < ClientSeedRange.min || parsedSeed > ClientSeedRange.max,
+                notice: this.getNoticeObj(noticeHelper.invalidClientSeed),
             },
         ];
     }

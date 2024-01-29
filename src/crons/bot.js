@@ -80,6 +80,7 @@ export default class Bot extends Table.Crons.TableGameBot {
             const maxBet = this.gameData.gameConfigs.bot_maxbet;
             const minBet = this.getMinBet();
             const amount = this.getBetAmount(minBet, maxBet);
+            bot.clientSeed = this.chance.integer({ min: 0, max: 9999 }).toString();
 
             const user = await this.userInfosRepository.findOneAndUpdate(
                 { id: bot.id, red: { $gt: amount } },
@@ -89,6 +90,7 @@ export default class Bot extends Table.Crons.TableGameBot {
 
             if (user) {
                 await this.insertBet(bot, amount);
+                this.gameData.addClientSeed({name: bot.name, clientSeed: bot.clientSeed});
 
                 this.totalTickets += 1;
 
@@ -174,6 +176,7 @@ export default class Bot extends Table.Crons.TableGameBot {
         bot.halfCashOut = false;
         bot.multiplier = 0;
         bot.expectCashOut = 0;
+        bot.clientSeed = null;
     }
 
     convertToEvenAmount(amount) {
@@ -192,6 +195,7 @@ export default class Bot extends Table.Crons.TableGameBot {
             operatorId: " ",
             amount,
             rate: this.botRate,
+            clientSeed: bot.clientSeed,
         };
 
         await this.tempBetsRepository.create(newBet);

@@ -26,6 +26,7 @@ describe("PlaceBetConsumer", () => {
         roundId: chance.natural({ min: 1 }),
         autoCashOut: 3.4,
         action: Actions.bet,
+        clientSeed: "999",
     };
     const definition = new Core.GameDefinition(gameSettings);
     const gameData = {
@@ -64,7 +65,8 @@ describe("PlaceBetConsumer", () => {
             // Arrange
             spyOn(consumer, "composeBettingTimeValidationCriteria").and.returnValue([{ id: 1 }]);
             spyOn(consumer, "composeBetAmountValidationCriteria").and.returnValue([{ id: 2 }]);
-            const expectedValue = [{ id: 1 }, { id: 2 }];
+            spyOn(consumer, "composeClientSeedValidationCriteria").and.returnValue([{ id: 3 }]);
+            const expectedValue = [{ id: 1 }, { id: 2 }, { id: 3 }];
 
             // Act
             const actualValue = consumer.composeValidationCriteria();
@@ -246,7 +248,8 @@ describe("PlaceBetConsumer", () => {
                 payload.amount,
                 payload.freeBet,
                 payload.roundId,
-                payload.autoCashOut
+                payload.autoCashOut,
+                payload.clientSeed
             );
         });
 

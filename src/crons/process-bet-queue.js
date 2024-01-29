@@ -1,8 +1,8 @@
 import { Core } from "sc-game-base";
+import { tracer } from "sc-instrument";
 import { Actions } from "../constants";
 import { calculateMultiplier } from "../helpers/crash-point-helper";
 import noticeHelper from "../helpers/notice-helper";
-import { tracer } from "sc-instrument";
 
 export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     constructor({
@@ -132,6 +132,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     }
 
     async handleSuccessBet(player, balance, roundId, bet) {
+        this.gameData.addClientSeed({ name: player.profile.name, clientSeed: bet.clientSeed });
         const rate = this.calculateCurrencyRate(player.session);
 
         await this.insertBet(player, roundId, bet, rate);
