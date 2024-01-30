@@ -24,9 +24,6 @@
     "dependencies": {
         "chance": "^1.1.7",
         "lodash": "^4.17.19",
-        "random": "^3.0.3",
-        "random-int": "^3.0.0",
-        "random-js": "^2.1.0",
         "sc-game-base": "4.1.0",
         "sc-instrument": "^1.1.0"
     },

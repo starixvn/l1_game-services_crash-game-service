@@ -1,5 +1,7 @@
+import crypto from "crypto";
+
 function getMergeSeed(serverSeed = "", clientSeeds = []) {
-    return clientSeeds.reduce((res, clientSeed) => res + clientSeed, serverSeed);
+    return serverSeed.concat(...clientSeeds);
 }
 
 function getSHA256Hash(seed) {

@@ -2,10 +2,10 @@ import { getMergeSeed, getSHA256Hash, getSHA512Hash } from "../helpers/seed-help
 import { generateServerSeed } from "../helpers/server-seed-helper";
 
 export default class PFRoundResultConsumer {
-    constructor(gameData, definition, pFroundResultPublisher, resultsRepository) {
+    constructor(gameData, definition, roundResultPublisher, resultsRepository) {
         this.gameData = gameData;
         this.definition = definition;
-        this.pFroundResultPublisher = pFroundResultPublisher;
+        this.roundResultPublisher = roundResultPublisher;
         this.resultsRepository = resultsRepository;
     }
 
@@ -35,7 +35,7 @@ export default class PFRoundResultConsumer {
         }
     }
 
-    async generateServerSeedAndPublishHash() {
+    async generateServerSeedAndPublishHash(lastResultRecord) {
         if (lastResultRecord && lastResultRecord.roundId === this.gameData.roundId) {
             const { serverSeed, serverSeedHash, clientSeeds, mergeSeed, finalHash } = lastResultRecord;
 
@@ -50,7 +50,7 @@ export default class PFRoundResultConsumer {
 
             await this.createResultRecord(serverSeed, serverSeedHash);
 
-            this.pFroundResultPublisher.publishServerSeedHash();
+            this.roundResultPublisher.publishServerSeedHash();
         }
     }
 

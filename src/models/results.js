@@ -11,5 +11,5 @@ const PFResultSchema = new mongoose.Schema({
 });
 
 export default function (gameConfigName) {
-    return mongoose.model(`${gameConfigName}_results`, PFResultSchema);
+    return mongoose.model(`${gameConfigName}_pf_results`, PFResultSchema);
 }
