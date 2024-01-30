@@ -7,11 +7,11 @@ import { GameDefinition } from "sc-game-base/src/core";
 import BaseMetrics from "sc-game-base/src/core/base-metrics";
 import { PlaceBetPublisher } from "sc-game-base/src/core/event-publishers";
 import { Actions } from "../../constants";
+import { SettleCashOutConsumer } from "../../consumers";
 import CrashGameData from "../../game-data";
 import { calculateMultiplier } from "../../helpers/crash-point-helper";
 import noticeHelper from "../../helpers/notice-helper";
 import ProcessBetQueue from "../process-bet-queue";
-import { SettleCashOutConsumer } from "../../consumers";
 
 const chance = new Chance();
 
@@ -87,10 +87,9 @@ describe("ProcessBetQueue", () => {
         roundId: gameData.roundId,
         receivedTime: new Date(),
         time: new Date(),
+        clientSeed: "9000",
     };
     beforeEach(() => {
-        jest.clearAllMocks();
-
         const playerInGameData = {
             name: "player01",
             betTracks: { red2: 100 },
@@ -112,6 +111,7 @@ describe("ProcessBetQueue", () => {
 
     afterEach(() => {
         jest.clearAllMocks();
+        jest.restoreAllMocks();
     });
 
     describe("dequeueBets", () => {
@@ -413,6 +413,7 @@ describe("ProcessBetQueue", () => {
                 profile: {
                     minBet: chance.natural(),
                     maxBet: chance.natural(),
+                    name: "player",
                 },
             },
             balance = {
@@ -451,6 +452,17 @@ describe("ProcessBetQueue", () => {
 
             // Assert
             expect(proceedBetQueue.notifyPlacingBetResult).toBeCalledWith(player, balance, payload, rate);
+        });
+
+        it("should call gameData.addClientSeed", async () => {
+            //Arrange
+            const spy = jest.spyOn(gameData, "addClientSeed");
+
+            // Act
+            await proceedBetQueue.handleSuccessBet(player, balance, roundId, payload);
+
+            // Assert
+            expect(spy).toBeCalledWith({ name: player.profile.name, clientSeed: payload.clientSeed });
         });
 
         describe("when bet is free bet", () => {
