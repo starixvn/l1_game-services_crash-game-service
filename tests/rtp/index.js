@@ -1,10 +1,19 @@
-import { generateResult } from "../../src/helpers/result-helper";
+import { generateResult, getFinalResult } from "../../src/helpers/result-helper";
 import fs from "fs";
 import Chance from "chance";
 import { roundFloat } from "../../src/helpers/number-helper";
 
-const exportRtpResult = (randomMode = 1, crashAtBase = 3, { minPoint, maxPoint }, numberOfRuns = 10_000) => {
-    const chance = new Chance();
+const chance = new Chance();
+
+const generateClientSeed = (length = 4, pool = "0123456789") => {
+    return chance.string({ pool, length });
+};
+
+const generateClientSeeds = () => {
+    return [generateClientSeed(), generateClientSeed(), generateClientSeed(), generateClientSeed(), generateClientSeed()];
+};
+
+const exportRtpResult = (randomMode = 1, crashAtBase = 3, { minPoint, maxPoint }, numberOfRuns = 1_000_000) => {
     let max = 0;
     let maxwin = 0;
     let crashPointRange = {};
@@ -15,7 +24,10 @@ const exportRtpResult = (randomMode = 1, crashAtBase = 3, { minPoint, maxPoint }
     for (let index = 0; index < numberOfRuns; index++) {
         const betAmount = chance.pickone([1, 5, 10, 50, 100]);
         const cashOutPoint = chance.floating({ min: minPoint, max: maxPoint });
-        const crashPoint = Math.min(generateResult(randomMode, crashAtBase), 2000);
+
+        const clientSeeds = generateClientSeeds();
+        const serverSeed = generateResult();
+        const crashPoint = getFinalResult(serverSeed, clientSeeds);
         const range = Math.round(crashPoint);
         crashPointRange[range] ? crashPointRange[range]++ : (crashPointRange[range] = 1);
         totalBetAmount += betAmount;
@@ -39,8 +51,8 @@ const exportRtpResult = (randomMode = 1, crashAtBase = 3, { minPoint, maxPoint }
     fs.writeFileSync(`./tests/rtp/stat_[${minPoint},${maxPoint}]_${numberOfRuns}.txt`, jsonData);
 };
 
-const minPoint = 1.5,
-    maxPoint = 1.5,
+const minPoint = 1.01,
+    maxPoint = 10,
     crashAtBase = 2;
 
 exportRtpResult(1, crashAtBase, { minPoint, maxPoint }, 5_000);

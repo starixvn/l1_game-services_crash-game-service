@@ -1,37 +1,44 @@
 import Chance from "chance";
-import randomLib1 from "random";
+import cryptoRandomString from "crypto-random-string";
 import { Random, MersenneTwister19937 } from "random-js";
-import _ from "lodash";
-import randomInteger from "random-int";
+import Randomstring from "randomstring";
+import { customAlphabet } from "nanoid";
+import { roundFloat } from "./number-helper";
+import crypto from "crypto";
 
-const MinRandomValue = 1;
+const Characters = [...Array(26)].reduce(
+    (res, _, i) => res.concat([String.fromCharCode(65 + i), String.fromCharCode(97 + i)]),
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
+);
 
-// reach max
-function random1(max) {
+const nanoid = customAlphabet(Characters.toString().replaceAll(",", ""));
+
+function random1(length) {
     const chance = new Chance();
-    return chance.natural({ min: MinRandomValue, max: max });
+    return chance.string({ length });
 }
 
-function random2(max) {
-    const chance = new Chance();
-    return chance.integer({ min: MinRandomValue, max: max });
-}
-
-function random3(max) {
-    return randomLib1.int(MinRandomValue, max);
-}
-
-function random4(max) {
+function random2(length) {
     const randomJs = new Random(MersenneTwister19937.autoSeed());
-    return randomJs.integer(MinRandomValue, max);
+    return randomJs.string(length);
 }
 
-function random5(max) {
-    return _.random(MinRandomValue, max);
+function random3(length) {
+    return Randomstring.generate({ length });
 }
 
-function random6(max) {
-    return randomInteger(MinRandomValue, max);
+function random4(length) {
+    return cryptoRandomString({ length, type: "url-safe" });
+}
+
+function random5(length) {
+    return nanoid(length);
+}
+
+function random6(length) {
+    const chance = new Chance();
+
+    return chance.pickset(Characters, length).toString().replaceAll(",", "");
 }
 
 const randomModes = {
@@ -40,17 +47,23 @@ const randomModes = {
     3: [random6, random5],
 };
 
-const generateResult = (randomMode, crashAtBasePercent = 3, maxMultiplier = 2 ** 16) => {
+const getFinalResult = (serverSeed, clientSeeds = []) => {
+    const mergeSeed = clientSeeds.reduce((res, clientSeed) => res + clientSeed, serverSeed);
+    const sha512 = crypto.createHash("sha512").update(mergeSeed).digest("hex");
+
+    const hexValue = sha512.slice(0, 8);
+    const decimalValue = parseInt(hexValue, 16);
+    const floatPoint = (2 ** 32 / (decimalValue + 1)) * (1 - 0.03);
+
+    return Math.min(roundFloat(floatPoint), 2000);
+};
+
+const generateResult = (randomMode) => {
     const randomFunctions = randomModes[randomMode] || randomModes[1];
     const chance = new Chance();
-    const randomFunction = chance.pickone(randomFunctions);
-    const randomSeed = randomFunction(maxMultiplier - 1);
+    const randomStringFunc = chance.pickone(randomFunctions);
 
-    if (chance.bool({ likelihood: crashAtBasePercent })) {
-        return MinRandomValue;
-    }
-
-    return Math.floor((100 * maxMultiplier - randomSeed) / (maxMultiplier - randomSeed)) / 100;
+    return randomStringFunc(40);
 };
 
 const getSettlementResult = () => {};
@@ -59,4 +72,4 @@ const generateRawResultForHash = (roundResult) => {
     return `{${roundResult}}`;
 };
 
-export { generateResult, getSettlementResult, generateRawResultForHash };
+export { generateResult, getSettlementResult, generateRawResultForHash, getFinalResult };
