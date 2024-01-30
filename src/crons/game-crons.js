@@ -88,7 +88,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         }
 
         if (this.gameData.remainingTime === durations.placingBets && this.resultsRepository) {
-            await this.roundResultConsumer.generateResultAndPublishHash(this.gameData.lastResultRecord);
+            await this.roundResultConsumer.generateServerSeedAndPublishHash(this.gameData.lastResultRecord);
             this.gameData.settlementResultFromAdmin = {};
         }
 
@@ -103,6 +103,10 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         if (this.gameData.remainingTime < durations.placingBets && this.gameData.remainingTime > 0) {
             this.bot && (await this.bot.run());
             this.runningRoundInfoPublisher.publish();
+        }
+
+        if (this.gameData.remainingTime === 1) {
+            await this.roundResultConsumer.generateResult();
         }
 
         if (this.gameData.remainingTime === -1) {

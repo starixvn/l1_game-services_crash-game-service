@@ -1,17 +1,17 @@
 import awilix from "awilix";
 import { Table } from "sc-game-base";
 import { CashOutConsumer, InGameConsumer, PlaceBetConsumer, SettleCashOutConsumer, SettleGameRoundConsumer } from "./consumers";
-import RoundResultConsumer from "./consumers/round-result-consumer";
 import { LiveGameCrons } from "./crons";
 import Bot from "./crons/bot";
 import GameCrons from "./crons/game-crons";
 import ProcessBetQueue from "./crons/process-bet-queue";
-import { LiveGamePublisher, PlaceBetPublisher, RoundResultPublisher, UserBetResultPublisher } from "./event-publishers";
-import { BetLogs, Bets, Results, Rounds, tempBetLogs, tempBets, umInfo } from "./models";
+import { LiveGamePublisher, PlaceBetPublisher, UserBetResultPublisher } from "./event-publishers";
+import { BetLogs, Bets, Rounds, tempBetLogs, tempBets, umInfo } from "./models";
 import liveGameLogs from "./models/live-game-logs";
 import { HistoryQuery, RoundQuery } from "./query-apis";
 import { HttpRouter, SocketRouter } from "./routers";
 import UmInfoWatcher from "./watchers/um-info-watcher";
+import { PFRoundResultConsumer, PFRoundResultPublisher, PFResult } from "../provably-fair";
 
 const { asClass, asValue } = awilix;
 
@@ -36,7 +36,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
         this.container.register({
             roundsRepository: asValue(Rounds(definition.configName)),
             betsRepository: asValue(Bets(definition.configName)),
-            resultsRepository: asValue(Results(definition.configName)),
+            resultsRepository: asValue(PFResult(definition.configName)),
             betLogsRepository: asValue(BetLogs(definition.configName)),
             tempBetsRepository: asValue(tempBets(definition.configName)),
             tempBetLogsRepository: asValue(tempBetLogs(definition.configName)),
@@ -52,7 +52,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             inGameConsumer: asClass(InGameConsumer).singleton(),
             placeBetConsumer: asClass(PlaceBetConsumer).singleton(),
             cashOutConsumer: asClass(CashOutConsumer).singleton(),
-            roundResultConsumer: asClass(RoundResultConsumer).singleton(),
+            roundResultConsumer: asClass(PFRoundResultConsumer).singleton(),
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
             settleCashOutConsumer: asClass(SettleCashOutConsumer).singleton(),
         });
@@ -64,7 +64,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
         this.container.register({
             liveGamePublisher: asClass(LiveGamePublisher).singleton(),
             placeBetPublisher: asClass(PlaceBetPublisher).singleton(),
-            roundResultPublisher: asClass(RoundResultPublisher).singleton(),
+            roundResultPublisher: asClass(PFRoundResultPublisher).singleton(),
             userBetResultPublisher: asClass(UserBetResultPublisher).singleton(),
         });
     }
