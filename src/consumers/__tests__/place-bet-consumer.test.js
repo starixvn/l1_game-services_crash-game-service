@@ -61,18 +61,50 @@ describe("PlaceBetConsumer", () => {
     });
 
     describe("composeValidationCriteria", () => {
-        it("should return combined results of betting time and bet amount validations", () => {
+        beforeEach(() => {
+            consumer.composeBalanceValidationCriteria = jest.fn();
+            consumer.composeBettingTimeValidationCriteria = jest.fn();
+            consumer.composeBetAmountValidationCriteria = jest.fn();
+            consumer.composeClientSeedValidationCriteria = jest.fn();
+        });
+
+        it("should return combine array from results of balance and betting time validation", () => {
             // Arrange
-            spyOn(consumer, "composeBettingTimeValidationCriteria").and.returnValue([{ id: 1 }]);
-            spyOn(consumer, "composeBetAmountValidationCriteria").and.returnValue([{ id: 2 }]);
-            spyOn(consumer, "composeClientSeedValidationCriteria").and.returnValue([{ id: 3 }]);
-            const expectedValue = [{ id: 1 }, { id: 2 }, { id: 3 }];
+            const balanceValidationCriteria = [
+                {
+                    failure: false,
+                    notice: "balance validation",
+                },
+            ];
+            const bettingTimeValidationCriteria = [
+                {
+                    failure: true,
+                    notice: "betting time validation",
+                },
+            ];
+            const betAmountValidationCriteria = [
+                {
+                    failure: false,
+                    notice: "bet amount validation",
+                },
+            ];
+            const clientSeedValidationCriteria = [
+                {
+                    failure: true,
+                    notice: "client seed validation",
+                },
+            ];
+            const expectResult = bettingTimeValidationCriteria.concat(betAmountValidationCriteria, clientSeedValidationCriteria);
+            consumer.composeBalanceValidationCriteria.mockResolvedValueOnce(balanceValidationCriteria);
+            consumer.composeBettingTimeValidationCriteria.mockReturnValueOnce(bettingTimeValidationCriteria);
+            consumer.composeBetAmountValidationCriteria.mockReturnValueOnce(betAmountValidationCriteria);
+            consumer.composeClientSeedValidationCriteria.mockReturnValueOnce(clientSeedValidationCriteria);
 
             // Act
-            const actualValue = consumer.composeValidationCriteria();
+            const actualValue = consumer.composeValidationCriteria(player, payload);
 
             // Assert
-            expect(actualValue).toStrictEqual(expectedValue);
+            expect(actualValue).toStrictEqual(expectResult);
         });
     });
 
