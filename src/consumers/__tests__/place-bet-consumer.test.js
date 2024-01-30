@@ -326,4 +326,71 @@ describe("PlaceBetConsumer", () => {
             });
         });
     });
+
+    describe("composeClientSeedValidationCriteria", () => {
+        describe("when the clientSeed is an integer within the range", () => {
+            it("should return an array containing a true failure", () => {
+                const placeBetConsumer = new PlaceBetConsumer();
+                const clientSeed = "1234";
+                const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
+                expect(validationCriteria).toEqual([
+                    { failure: false, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidClientSeed) },
+                ]);
+            });
+        });
+
+        describe("when the clientSeed is the minimum value of ClientSeedRange", () => {
+            it("should return an array containing a false failure", () => {
+                const placeBetConsumer = new PlaceBetConsumer();
+                const clientSeed = "0";
+                const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
+                expect(validationCriteria).toEqual([
+                    { failure: false, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidClientSeed) },
+                ]);
+            });
+        });
+
+        describe("when the clientSeed is the maximum value of ClientSeedRange", () => {
+            it("should return an array containing a false failure", () => {
+                const placeBetConsumer = new PlaceBetConsumer();
+                const clientSeed = "9999";
+                const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
+                expect(validationCriteria).toEqual([
+                    { failure: false, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidClientSeed) },
+                ]);
+            });
+        });
+
+        describe("when the clientSeed is not an integer", () => {
+            it("should return an array containing a true failure", () => {
+                const placeBetConsumer = new PlaceBetConsumer();
+                const clientSeed = "12.34";
+                const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
+                expect(validationCriteria).toEqual([
+                    { failure: true, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidClientSeed) },
+                ]);
+            });
+        });
+
+        describe("when the clientSeed is a float", () => {
+            it("should return an array containing a failure", () => {
+                const placeBetConsumer = new PlaceBetConsumer();
+                const clientSeed = "12.34";
+                const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
+                expect(validationCriteria).toEqual([
+                    { failure: true, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidClientSeed) },
+                ]);
+            });
+        });
+        describe("when the clientSeed is not within ClientSeedRange", () => {
+            it("should return an array containing a failure", () => {
+                const placeBetConsumer = new PlaceBetConsumer();
+                const clientSeed = "-1";
+                const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
+                expect(validationCriteria).toEqual([
+                    { failure: true, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidClientSeed) },
+                ]);
+            });
+        });
+    });
 });
