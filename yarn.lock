@@ -2554,6 +2554,11 @@ chalk@^3.0.0:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
 
+chance@^1.1.11:
+  version "1.1.11"
+  resolved "http://npm.lumigame.com/chance/-/chance-1.1.11.tgz#78e10e1f9220a5bbc60a83e3f28a5d8558d84d1b"
+  integrity sha512-kqTg3WWywappJPqtgrdvbA380VoXO2eu9VCV895JgbyHsaErXdyHK9LOZ911OvAk6L0obK7kDk9CGs8+oBawVA==
+
 chance@^1.1.7:
   version "1.1.7"
   resolved "http://npm.lumigame.com/chance/-/chance-1.1.7.tgz"
@@ -2880,6 +2885,18 @@ crypto-random-string@^2.0.0:
   version "2.0.0"
   resolved "http://npm.lumigame.com/crypto-random-string/-/crypto-random-string-2.0.0.tgz"
   integrity sha512-v1plID3y9r/lPhviJ1wrXpLeyUIGAZ2SHNYTEapm7/8A9nLPoyvVp3RK/EPFqn5kEznyWgYZNsRtYYIWbuG8KA==
+
+crypto-random-string@^5.0.0:
+  version "5.0.0"
+  resolved "http://npm.lumigame.com/crypto-random-string/-/crypto-random-string-5.0.0.tgz#12b4ca8ba936c36d757b65b71a7d85a69a02c18a"
+  integrity sha512-KWjTXWwxFd6a94m5CdRGW/t82Tr8DoBc9dNnPCAbFI1EBweN6v1tv8y4Y1m7ndkp/nkIBRxUxAzpaBnR2k3bcQ==
+  dependencies:
+    type-fest "^2.12.2"
+
+crypto@^1.0.1:
+  version "1.0.1"
+  resolved "http://npm.lumigame.com/crypto/-/crypto-1.0.1.tgz#2af1b7cad8175d24c8a1b0778255794a21803037"
+  integrity sha512-VxBKmeNcqQdiUQUW2Tzq0t377b54N2bMtXO/qiLa+6eRRmmC4qT3D4OnTGoT/U6O9aklQ/jTwbOtRMTTY8G0Ig==
 
 cssom@^0.4.4:
   version "0.4.4"
@@ -5478,6 +5495,11 @@ ms@2.1.2, ms@^2.1.1, ms@^2.1.2:
   resolved "http://npm.lumigame.com/ms/-/ms-2.1.2.tgz"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
 
+nanoid@^5.0.4:
+  version "5.0.4"
+  resolved "http://npm.lumigame.com/nanoid/-/nanoid-5.0.4.tgz#d2b608d8169d7da669279127615535705aa52edf"
+  integrity sha512-vAjmBf13gsmhXSgBrtIclinISzFFy22WwCYoyilZlsrRXNIHSwgFQ1bEdjRwMT3aoadeIF6HMuDRlOxzfXV8ig==
+
 nanomatch@^1.2.9:
   version "1.2.13"
   resolved "http://npm.lumigame.com/nanomatch/-/nanomatch-1.2.13.tgz"
@@ -6114,6 +6136,23 @@ quick-lru@^4.0.1:
   resolved "http://npm.lumigame.com/quick-lru/-/quick-lru-4.0.1.tgz"
   integrity sha512-ARhCpm70fzdcvNQfPoy49IaanKkTlRWF2JMzqhcJbhSFRZv7nPTvZJdcY7301IPmvW+/p0RgIWnQDLJxifsQ7g==
 
+random-js@^2.1.0:
+  version "2.1.0"
+  resolved "http://npm.lumigame.com/random-js/-/random-js-2.1.0.tgz#0c03238b0a4f701f7a4c7303036ade3083d8ee14"
+  integrity sha512-CRUyWmnzmZBA7RZSVGq0xMqmgCyPPxbiKNLFA5ud7KenojVX2s7Gv+V7eB52beKTPGxWRnVZ7D/tCIgYJJ8vNQ==
+
+randombytes@2.0.3:
+  version "2.0.3"
+  resolved "http://npm.lumigame.com/randombytes/-/randombytes-2.0.3.tgz#674c99760901c3c4112771a31e521dc349cc09ec"
+  integrity sha1-Z0yZdgkBw8QRJ3GjHlIdw0nMCew=
+
+randomstring@^1.3.0:
+  version "1.3.0"
+  resolved "http://npm.lumigame.com/randomstring/-/randomstring-1.3.0.tgz#1bf9d730066899e70aee3285573f84708278683d"
+  integrity sha512-gY7aQ4i1BgwZ8I1Op4YseITAyiDiajeZOPQUbIq9TPGPhUm5FX59izIaOpmKbME1nmnEiABf28d9K2VSii6BBg==
+  dependencies:
+    randombytes "2.0.3"
+
 range-parser@~1.2.1:
   version "1.2.1"
   resolved "http://npm.lumigame.com/range-parser/-/range-parser-1.2.1.tgz"
@@ -6629,6 +6668,18 @@ sc-instrument@^1.1.0:
     "@opentelemetry/semantic-conventions" "1.15.2"
     opentelemetry-instrumentation-socket.io "0.34.0"
     socket.io "4.6.1"
+
+sc-provably-fair@^1.0.1-beta.0:
+  version "1.0.1-beta.0"
+  resolved "http://npm.lumigame.com/sc-provably-fair/-/sc-provably-fair-1.0.1-beta.0.tgz#187dfdf60b2c3065743afd03702300e38291b048"
+  integrity sha512-VCNsTcTkX2BkA9gYPpI2/Yu8dIEvWxamXDezxMutYEdA2QxQ1THj8p/kenYFW5HrgNB91WG05JdxNvwI/Y5HdA==
+  dependencies:
+    chance "^1.1.11"
+    crypto "^1.0.1"
+    crypto-random-string "^5.0.0"
+    nanoid "^5.0.4"
+    random-js "^2.1.0"
+    randomstring "^1.3.0"
 
 semver-compare@^1.0.0:
   version "1.0.0"
@@ -7392,6 +7443,11 @@ type-fest@^0.8.1:
   version "0.8.1"
   resolved "http://npm.lumigame.com/type-fest/-/type-fest-0.8.1.tgz"
   integrity sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==
+
+type-fest@^2.12.2:
+  version "2.19.0"
+  resolved "http://npm.lumigame.com/type-fest/-/type-fest-2.19.0.tgz#88068015bb33036a598b952e55e9311a60fd3a9b"
+  integrity sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==
 
 type-is@~1.6.17, type-is@~1.6.18:
   version "1.6.18"

@@ -11,7 +11,7 @@ import liveGameLogs from "./models/live-game-logs";
 import { HistoryQuery, RoundQuery } from "./query-apis";
 import { HttpRouter, SocketRouter } from "./routers";
 import UmInfoWatcher from "./watchers/um-info-watcher";
-import { PFRoundResultConsumer, PFRoundResultPublisher } from "../provably-fair";
+import { PFRoundResultConsumer, PFRoundResultPublisher } from "sc-provably-fair";
 
 const { asClass, asValue } = awilix;
 

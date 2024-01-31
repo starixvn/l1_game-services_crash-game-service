@@ -171,10 +171,25 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         }
     }
 
+    async initResultHash() {
+        if (this.resultsRepository) {
+            // const previousResultRecord = await this.resultsRepository
+            //     .findOne({ roundId: this.gameData.roundId - 1 })
+            //     .lean()
+            //     .exec();
+            // if (previousResultRecord) {
+            //     this.gameData.result = JSON.parse(decrypt(previousResultRecord.encryptedResult));
+            //     this.gameData.resultHash = JSON.parse(decrypt(previousResultRecord.encryptedResultHash));
+            // }
+        }
+    }
+
     async resetForNewRound() {
         super.resetForNewRound();
         this.gameData.betList = {};
-        this.gameData.pf.clientSeeds = [];
+        this.gameData.pf = {
+            clientSeeds: [],
+        };
         this.bot && (await this.bot.reset());
         this.appConfigs.enabledBoostedOdds && (await this.updatePromotionOddsAndNotify());
     }
