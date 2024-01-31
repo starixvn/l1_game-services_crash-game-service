@@ -6669,10 +6669,10 @@ sc-instrument@^1.1.0:
     opentelemetry-instrumentation-socket.io "0.34.0"
     socket.io "4.6.1"
 
-sc-provably-fair@^1.0.1-beta.0:
-  version "1.0.1-beta.0"
-  resolved "http://npm.lumigame.com/sc-provably-fair/-/sc-provably-fair-1.0.1-beta.0.tgz#187dfdf60b2c3065743afd03702300e38291b048"
-  integrity sha512-VCNsTcTkX2BkA9gYPpI2/Yu8dIEvWxamXDezxMutYEdA2QxQ1THj8p/kenYFW5HrgNB91WG05JdxNvwI/Y5HdA==
+sc-provably-fair@^1.0.1-beta.1:
+  version "1.0.1-beta.1"
+  resolved "http://npm.lumigame.com/sc-provably-fair/-/sc-provably-fair-1.0.1-beta.1.tgz#069420c9e4d9022d5002ffd0f0b678544eb44823"
+  integrity sha512-uGeAHiouVaxrgzFC6zX9Wa19QQpMVXZ1CaeFIbezuPD9p6fpWdzKQr90/KVu5Z/bsA9aF8ZkcgePhSoWp0ljzg==
   dependencies:
     chance "^1.1.11"
     crypto "^1.0.1"
