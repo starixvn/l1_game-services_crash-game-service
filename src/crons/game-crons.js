@@ -187,9 +187,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
     async resetForNewRound() {
         super.resetForNewRound();
         this.gameData.betList = {};
-        this.gameData.pf = {
-            clientSeeds: [],
-        };
+        this.gameData.resetPF();
         this.bot && (await this.bot.reset());
         this.appConfigs.enabledBoostedOdds && (await this.updatePromotionOddsAndNotify());
     }

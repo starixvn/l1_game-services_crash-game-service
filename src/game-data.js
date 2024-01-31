@@ -5,7 +5,7 @@ export default class GameData extends Table.TableGameData {
     constructor(remainingTime) {
         super(remainingTime);
         this.betList = {};
-        this.pf = { clientSeeds: [] };
+        this.resetPF();
     }
 
     addPlayerToBetList(playerId, { name, amount, rate, autoCashOut }) {
@@ -19,5 +19,13 @@ export default class GameData extends Table.TableGameData {
 
     addClientSeed({ name, clientSeed }) {
         this.pf.clientSeeds.length < MaxCombinedClientSeeds && this.pf.clientSeeds.push({ name, clientSeed });
+    }
+
+    setServerSeed(serverSeed) {
+        this.pf.serverSeed = serverSeed;
+    }
+
+    resetPF() {
+        this.pf = { clientSeeds: [], serverSeed: "" };
     }
 }

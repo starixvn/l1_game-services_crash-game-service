@@ -1,17 +1,24 @@
 import awilix from "awilix";
 import { Table } from "sc-game-base";
-import { CashOutConsumer, InGameConsumer, PlaceBetConsumer, SettleCashOutConsumer, SettleGameRoundConsumer } from "./consumers";
+import { PFRoundResultConsumer, PFRoundResultPublisher } from "sc-provably-fair";
+import {
+    CashOutConsumer,
+    InGameConsumer,
+    PlaceBetConsumer,
+    SettleCashOutConsumer,
+    SettleGameRoundConsumer,
+    UnsettledBetConsumer,
+} from "./consumers";
 import { LiveGameCrons } from "./crons";
 import Bot from "./crons/bot";
 import GameCrons from "./crons/game-crons";
 import ProcessBetQueue from "./crons/process-bet-queue";
 import { LiveGamePublisher, PlaceBetPublisher, UserBetResultPublisher } from "./event-publishers";
-import { BetLogs, Bets, Rounds, tempBetLogs, tempBets, umInfo, Results } from "./models";
+import { BetLogs, Bets, Results, Rounds, tempBetLogs, tempBets, umInfo } from "./models";
 import liveGameLogs from "./models/live-game-logs";
 import { HistoryQuery, RoundQuery } from "./query-apis";
 import { HttpRouter, SocketRouter } from "./routers";
 import UmInfoWatcher from "./watchers/um-info-watcher";
-import { PFRoundResultConsumer, PFRoundResultPublisher } from "sc-provably-fair";
 
 const { asClass, asValue } = awilix;
 
@@ -55,6 +62,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             roundResultConsumer: asClass(PFRoundResultConsumer).singleton(),
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
             settleCashOutConsumer: asClass(SettleCashOutConsumer).singleton(),
+            unsettledBetConsumer: asClass(UnsettledBetConsumer).singleton(),
         });
     }
 
