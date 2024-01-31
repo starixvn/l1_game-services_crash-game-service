@@ -59,7 +59,7 @@ export class UnsettledBetConsumer {
     }
 
     updateClientSeeds(unsettledBets) {
-        const sortedBets = unsettledBets.toSorted((b1, b2) => b1.time - b2.time);
+        const sortedBets = [...unsettledBets].sort((b1, b2) => b1.time - b2.time);
         sortedBets.slice(0, MaxCombinedClientSeeds).forEach(({ name, clientSeed }) => this.gameData.addClientSeed({ name, clientSeed }));
     }
 
