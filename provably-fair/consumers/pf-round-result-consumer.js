@@ -19,18 +19,19 @@ export default class PFRoundResultConsumer {
             const { serverSeed, clientSeeds } = this.gameData.pf;
             const mergeSeed = getMergeSeed(serverSeed, clientSeeds);
             const finalHash = getSHA512Hash(mergeSeed);
-            const pf = { serverSeed, clientSeeds, mergeSeed, finalHash };
 
             await this.resultsRepository.findOneAndUpdate(
                 {
                     roundId,
                 },
                 {
-                    ...pf,
+                    mergeSeed,
+                    clientSeeds,
+                    finalHash,
                 }
             );
 
-            this.gameData.pf = pf;
+            this.gameData.pf = { serverSeed, clientSeeds, mergeSeed, finalHash };
             this.gameData.result = this.definition.generateResult(finalHash);
         }
     }
