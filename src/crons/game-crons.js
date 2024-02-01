@@ -1,5 +1,4 @@
 import { Core } from "sc-game-base";
-import { Actions } from "../constants";
 import { calculateCrashTimeInMillisecond } from "../helpers/crash-point-helper";
 
 export default class GameCrons extends Core.Crons.BaseGameCron {
@@ -51,6 +50,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
             resultsRepository,
             promotionRepository,
             appConfigs,
+            refundBetConsumer,
         });
 
         this.liveGameCrons = liveGameCrons;
@@ -58,6 +58,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         this.betLogsRepository = betLogsRepository;
         this.umInfoWatcher = umInfoWatcher;
         this.settleCashOutConsumer = settleCashOutConsumer;
+        this.refundBetConsumer = refundBetConsumer;
     }
 
     async start() {
@@ -65,7 +66,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         await this.initRoundId();
         await this.queryLastResult();
         await this.updateExchangeRates();
-        await this.proceedUnsettledBets();
+        await this.refundBetConsumer.proceed();
         await this.initResultHash();
         await this.getSettingForNewRound();
         this.startCron();
@@ -132,43 +133,6 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         }, settleTimeOut);
 
         this.gameData.startTime = new Date();
-    }
-
-    async proceedUnsettledBets() {
-        const unsettledBets = await this.betsRepository.find({ paid: false, roundId: this.gameData.roundId }).lean().exec();
-        if (unsettledBets.length > 0) {
-            const betLogs = await this.betLogsRepository.find({ roundId: this.gameData.roundId }).lean().exec();
-
-            await this.roundResultConsumer.generateResultAndPublishHash(this.gameData.lastResultRecord);
-
-            for (const bet of unsettledBets) {
-                const betLog = betLogs.filter((x) => x.playerId === bet.playerId);
-
-                if (!betLog.some((x) => x.action === Actions.CashOut)) {
-                    const halfCashOutLog = betLog.find((x) => x.action === Actions.HalfCashOut);
-                    const amount = halfCashOutLog ? halfCashOutLog.amount : bet.amount;
-                    await this.betLogsRepository.create({
-                        uid: bet.uid,
-                        name: bet.name,
-                        time: new Date(),
-                        action: Actions.Refund,
-                        amount: amount,
-                        winAmount: amount,
-                        freeBet: bet.freeBet,
-                        clientSendTime: new Date(),
-                        receivedTime: new Date(),
-                        roundId: bet.roundId,
-                        siteId: bet.siteId,
-                        currency: bet.currency,
-                        rate: bet.rate,
-                        operatorId: bet.operatorId,
-                        playerId: bet.playerId,
-                    });
-                }
-            }
-
-            await this.settleGameRoundConsumer.settleRound();
-        }
     }
 
     async initResultHash() {

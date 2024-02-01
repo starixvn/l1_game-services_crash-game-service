@@ -1,6 +1,6 @@
 import { Actions, MaxCombinedClientSeeds } from "../constants";
 
-export class UnsettledBetConsumer {
+export class RefundBetConsumer {
     constructor(gameData, betsRepository, betLogsRepository, tempBetsRepository, settleGameRoundConsumer, roundResultConsumer) {
         this.gameData = gameData;
         this.betsRepository = betsRepository;
