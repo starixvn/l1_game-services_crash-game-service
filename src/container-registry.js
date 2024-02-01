@@ -1,6 +1,6 @@
 import awilix from "awilix";
 import { Table } from "sc-game-base";
-import { PFRoundResultConsumer, PFRoundResultPublisher } from "sc-provably-fair";
+import { PFRoundResultConsumer, PFRoundResultPublisher, PFRoundQuery } from "sc-provably-fair";
 import {
     CashOutConsumer,
     InGameConsumer,
@@ -92,7 +92,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
         super.registerApis();
 
         this.container.register({
-            roundQuery: asClass(RoundQuery).singleton(),
+            roundQuery: asClass(PFRoundQuery).singleton(),
             historyQuery: asClass(HistoryQuery).singleton(),
         });
     }
