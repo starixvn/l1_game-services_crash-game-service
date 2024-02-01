@@ -14,12 +14,12 @@ export default class RoundQuery extends QueryApis.RoundQuery {
         return Promise.all(
             rounds.map(async (round) => {
                 const result = round.result || this.convertResult(round);
-                const md5Result = this.resultsRepository ? await this.getMd5Result(round.id) : {};
+                //const md5Result = this.resultsRepository ? await this.getMd5Result(round.id) : {};
 
                 return {
                     roundId: round.id,
                     result,
-                    md5Result,
+                    //md5Result,
                 };
             })
         );
