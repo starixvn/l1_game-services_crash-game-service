@@ -28,6 +28,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         betLogsRepository,
         umInfoWatcher,
         settleCashOutConsumer,
+        refundBetConsumer,
     }) {
         super({
             definition,
@@ -50,7 +51,6 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
             resultsRepository,
             promotionRepository,
             appConfigs,
-            refundBetConsumer,
         });
 
         this.liveGameCrons = liveGameCrons;
