@@ -7,7 +7,7 @@ import {
     PlaceBetConsumer,
     RefundBetConsumer,
     SettleCashOutConsumer,
-    SettleGameRoundConsumer
+    SettleGameRoundConsumer,
 } from "./consumers";
 import { LiveGameCrons } from "./crons";
 import Bot from "./crons/bot";
@@ -16,7 +16,7 @@ import ProcessBetQueue from "./crons/process-bet-queue";
 import { LiveGamePublisher, PlaceBetPublisher, UserBetResultPublisher } from "./event-publishers";
 import { BetLogs, Bets, Results, Rounds, tempBetLogs, tempBets, umInfo } from "./models";
 import liveGameLogs from "./models/live-game-logs";
-import { HistoryQuery, RoundQuery } from "./query-apis";
+import { HistoryQuery } from "./query-apis";
 import { HttpRouter, SocketRouter } from "./routers";
 import UmInfoWatcher from "./watchers/um-info-watcher";
 
