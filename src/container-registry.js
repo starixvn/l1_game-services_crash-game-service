@@ -5,10 +5,10 @@ import {
     CashOutConsumer,
     InGameConsumer,
     PlaceBetConsumer,
+    RefundBetConsumer,
     SettleCashOutConsumer,
     SettleGameRoundConsumer
 } from "./consumers";
-import { RefundBetConsumer } from "./consumers/refund-bet-consumer";
 import { LiveGameCrons } from "./crons";
 import Bot from "./crons/bot";
 import GameCrons from "./crons/game-crons";
