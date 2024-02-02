@@ -5,6 +5,7 @@ const PFResultSchema = new mongoose.Schema({
     serverSeed: { type: String },
     serverSeedHash: { type: String },
     clientSeeds: { type: Array, default: [] },
+    mergeClientSeed: { type: String },
     mergeSeed: { type: String },
     finalHash: { type: String },
     time: { type: Date, default: new Date() },
