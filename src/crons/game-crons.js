@@ -67,7 +67,6 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         await this.queryLastResult();
         await this.updateExchangeRates();
         await this.refundBetConsumer.proceed();
-        await this.initResultHash();
         await this.getSettingForNewRound();
         this.startCron();
         this.umInfoWatcher.initChangeStream();
@@ -133,19 +132,6 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         }, settleTimeOut);
 
         this.gameData.startTime = new Date();
-    }
-
-    async initResultHash() {
-        if (this.resultsRepository) {
-            // const previousResultRecord = await this.resultsRepository
-            //     .findOne({ roundId: this.gameData.roundId - 1 })
-            //     .lean()
-            //     .exec();
-            // if (previousResultRecord) {
-            //     this.gameData.result = JSON.parse(decrypt(previousResultRecord.encryptedResult));
-            //     this.gameData.resultHash = JSON.parse(decrypt(previousResultRecord.encryptedResultHash));
-            // }
-        }
     }
 
     async resetForNewRound() {

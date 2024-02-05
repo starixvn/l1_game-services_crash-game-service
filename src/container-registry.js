@@ -61,7 +61,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             roundResultConsumer: asClass(PFRoundResultConsumer).singleton(),
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
             settleCashOutConsumer: asClass(SettleCashOutConsumer).singleton(),
-            refundBetConsumer: asClass(RefundBetConsumer).singleton(),
+            refundBetConsumer: asClass(RefundBetConsumer).singleton().proxy(),
         });
     }
 

@@ -1,8 +1,10 @@
 import { stubMongoose } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
+import TableGameDefinition from "sc-game-base/src/table/table-game-definition";
 import { PFRoundResultConsumer } from "sc-provably-fair";
 import { Actions } from "../../constants";
 import CrashGameData from "../../game-data";
+import gameSettings from "../../game-settings";
 import { RefundBetConsumer } from "../refund-bet-consumer";
 import { SettleGameRoundConsumer } from "../settle-game-round-consumer";
 
@@ -20,6 +22,8 @@ jest.mock("sc-provably-fair", () => {
         }),
     };
 });
+
+const definition = new TableGameDefinition(gameSettings, jest.fn());
 
 /** @type {mongoose.Model}*/
 const betsRepository = stubMongoose(mongoose.Model);
@@ -43,20 +47,21 @@ afterEach(() => {
 });
 
 function initConsumer() {
-    return new RefundBetConsumer(
+    return new RefundBetConsumer({
         gameData,
+        definition,
         betsRepository,
         betLogsRepository,
         tempBetsRepository,
         settleGameRoundConsumer,
-        roundResultConsumer
-    );
+        roundResultConsumer,
+    });
 }
 
 describe("RefundBetConsumer", () => {
     describe("generateResult", () => {
         describe("when lastResultRecord has finalHash", () => {
-            it("should call roundResultConsumer.generateServerSeedAndPublishHash", async () => {
+            it("should call definition.generateResult", async () => {
                 // Arrange
                 const refundBetConsumer = initConsumer();
                 gameData.lastResultRecord = { finalHash: "hash" };
@@ -65,7 +70,7 @@ describe("RefundBetConsumer", () => {
                 await refundBetConsumer.generateResult([]);
 
                 // Assert
-                expect(roundResultConsumer.generateServerSeedAndPublishHash).toHaveBeenCalledWith(gameData.lastResultRecord);
+                expect(definition.generateResult).toHaveBeenCalledWith(gameData.lastResultRecord.finalHash);
             });
         });
 
@@ -73,13 +78,25 @@ describe("RefundBetConsumer", () => {
             it("should add serverSeed to gameData.pf", async () => {
                 // Arrange
                 const refundBetConsumer = initConsumer();
-                gameData.lastResultRecord = { serverSeed: "seed" };
+                gameData.lastResultRecord = { serverSeed: "seed", serverSeedHash: "serverSeedHash" };
 
                 // Act
                 await refundBetConsumer.generateResult([]);
 
                 // Assert
                 expect(gameData.pf.serverSeed).toEqual(gameData.lastResultRecord.serverSeed);
+            });
+
+            it("should add serverSeedHash to gameData.pf", async () => {
+                // Arrange
+                const refundBetConsumer = initConsumer();
+                gameData.lastResultRecord = { serverSeed: "seed", serverSeedHash: "serverSeedHash" };
+
+                // Act
+                await refundBetConsumer.generateResult([]);
+
+                // Assert
+                expect(gameData.pf.serverSeedHash).toEqual(gameData.lastResultRecord.serverSeedHash);
             });
 
             it("should call roundResultConsumer.generateResult", async () => {

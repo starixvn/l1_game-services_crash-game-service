@@ -1,8 +1,17 @@
 import { Actions, MaxCombinedClientSeeds } from "../constants";
 
 export class RefundBetConsumer {
-    constructor(gameData, betsRepository, betLogsRepository, tempBetsRepository, settleGameRoundConsumer, roundResultConsumer) {
+    constructor({
+        gameData,
+        definition,
+        betsRepository,
+        betLogsRepository,
+        tempBetsRepository,
+        settleGameRoundConsumer,
+        roundResultConsumer,
+    }) {
         this.gameData = gameData;
+        this.definition = definition;
         this.betsRepository = betsRepository;
         this.betLogsRepository = betLogsRepository;
         this.tempBetsRepository = tempBetsRepository;
@@ -49,11 +58,14 @@ export class RefundBetConsumer {
     }
 
     async generateResult(unsettledBets) {
-        if (this.gameData.lastResultRecord.finalHash) {
-            await this.roundResultConsumer.generateServerSeedAndPublishHash(this.gameData.lastResultRecord);
+        const { serverSeed, serverSeedHash, finalHash } = this.gameData.lastResultRecord;
+
+        if (finalHash) {
+            this.gameData.result = this.definition.generateResult(finalHash);
         } else {
-            this.gameData.setServerSeed(this.gameData.lastResultRecord.serverSeed);
             this.updateClientSeeds(unsettledBets);
+            this.gameData.setServerSeed(serverSeed);
+            this.gameData.setServerSeedHash(serverSeedHash);
             await this.roundResultConsumer.generateResult();
         }
     }
