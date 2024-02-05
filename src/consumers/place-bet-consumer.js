@@ -1,9 +1,9 @@
 import { helpers } from "sc-common";
 import { BaseEventConsumers } from "sc-game-base/src/core";
+import { verifySeed } from "sc-pf-client-seed/dist";
 import { Actions, MinMultiplierValue } from "../constants";
 import noticeHelper from "../helpers/notice-helper";
 import { roundFloat } from "../helpers/number-helper";
-import { validateClientSeed } from "../provably-fair/client-seed";
 
 export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     consume(player, payload) {
@@ -124,7 +124,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     composeClientSeedValidationCriteria(clientSeed) {
         return [
             {
-                failure: !validateClientSeed(clientSeed),
+                failure: !verifySeed(clientSeed),
                 notice: this.getNoticeObj(noticeHelper.invalidClientSeed),
             },
         ];

@@ -1,5 +1,6 @@
 import Chance from "chance";
 import { Constants, Table } from "sc-game-base";
+import { generateSeed } from "sc-pf-client-seed";
 import { Actions, Chips } from "../constants";
 import CrashGameData from "../game-data";
 import { calculateMultiplier } from "../helpers/crash-point-helper";
@@ -80,7 +81,7 @@ export default class Bot extends Table.Crons.TableGameBot {
             const maxBet = this.gameData.gameConfigs.bot_maxbet;
             const minBet = this.getMinBet();
             const amount = this.getBetAmount(minBet, maxBet);
-            bot.clientSeed = this.chance.integer({ min: 0, max: 9999 }).toString();
+            bot.clientSeed = generateSeed();
 
             const user = await this.userInfosRepository.findOneAndUpdate(
                 { id: bot.id, red: { $gt: amount } },
@@ -90,7 +91,7 @@ export default class Bot extends Table.Crons.TableGameBot {
 
             if (user) {
                 await this.insertBet(bot, amount);
-                this.gameData.addClientSeed({name: bot.name, clientSeed: bot.clientSeed});
+                this.gameData.addClientSeed({ name: bot.name, clientSeed: bot.clientSeed });
 
                 this.totalTickets += 1;
 
