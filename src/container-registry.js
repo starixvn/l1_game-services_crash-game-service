@@ -18,6 +18,7 @@ import { BetLogs, Bets, Results, Rounds, tempBetLogs, tempBets, umInfo } from ".
 import liveGameLogs from "./models/live-game-logs";
 import { HttpRouter, SocketRouter } from "./routers";
 import UmInfoWatcher from "./watchers/um-info-watcher";
+import { ProvablyFairConsumer } from "sc-provably-fair";
 
 const { asClass, asValue } = awilix;
 
@@ -62,6 +63,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
             settleCashOutConsumer: asClass(SettleCashOutConsumer).singleton(),
             refundBetConsumer: asClass(RefundBetConsumer).singleton().proxy(),
+            provablyFairConsumer: asClass(ProvablyFairConsumer).singleton().proxy(),
         });
     }
 
