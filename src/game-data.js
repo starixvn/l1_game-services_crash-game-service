@@ -8,4 +8,13 @@ export default class GameData extends MultipleClassesExtender.extend(Table.Table
         super([remainingTime], [MaxCombinedClientSeeds]);
         this.betList = {};
     }
+
+    addPlayerToBetList(playerId, { name, amount, rate, autoCashOut }) {
+        this.betList[playerId] = { time: new Date(), playerId, name, amount, rate, autoCashOut };
+    }
+
+    updatePlayerAction(playerId, action, data) {
+        this.betList[playerId][action] = data;
+        this.betList[playerId].time = new Date();
+    }
 }
