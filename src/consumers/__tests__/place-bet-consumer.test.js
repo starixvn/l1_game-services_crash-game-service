@@ -334,7 +334,7 @@ describe("PlaceBetConsumer", () => {
                 const clientSeed = "1234";
                 const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
                 expect(validationCriteria).toEqual([
-                    { failure: false, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidClientSeed) },
+                    { failure: false, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidBet) },
                 ]);
             });
         });
@@ -345,7 +345,7 @@ describe("PlaceBetConsumer", () => {
                 const clientSeed = "0";
                 const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
                 expect(validationCriteria).toEqual([
-                    { failure: false, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidClientSeed) },
+                    { failure: false, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidBet) },
                 ]);
             });
         });
@@ -356,7 +356,7 @@ describe("PlaceBetConsumer", () => {
                 const clientSeed = "9999";
                 const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
                 expect(validationCriteria).toEqual([
-                    { failure: false, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidClientSeed) },
+                    { failure: false, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidBet) },
                 ]);
             });
         });
@@ -367,7 +367,7 @@ describe("PlaceBetConsumer", () => {
                 const clientSeed = "12.34";
                 const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
                 expect(validationCriteria).toEqual([
-                    { failure: true, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidClientSeed) },
+                    { failure: true, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidBet) },
                 ]);
             });
         });
@@ -378,7 +378,7 @@ describe("PlaceBetConsumer", () => {
                 const clientSeed = "12.34";
                 const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
                 expect(validationCriteria).toEqual([
-                    { failure: true, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidClientSeed) },
+                    { failure: true, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidBet) },
                 ]);
             });
         });
@@ -388,7 +388,7 @@ describe("PlaceBetConsumer", () => {
                 const clientSeed = "-1";
                 const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
                 expect(validationCriteria).toEqual([
-                    { failure: true, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidClientSeed) },
+                    { failure: true, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidBet) },
                 ]);
             });
         });
