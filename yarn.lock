@@ -6820,10 +6820,10 @@ sc-pf-client-seed@1.0.1-beta.0:
     "@types/jest" "^29.5.11"
     chance "^1.1.11"
 
-sc-provably-fair@^1.0.1-beta.10:
-  version "1.0.1-beta.10"
-  resolved "http://npm.lumigame.com/sc-provably-fair/-/sc-provably-fair-1.0.1-beta.10.tgz#7fee095fc437c7ed70d36be0c551c671a3e0dbfe"
-  integrity sha512-8Kb/nawbB69bQWk111qDiHcd45n2BHjRvtX8QrgPhM4q7q9+nga9KCqqjrlSi8/9dDF/E4wdEBkJhY9ZnnOBqQ==
+sc-provably-fair@^1.0.1-beta.13:
+  version "1.0.1-beta.13"
+  resolved "https://npm.lumigame.com/sc-provably-fair/-/sc-provably-fair-1.0.1-beta.13.tgz#4766316439fb423d550a1dffd1445274575157d5"
+  integrity sha512-JkWURGcRHI37kP5BFVqEj9PIhL7JVpq/GvVlI5e4r/4sf5qqgmmbl7Sb5BhQSde9kkyAtmCOjFxmASb1tJb9mw==
   dependencies:
     chance "^1.1.11"
     crypto "^1.0.1"

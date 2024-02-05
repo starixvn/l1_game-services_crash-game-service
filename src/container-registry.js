@@ -1,6 +1,6 @@
 import awilix from "awilix";
 import { Table } from "sc-game-base";
-import { PFRoundResultConsumer, PFRoundResultPublisher, PFRoundQuery } from "sc-provably-fair";
+import { PFHistoryQuery, PFRoundQuery, PFRoundResultConsumer, PFRoundResultPublisher } from "sc-provably-fair";
 import {
     CashOutConsumer,
     InGameConsumer,
@@ -16,7 +16,6 @@ import ProcessBetQueue from "./crons/process-bet-queue";
 import { LiveGamePublisher, PlaceBetPublisher, UserBetResultPublisher } from "./event-publishers";
 import { BetLogs, Bets, Results, Rounds, tempBetLogs, tempBets, umInfo } from "./models";
 import liveGameLogs from "./models/live-game-logs";
-import { HistoryQuery } from "./query-apis";
 import { HttpRouter, SocketRouter } from "./routers";
 import UmInfoWatcher from "./watchers/um-info-watcher";
 
@@ -93,7 +92,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
 
         this.container.register({
             roundQuery: asClass(PFRoundQuery).singleton(),
-            historyQuery: asClass(HistoryQuery).singleton(),
+            historyQuery: asClass(PFHistoryQuery).singleton(),
         });
     }
 
