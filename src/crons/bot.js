@@ -14,9 +14,10 @@ export default class Bot extends Table.Crons.TableGameBot {
      * @param {mongoose.Model} tempBetsRepository
      */
 
-    constructor(definition, gameData, publisher, userInfosRepository, tempBetsRepository, tempBetLogsRepository) {
+    constructor(definition, gameData, publisher, userInfosRepository, tempBetsRepository, tempBetLogsRepository, provablyFairConsumer) {
         super(definition, gameData, publisher, userInfosRepository, tempBetsRepository);
 
+        this.provablyFairConsumer = provablyFairConsumer;
         this.tempBetLogsRepository = tempBetLogsRepository;
         this.chance = new Chance();
         this.cashOutBoundary = 3.5;
@@ -91,7 +92,7 @@ export default class Bot extends Table.Crons.TableGameBot {
 
             if (user) {
                 await this.insertBet(bot, amount);
-                this.gameData.addClientSeed({ name: bot.name, clientSeed: bot.clientSeed });
+                this.provablyFairConsumer.addClientSeed({ name: bot.name, clientSeed: bot.clientSeed });
 
                 this.totalTickets += 1;
 

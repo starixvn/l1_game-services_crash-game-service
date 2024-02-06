@@ -5,7 +5,7 @@
     "main": "./src/app.js",
     "scripts": {
         "integration-test": "jest --config ./jest.integration-test.config.cjs --testPathPattern=tests/integration-tests/ --ci --forceExit --runInBand",
-        "test": "jest --testPathPattern=src/",
+        "test": "jest",
         "test-coverage": "jest --testPathPattern=src/ --collect-coverage",
         "dev": "set APP_NAME=spaceflight_service&& nodemon --es-module-specifier-resolution=node --watch ./src ./src/app.js",
         "debug": "set APP_NAME=spaceflight_service && nodemon --es-module-specifier-resolution=node --watch ./ --inspect ./src/app.js",
@@ -26,7 +26,7 @@
         "lodash": "^4.17.19",
         "sc-game-base": "4.1.0",
         "sc-instrument": "^1.1.0",
-        "sc-provably-fair": "^1.0.1-beta.18",
+        "sc-provably-fair": "^1.0.1-beta.19",
         "sc-pf-client-seed": "1.0.1-beta.0"
     },
     "devDependencies": {

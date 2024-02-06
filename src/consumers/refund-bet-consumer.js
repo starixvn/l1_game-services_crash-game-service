@@ -1,4 +1,4 @@
-import { Actions } from "../constants";
+import { Actions, MaxCombinedClientSeeds } from "../constants";
 
 export class RefundBetConsumer {
     constructor({
@@ -65,13 +65,18 @@ export class RefundBetConsumer {
         if (finalHash) {
             this.gameData.result = this.definition.generateResult(finalHash);
         } else {
-            this.provablyFairConsumer.updateClientSeeds(this.provablyFairConsumer.generateClientSeeds(unsettledBets));
-            this.provablyFairConsumer.addServerSeed(serverSeed);
-
-            //TODO move to provablyFairConsumer
-            this.gameData.setServerSeedHash(serverSeedHash);
+            this.updateClientSeeds(unsettledBets);
+            this.provablyFairConsumer.setServerSeed(serverSeed);
+            this.provablyFairConsumer.setServerSeedHash(serverSeedHash);
             await this.roundResultConsumer.generateResult();
         }
+    }
+
+    updateClientSeeds(unsettledBets) {
+        const sortedBets = [...unsettledBets].sort((b1, b2) => b1.time - b2.time);
+        sortedBets
+            .slice(0, MaxCombinedClientSeeds)
+            .forEach(({ name, clientSeed }) => this.provablyFairConsumer.addClientSeed({ name, clientSeed }));
     }
 
     async getUnsettledBets() {

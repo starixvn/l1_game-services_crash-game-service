@@ -1,6 +1,7 @@
 import awilix from "awilix";
 import { Table } from "sc-game-base";
-import { PFHistoryQuery, PFRoundQuery, PFRoundResultConsumer, PFRoundResultPublisher } from "sc-provably-fair";
+import { PFHistoryQuery, PFRoundQuery, PFRoundResultConsumer, PFRoundResultPublisher, ProvablyFairConsumer } from "sc-provably-fair";
+import { MaxCombinedClientSeeds } from "./constants";
 import {
     CashOutConsumer,
     InGameConsumer,
@@ -18,7 +19,6 @@ import { BetLogs, Bets, Results, Rounds, tempBetLogs, tempBets, umInfo } from ".
 import liveGameLogs from "./models/live-game-logs";
 import { HttpRouter, SocketRouter } from "./routers";
 import UmInfoWatcher from "./watchers/um-info-watcher";
-import { ProvablyFairConsumer } from "sc-provably-fair";
 
 const { asClass, asValue } = awilix;
 
@@ -26,8 +26,15 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
     register(appConfigs, definition, gameData) {
         super.register(appConfigs, definition, gameData);
         this.registerWatchers();
+        this.registerPFSettings();
 
         return this.container;
+    }
+
+    registerPFSettings() {
+        this.container.register({
+            maxCombinedClientSeeds: asValue(MaxCombinedClientSeeds),
+        });
     }
 
     registerWatchers() {

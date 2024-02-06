@@ -1,4 +1,4 @@
-import { stubMongoose, stub } from "jest-micro-auto-stub";
+import { stub, stubMongoose } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
 import TableGameDefinition from "sc-game-base/src/table/table-game-definition";
 import { PFRoundResultConsumer, ProvablyFairConsumer } from "sc-provably-fair";
@@ -7,21 +7,6 @@ import CrashGameData from "../../game-data";
 import gameSettings from "../../game-settings";
 import { RefundBetConsumer } from "../refund-bet-consumer";
 import { SettleGameRoundConsumer } from "../settle-game-round-consumer";
-
-jest.mock("../../consumers/settle-game-round-consumer", () => {
-    return {
-        SettleGameRoundConsumer: jest.fn(() => {
-            return { settleRound: jest.fn() };
-        }),
-    };
-});
-jest.mock("sc-provably-fair", () => {
-    return {
-        PFRoundResultConsumer: jest.fn(() => {
-            return { generateResult: jest.fn(), generateServerSeedAndPublishHash: jest.fn() };
-        }),
-    };
-});
 
 const definition = new TableGameDefinition(gameSettings, jest.fn());
 let gameData;
@@ -34,8 +19,8 @@ const tempBetsRepository = stubMongoose(mongoose.Model);
 
 /** @type {mongoose.Model}*/
 const betLogsRepository = stubMongoose(mongoose.Model);
-const settleGameRoundConsumer = new SettleGameRoundConsumer({});
-const roundResultConsumer = new PFRoundResultConsumer();
+const settleGameRoundConsumer = stub(SettleGameRoundConsumer);
+const roundResultConsumer = stub(PFRoundResultConsumer);
 const provablyFairConsumer = stub(ProvablyFairConsumer);
 
 beforeEach(() => {
@@ -88,7 +73,7 @@ describe("RefundBetConsumer", () => {
                 expect(provablyFairConsumer.addServerSeed).toHaveBeenCalledWith(gameData.lastResultRecord.serverSeed);
             });
 
-            it("should add serverSeedHash to gameData.pf", async () => {
+            it("should call provablyFairConsumer.addServerSeed", async () => {
                 // Arrange
                 const refundBetConsumer = initConsumer();
                 gameData.lastResultRecord = { serverSeed: "seed", serverSeedHash: "serverSeedHash" };
@@ -97,7 +82,7 @@ describe("RefundBetConsumer", () => {
                 await refundBetConsumer.generateResult([]);
 
                 // Assert
-                expect(gameData.pf.serverSeedHash).toEqual(gameData.lastResultRecord.serverSeedHash);
+                expect(provablyFairConsumer.addServerSeedHash).toEqual(gameData.lastResultRecord.serverSeedHash);
             });
 
             it("should call roundResultConsumer.generateResult", async () => {
@@ -114,28 +99,24 @@ describe("RefundBetConsumer", () => {
         });
     });
 
-    // describe("updateClientSeeds", () => {
-    //     it("should update client seeds from unsettled bets with order by time", () => {
-    //         // Arrange
-    //         const unsettledBets = [
-    //             { name: "player2", clientSeed: "seed2", time: new Date(new Date().getTime() + 10000) },
-    //             { name: "player1", clientSeed: "seed1", time: new Date() },
-    //             { name: "player3", clientSeed: "seed3", time: new Date(new Date().getTime() + 20000) },
-    //         ];
+    describe("updateClientSeeds", () => {
+        it("should call provablyFairConsumer.addClientSeed", () => {
+            // Arrange
+            const unsettledBets = [
+                { name: "player2", clientSeed: "seed2", time: new Date(new Date().getTime() + 10000) },
+                { name: "player1", clientSeed: "seed1", time: new Date() },
+                { name: "player3", clientSeed: "seed3", time: new Date(new Date().getTime() + 20000) },
+            ];
 
-    //         const refundBetConsumer = new initConsumer();
+            const refundBetConsumer = new initConsumer();
 
-    //         // Act
-    //         refundBetConsumer.updateClientSeeds(unsettledBets);
+            // Act
+            refundBetConsumer.updateClientSeeds(unsettledBets);
 
-    //         // Assert
-    //         expect(gameData.pf.clientSeeds).toEqual([
-    //             { name: "player1", clientSeed: "seed1" },
-    //             { name: "player2", clientSeed: "seed2" },
-    //             { name: "player3", clientSeed: "seed3" },
-    //         ]);
-    //     });
-    // });
+            // Assert
+            expect(provablyFairConsumer.addClientSeed).toHaveBeenCalledTimes(unsettledBets.length);
+        });
+    });
 
     describe("getUnsettledBets", () => {
         it("should return array containing bot bets and player bets", async () => {

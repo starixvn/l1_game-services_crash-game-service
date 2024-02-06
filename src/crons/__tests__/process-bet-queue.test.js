@@ -6,6 +6,7 @@ import logger from "sc-common/logger";
 import { GameDefinition } from "sc-game-base/src/core";
 import BaseMetrics from "sc-game-base/src/core/base-metrics";
 import { PlaceBetPublisher } from "sc-game-base/src/core/event-publishers";
+import { ProvablyFairConsumer } from "sc-provably-fair";
 import { Actions } from "../../constants";
 import { SettleCashOutConsumer } from "../../consumers";
 import CrashGameData from "../../game-data";
@@ -57,6 +58,7 @@ describe("ProcessBetQueue", () => {
     });
     const placeBetPublisher = stub(PlaceBetPublisher);
     const settleCashOutConsumer = stub(SettleCashOutConsumer);
+    const provablyFairConsumer = stub(ProvablyFairConsumer);
     /** @type {logger}*/
     const logService = stub(logger);
     /** @type {mongoose.Model}*/
@@ -547,6 +549,7 @@ describe("ProcessBetQueue", () => {
             userInfosRepository,
             baseMetrics,
             settleCashOutConsumer,
+            provablyFairConsumer
         });
     };
 

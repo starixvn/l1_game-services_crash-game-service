@@ -16,6 +16,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         userInfosRepository,
         baseMetrics,
         settleCashOutConsumer,
+        provablyFairConsumer,
     }) {
         super({
             definition,
@@ -30,6 +31,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         });
 
         this.settleCashOutConsumer = settleCashOutConsumer;
+        this.provablyFairConsumer = provablyFairConsumer;
     }
 
     dequeueBets() {
@@ -132,7 +134,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     }
 
     async handleSuccessBet(player, balance, roundId, bet) {
-        this.gameData.addClientSeed({ name: player.profile.name, clientSeed: bet.clientSeed });
+        this.provablyFairConsumer.addClientSeed({ name: player.profile.name, clientSeed: bet.clientSeed });
         const rate = this.calculateCurrencyRate(player.session);
 
         await this.insertBet(player, roundId, bet, rate);
@@ -192,6 +194,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             roundId,
             amount: bet.amount,
             autoCashOut: bet.autoCashOut,
+            clientSeed: bet.clientSeed,
         };
 
         if (player.session) {

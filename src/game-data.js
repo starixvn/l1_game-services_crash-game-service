@@ -1,11 +1,8 @@
 import { Table } from "sc-game-base";
-import MultipleClassesExtender from "sc-provably-fair/src/multiple-classes-extender";
-import PFGameData from "sc-provably-fair/src/pf-game-data";
-import { MaxCombinedClientSeeds } from "./constants";
 
-export default class GameData extends MultipleClassesExtender.extend(Table.TableGameData, PFGameData) {
+export default class GameData extends Table.TableGameData {
     constructor(remainingTime) {
-        super([remainingTime], [MaxCombinedClientSeeds]);
+        super(remainingTime);
         this.betList = {};
     }
 
