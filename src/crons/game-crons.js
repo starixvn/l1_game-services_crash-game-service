@@ -28,7 +28,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         betLogsRepository,
         umInfoWatcher,
         settleCashOutConsumer,
-        refundBetConsumer,
+        unsettledRoundConsumer,
         provablyFairConsumer,
     }) {
         super({
@@ -59,7 +59,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         this.betLogsRepository = betLogsRepository;
         this.umInfoWatcher = umInfoWatcher;
         this.settleCashOutConsumer = settleCashOutConsumer;
-        this.refundBetConsumer = refundBetConsumer;
+        this.unsettledRoundConsumer = unsettledRoundConsumer;
         this.provablyFairConsumer = provablyFairConsumer;
     }
 
@@ -68,7 +68,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         await this.initRoundId();
         await this.queryLastResult();
         await this.updateExchangeRates();
-        await this.refundBetConsumer.proceed();
+        await this.unsettledRoundConsumer.proceed();
         await this.getSettingForNewRound();
         this.startCron();
         this.umInfoWatcher.initChangeStream();

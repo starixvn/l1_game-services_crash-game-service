@@ -6,9 +6,9 @@ import {
     CashOutConsumer,
     InGameConsumer,
     PlaceBetConsumer,
-    RefundBetConsumer,
     SettleCashOutConsumer,
     SettleGameRoundConsumer,
+    UnsettledRoundConsumer
 } from "./consumers";
 import { LiveGameCrons } from "./crons";
 import Bot from "./crons/bot";
@@ -69,7 +69,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             roundResultConsumer: asClass(PFRoundResultConsumer).singleton(),
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
             settleCashOutConsumer: asClass(SettleCashOutConsumer).singleton(),
-            refundBetConsumer: asClass(RefundBetConsumer).singleton().proxy(),
+            unsettledRoundConsumer: asClass(UnsettledRoundConsumer).singleton().proxy(),
             provablyFairConsumer: asClass(ProvablyFairConsumer).singleton().proxy(),
         });
     }

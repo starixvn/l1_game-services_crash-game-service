@@ -5,8 +5,8 @@ import { PFRoundResultConsumer, ProvablyFairConsumer } from "sc-provably-fair";
 import { Actions } from "../../constants";
 import CrashGameData from "../../game-data";
 import gameSettings from "../../game-settings";
-import { RefundBetConsumer } from "../refund-bet-consumer";
 import { SettleGameRoundConsumer } from "../settle-game-round-consumer";
+import { UnsettledRoundConsumer } from "../unsettled-round-consumer";
 
 const definition = new TableGameDefinition(gameSettings, jest.fn());
 let gameData;
@@ -32,7 +32,7 @@ afterEach(() => {
 });
 
 function initConsumer() {
-    return new RefundBetConsumer({
+    return new UnsettledRoundConsumer({
         gameData,
         definition,
         betsRepository,
@@ -44,16 +44,16 @@ function initConsumer() {
     });
 }
 
-describe("RefundBetConsumer", () => {
+describe("unsettledRoundConsumer", () => {
     describe("generateResult", () => {
         describe("when lastResultRecord has finalHash", () => {
             it("should call definition.generateResult", async () => {
                 // Arrange
-                const refundBetConsumer = initConsumer();
+                const unsettledRoundConsumer = initConsumer();
                 gameData.lastResultRecord = { finalHash: "hash" };
 
                 // Act
-                await refundBetConsumer.generateResult([]);
+                await unsettledRoundConsumer.generateResult([]);
 
                 // Assert
                 expect(definition.generateResult).toHaveBeenCalledWith(gameData.lastResultRecord.finalHash);
@@ -63,11 +63,11 @@ describe("RefundBetConsumer", () => {
         describe("when lastResultRecord does not have finalHash", () => {
             it("should call provablyFairConsumer.addServerSeed", async () => {
                 // Arrange
-                const refundBetConsumer = initConsumer();
+                const unsettledRoundConsumer = initConsumer();
                 gameData.lastResultRecord = { serverSeed: "seed", serverSeedHash: "serverSeedHash" };
 
                 // Act
-                await refundBetConsumer.generateResult([]);
+                await unsettledRoundConsumer.generateResult([]);
 
                 // Assert
                 expect(provablyFairConsumer.addServerSeed).toHaveBeenCalledWith(gameData.lastResultRecord.serverSeed);
@@ -75,11 +75,11 @@ describe("RefundBetConsumer", () => {
 
             it("should call provablyFairConsumer.addServerSeed", async () => {
                 // Arrange
-                const refundBetConsumer = initConsumer();
+                const unsettledRoundConsumer = initConsumer();
                 gameData.lastResultRecord = { serverSeed: "seed", serverSeedHash: "serverSeedHash" };
 
                 // Act
-                await refundBetConsumer.generateResult([]);
+                await unsettledRoundConsumer.generateResult([]);
 
                 // Assert
                 expect(provablyFairConsumer.addServerSeedHash).toEqual(gameData.lastResultRecord.serverSeedHash);
@@ -87,11 +87,11 @@ describe("RefundBetConsumer", () => {
 
             it("should call roundResultConsumer.generateResult", async () => {
                 // Arrange
-                const refundBetConsumer = initConsumer();
+                const unsettledRoundConsumer = initConsumer();
                 gameData.lastResultRecord = { serverSeed: "seed" };
 
                 // Act
-                await refundBetConsumer.generateResult([]);
+                await unsettledRoundConsumer.generateResult([]);
 
                 // Assert
                 expect(roundResultConsumer.generateResult).toHaveBeenCalled();
@@ -108,10 +108,10 @@ describe("RefundBetConsumer", () => {
                 { name: "player3", clientSeed: "seed3", time: new Date(new Date().getTime() + 20000) },
             ];
 
-            const refundBetConsumer = new initConsumer();
+            const unsettledRoundConsumer = new initConsumer();
 
             // Act
-            refundBetConsumer.updateClientSeeds(unsettledBets);
+            unsettledRoundConsumer.updateClientSeeds(unsettledBets);
 
             // Assert
             expect(provablyFairConsumer.addClientSeed).toHaveBeenCalledTimes(unsettledBets.length);
@@ -121,7 +121,7 @@ describe("RefundBetConsumer", () => {
     describe("getUnsettledBets", () => {
         it("should return array containing bot bets and player bets", async () => {
             // Arrange
-            const refundBetConsumer = initConsumer();
+            const unsettledRoundConsumer = initConsumer();
             gameData.roundId = 100;
             const playerBets = [
                 { name: "player1", clientSeed: "seed1", time: new Date() },
@@ -138,7 +138,7 @@ describe("RefundBetConsumer", () => {
             tempBetsRepository.find().lean().exec.mockReturnValueOnce(botBets);
 
             // Act
-            const result = await refundBetConsumer.getUnsettledBets();
+            const result = await unsettledRoundConsumer.getUnsettledBets();
 
             // Assert
             expect(result).toEqual(playerBets.concat(botBets));
@@ -147,17 +147,18 @@ describe("RefundBetConsumer", () => {
 
     describe("proceed", () => {
         describe(" when there are no unsettled bets", () => {
-            it("should do nothing", async () => {
+            it("shouldn't call betLogsRepository.insertMany", async () => {
                 // Arrange
-                const refundBetConsumer = initConsumer();
+                const unsettledRoundConsumer = initConsumer();
+                gameData.lastResultRecord = { serverSeed: "seed", finalHash: "hash" };
                 betsRepository.find().lean().exec.mockReturnValueOnce([]);
                 tempBetsRepository.find().lean().exec.mockReturnValueOnce([]);
 
                 // Act
-                await refundBetConsumer.proceed();
+                await unsettledRoundConsumer.proceed();
 
                 // Assert
-                expect(settleGameRoundConsumer.settleRound).not.toHaveBeenCalled();
+                expect(betLogsRepository.insertMany).not.toHaveBeenCalled();
             });
         });
 
@@ -221,10 +222,10 @@ describe("RefundBetConsumer", () => {
                 betsRepository.find().lean().exec.mockReturnValueOnce(unsettledBets);
                 tempBetsRepository.find().lean().exec.mockReturnValueOnce([]);
 
-                const refundBetConsumer = initConsumer();
+                const unsettledRoundConsumer = initConsumer();
 
                 // Act
-                await refundBetConsumer.proceed();
+                await unsettledRoundConsumer.proceed();
 
                 // Assert
                 expect(betLogsRepository.insertMany).toHaveBeenCalledWith([
@@ -280,10 +281,10 @@ describe("RefundBetConsumer", () => {
                 betsRepository.find().lean().exec.mockReturnValueOnce(unsettledBets);
                 tempBetsRepository.find().lean().exec.mockReturnValueOnce([]);
 
-                const refundBetConsumer = initConsumer();
+                const unsettledRoundConsumer = initConsumer();
 
                 // Act
-                await refundBetConsumer.proceed();
+                await unsettledRoundConsumer.proceed();
 
                 // Assert
                 expect(betLogsRepository.insertMany).toHaveBeenCalledWith([
