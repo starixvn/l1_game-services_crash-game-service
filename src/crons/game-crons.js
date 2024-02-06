@@ -29,6 +29,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         umInfoWatcher,
         settleCashOutConsumer,
         refundBetConsumer,
+        provablyFairConsumer,
     }) {
         super({
             definition,
@@ -59,6 +60,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         this.umInfoWatcher = umInfoWatcher;
         this.settleCashOutConsumer = settleCashOutConsumer;
         this.refundBetConsumer = refundBetConsumer;
+        this.provablyFairConsumer = provablyFairConsumer;
     }
 
     async start() {
@@ -137,7 +139,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
     async resetForNewRound() {
         super.resetForNewRound();
         this.gameData.betList = {};
-        this.gameData.resetPF();
+        this.provablyFairConsumer.resetPF();
         this.bot && (await this.bot.reset());
         this.appConfigs.enabledBoostedOdds && (await this.updatePromotionOddsAndNotify());
     }
