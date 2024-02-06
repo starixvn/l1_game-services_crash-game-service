@@ -70,7 +70,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
             settleCashOutConsumer: asClass(SettleCashOutConsumer).singleton(),
             unsettledRoundConsumer: asClass(UnsettledRoundConsumer).singleton().proxy(),
-            provablyFairConsumer: asClass(ProvablyFairConsumer).singleton().proxy(),
+            provablyFairConsumer: asClass(ProvablyFairConsumer).singleton(),
         });
     }
 
