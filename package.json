@@ -26,7 +26,7 @@
         "lodash": "^4.17.19",
         "sc-game-base": "4.1.0",
         "sc-instrument": "^1.1.0",
-        "sc-provably-fair": "^1.0.1-beta.21",
+        "sc-provably-fair": "^1.0.1-beta.22",
         "sc-pf-client-seed": "1.0.1-beta.0"
     },
     "devDependencies": {
