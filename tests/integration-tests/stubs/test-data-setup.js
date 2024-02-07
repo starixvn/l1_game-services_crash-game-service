@@ -35,7 +35,7 @@ const createTestData = async () => {
     const currency = await createDummyCurrency(partnerConfig.partnerId, currencyData.code, currencyData.name);
     await createCurrencyGroupGames(currency.groupId, game.id, gameConfig);
     await createDummyUsers(currency);
-    //await createRounds();
+    await createRounds();
     await createUserBetData();
     await createHashResult();
     console.log("Create game config & dummy user for testing successfully!");

@@ -56,21 +56,67 @@ const userBetData = ({ uid, name, playerId }) => {
     ];
 };
 
-const rounds = [];
+const rounds = [
+    {
+        id: 1,
+        result: 2.98,
+        exchangeRateId: 1,
+    },
+    {
+        id: 2,
+        result: 1.98,
+        exchangeRateId: 1,
+    },
+    {
+        id: 3,
+        result: 2.2,
+        exchangeRateId: 1,
+    },
+];
 
 const hashResults = [
     {
-        time: new Date(),
+        clientSeeds: [],
         roundId: 1,
-        encryptedResultHash: {
-            iv: "28c975ff0d360a3f99a8173c78438519",
-            content:
-                "52f2b233602b55bfe7629f62a80d1ccf49613161da5bad4469ab5ab6b5283f0c04a43973c0a9b8034cbe1f581fa11ab1328eda01be8915cc20ad1ef9d923ff7cf0012c99c562352a3de48113671ef07b12887c76a2e296e0e66e892e2f2a7408a057f46408f20e914e69",
-        },
-        encryptedResult: {
-            iv: "054eb748a3fd3fcc6a8fc9061e612459",
-            content: "2d7fe7c7",
-        },
+        serverSeedHash: "7c652e8be28522c4b7371fc408481f47910107f5842258b54d918fc70531eb78",
+        serverSeed: "a8fcT5f6gZ2cW2GIM7I4aq1AgCnQKaSKAgZpE7hG",
+        finalHash:
+            "534faade8bd71272c1039f14538cbe2917eed43957e28e142403fc615bdbbe8f54f0794ad697c0aa07a80535922f7926ef1a606424fce63ce4a0e05f788764bc",
+        mergeClientSeed: "",
+        mergeSeed: "a8fcT5f6gZ2cW2GIM7I4aq1AgCnQKaSKAgZpE7hG",
+    },
+    {
+        clientSeeds: [
+            { name: "TennTien", clientSeed: "4474" },
+            { name: "ChoiLord88", clientSeed: "2215" },
+            { name: "Van83275", clientSeed: "3583" },
+            { name: "DefenderDefeat", clientSeed: "0010" },
+            { name: "Tecthang", clientSeed: "5342" },
+        ],
+        roundId: 2,
+        serverSeedHash: "1a41b64d07b8ace1999dc2dc26436cfe6452de3e561888e4988eb73b187dcf8b",
+        serverSeed: "qfXrBqflDw5SfvDt5jdnRaxUN4y6Kih6MmGLzG9r",
+        finalHash:
+            "62be9cdf781a47fa9c40a28fe7bc7a46aceded80593b34fabd8f4b2368ecab50d2be3360affc7ca8ffc2e8c819af2a0cc1bbc6bc0113884652e69626b00ce171",
+        mergeClientSeed: "44742215358300105342",
+        mergeSeed: "qfXrBqflDw5SfvDt5jdnRaxUN4y6Kih6MmGLzG9r44742215358300105342",
+    },
+    {
+        clientSeeds: [
+            { name: "Van53206", clientSeed: "6985" },
+            { name: "DefenderDefeat", clientSeed: "8064" },
+            { name: "TennTien", clientSeed: "0703" },
+            { name: "Tecthang", clientSeed: "0837" },
+            { name: "Van83275", clientSeed: "6874" },
+        ],
+        roundId: 3,
+        serverSeedHash: "c3f91b09beaf6df73f2693f0ec1f456fb3760113c88bff19e5f6bcdde132c423",
+        serverSeed: "GBtyNks2TuvH4b8MDY6aA3o9EfgcjmwKeLxPXRzF",
+        __v: 0,
+        finalHash:
+            "5e49d68e45d4fd11a6617722bfb5a0e02267843c2e80382830de34e2aa42223455b3f736b226dc45b92377d139fd2b4c382462044f6820573e8622d6fa4c1952",
+        mergeClientSeed: "69858064070308376874",
+        mergeSeed: "GBtyNks2TuvH4b8MDY6aA3o9EfgcjmwKeLxPXRzF69858064070308376874",
     },
 ];
 
@@ -81,4 +127,3 @@ const socketOptions = {
 };
 
 export { currencyData, game, gameConfig, hashResults, rounds, socketOptions, userBetData };
-
