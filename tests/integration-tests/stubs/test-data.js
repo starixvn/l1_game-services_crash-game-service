@@ -52,6 +52,7 @@ const userBetData = ({ uid, name, playerId }) => {
             siteId: "4100300",
             currency: "$US",
             operatorId: "ONEworks1",
+            clientSeed: "1234",
         },
     ];
 };
