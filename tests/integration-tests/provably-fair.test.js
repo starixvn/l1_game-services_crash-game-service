@@ -18,6 +18,7 @@ describe("ProvablyPair", () => {
     describe("when get ingame data", () => {
         it("should receive pf info in round history ", async () => {
             //Act
+            userClientDriver.sendInGameEvent();
             const { roundHistory } = await userClientDriver.handleGameEvent((ingameData) => ingameData.roundHistory);
 
             // Assert

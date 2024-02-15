@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="3" failures="0" errors="0" time="33.482">
-  <testsuite name="ProvablyPair" errors="0" failures="0" skipped="0" timestamp="2024-02-07T06:28:10" time="33.225" tests="3">
-    <testcase classname="ProvablyPair when get ingame data should receive pf info in round history " name="ProvablyPair when get ingame data should receive pf info in round history " time="0.036">
+<testsuites name="jest tests" tests="4" failures="0" errors="0" time="43.566">
+  <testsuite name="ProvablyPair" errors="0" failures="0" skipped="0" timestamp="2024-02-15T07:21:59" time="33.714" tests="3">
+    <testcase classname="ProvablyPair when get ingame data should receive pf info in round history " name="ProvablyPair when get ingame data should receive pf info in round history " time="0.018">
     </testcase>
-    <testcase classname="ProvablyPair when start placeBet should receive pf server seed hash " name="ProvablyPair when start placeBet should receive pf server seed hash " time="14.27">
+    <testcase classname="ProvablyPair when start placeBet should receive pf server seed hash " name="ProvablyPair when start placeBet should receive pf server seed hash " time="14.209">
     </testcase>
-    <testcase classname="ProvablyPair when finish should receive pf info" name="ProvablyPair when finish should receive pf info" time="13.061">
+    <testcase classname="ProvablyPair when finish should receive pf info" name="ProvablyPair when finish should receive pf info" time="13.054">
+    </testcase>
+  </testsuite>
+  <testsuite name="refund bet" errors="0" failures="0" skipped="0" timestamp="2024-02-15T07:22:33" time="9.583" tests="1">
+    <testcase classname="refund bet should refund all unsettled bets" name="refund bet should refund all unsettled bets" time="8.015">
     </testcase>
   </testsuite>
 </testsuites>
