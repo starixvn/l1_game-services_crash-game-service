@@ -91,8 +91,8 @@ export default class Bot extends Table.Crons.TableGameBot {
             );
 
             if (user) {
-                await this.insertBet(bot, amount);
                 this.provablyFairConsumer.addClientSeed({ name: bot.name, clientSeed: bot.clientSeed });
+                await this.insertBet(bot, amount);
 
                 this.totalTickets += 1;
 

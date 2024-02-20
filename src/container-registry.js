@@ -1,6 +1,6 @@
 import awilix from "awilix";
 import { Table } from "sc-game-base";
-import { PFHistoryQuery, PFRoundQuery, PFRoundResultConsumer, PFRoundResultPublisher, ProvablyFairConsumer } from "sc-provably-fair";
+import { PFRoundResultConsumer, PFRoundResultPublisher, ProvablyFairConsumer } from "sc-provably-fair";
 import { MaxCombinedClientSeeds } from "./constants";
 import {
     CashOutConsumer,
@@ -93,15 +93,6 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             liveGameCrons: asClass(LiveGameCrons).singleton().proxy(),
             processBetQueue: asClass(ProcessBetQueue).singleton().proxy(),
             bot: asClass(Bot).singleton(),
-        });
-    }
-
-    registerApis() {
-        super.registerApis();
-
-        this.container.register({
-            roundQuery: asClass(PFRoundQuery).singleton(),
-            historyQuery: asClass(PFHistoryQuery).singleton(),
         });
     }
 
