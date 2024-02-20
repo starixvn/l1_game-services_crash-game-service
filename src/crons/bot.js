@@ -200,7 +200,7 @@ export default class Bot extends Table.Crons.TableGameBot {
             clientSeed: bot.clientSeed,
         };
 
-        await this.tempBetsRepository.create(newBet);
+        return await this.tempBetsRepository.create(newBet);
     }
 
     async insertBetLog(bot, { amount, winAmount, action, multiplier }) {
