@@ -13,6 +13,7 @@ export default class SocketRouter extends Routers.BaseSocketRouter {
         logService,
         playGamePermissionValidator,
         cashOutConsumer,
+        roundQuery,
     }) {
         super({
             definition,
@@ -25,6 +26,7 @@ export default class SocketRouter extends Routers.BaseSocketRouter {
             historyQuery,
             logService,
             playGamePermissionValidator,
+            roundQuery,
         });
 
         this.cashOutConsumer = cashOutConsumer;
