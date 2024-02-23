@@ -1,4 +1,4 @@
-import { stubMongoose } from "jest-micro-auto-stub";
+import { stub, stubMongoose } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
 import { Core } from "sc-game-base";
 import { GameDefinition } from "sc-game-base/src/core";
