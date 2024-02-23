@@ -52,6 +52,8 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
             resultsRepository,
             promotionRepository,
             appConfigs,
+            unsettledRoundConsumer,
+            provablyFairConsumer,
         });
 
         this.liveGameCrons = liveGameCrons;
@@ -59,17 +61,11 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         this.betLogsRepository = betLogsRepository;
         this.umInfoWatcher = umInfoWatcher;
         this.settleCashOutConsumer = settleCashOutConsumer;
-        this.unsettledRoundConsumer = unsettledRoundConsumer;
-        this.provablyFairConsumer = provablyFairConsumer;
     }
 
     async start() {
         this.bot && (await this.bot.resetInRoomTrackings());
-        await this.initRoundId();
-        await this.queryLastResult();
-        await this.updateExchangeRates();
-        await this.getSettingForNewRound();
-        this.startCron();
+        await super.start();
         this.umInfoWatcher.initChangeStream();
     }
 
@@ -107,6 +103,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         }
 
         if (this.gameData.remainingTime === durations.mergeClientSeeds && this.resultsRepository) {
+            this.provablyFairConsumer.updateClientSeedFromBets();
             await this.roundResultConsumer.generateResult();
         }
 
@@ -138,7 +135,6 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
     async resetForNewRound() {
         super.resetForNewRound();
         this.gameData.betList = {};
-        this.provablyFairConsumer.reset();
         this.bot && (await this.bot.reset());
         this.appConfigs.enabledBoostedOdds && (await this.updatePromotionOddsAndNotify());
     }

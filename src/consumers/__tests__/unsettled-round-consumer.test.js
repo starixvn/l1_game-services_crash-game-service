@@ -175,7 +175,7 @@ describe("unsettledRoundConsumer", () => {
                 const unsettledRoundConsumer = initConsumer();
 
                 // Act
-                await unsettledRoundConsumer.proceedUnsettledBets();
+                await unsettledRoundConsumer.proceedUnsettledBets(unsettledBets);
 
                 // Assert
                 expect(betLogsRepository.insertMany).toHaveBeenCalledWith([

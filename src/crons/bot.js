@@ -1,6 +1,5 @@
 import Chance from "chance";
 import { Constants, Table } from "sc-game-base";
-import { generateSeed } from "sc-pf-client-seed";
 import { Actions, Chips } from "../constants";
 import CrashGameData from "../game-data";
 import { calculateMultiplier } from "../helpers/crash-point-helper";
@@ -15,9 +14,8 @@ export default class Bot extends Table.Crons.TableGameBot {
      */
 
     constructor(definition, gameData, publisher, userInfosRepository, tempBetsRepository, tempBetLogsRepository, provablyFairConsumer) {
-        super(definition, gameData, publisher, userInfosRepository, tempBetsRepository);
+        super(definition, gameData, publisher, userInfosRepository, tempBetsRepository, provablyFairConsumer);
 
-        this.provablyFairConsumer = provablyFairConsumer;
         this.tempBetLogsRepository = tempBetLogsRepository;
         this.chance = new Chance();
         this.cashOutBoundary = 3.5;
@@ -82,7 +80,7 @@ export default class Bot extends Table.Crons.TableGameBot {
             const maxBet = this.gameData.gameConfigs.bot_maxbet;
             const minBet = this.getMinBet();
             const amount = this.getBetAmount(minBet, maxBet);
-            bot.clientSeed = generateSeed();
+            bot.clientSeed = this.generateClientSeed();
 
             const user = await this.userInfosRepository.findOneAndUpdate(
                 { id: bot.id, red: { $gt: amount } },
@@ -91,8 +89,8 @@ export default class Bot extends Table.Crons.TableGameBot {
             );
 
             if (user) {
-                this.provablyFairConsumer.addClientSeed({ name: bot.name, clientSeed: bot.clientSeed });
-                await this.insertBet(bot, amount);
+                const time = await this.insertBet(bot, amount);
+                this.provablyFairConsumer.addBets({ time, name: bot.name, clientSeed: bot.clientSeed });
 
                 this.totalTickets += 1;
 
@@ -200,7 +198,9 @@ export default class Bot extends Table.Crons.TableGameBot {
             clientSeed: bot.clientSeed,
         };
 
-        return await this.tempBetsRepository.create(newBet);
+        await this.tempBetsRepository.create(newBet);
+
+        return newBet.time;
     }
 
     async insertBetLog(bot, { amount, winAmount, action, multiplier }) {

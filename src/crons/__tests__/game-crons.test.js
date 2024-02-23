@@ -2,6 +2,7 @@ import { stubMongoose } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
 import { Core } from "sc-game-base";
 import { GameDefinition } from "sc-game-base/src/core";
+import { ProvablyFairConsumer, UnsettledRoundConsumer } from "sc-game-base/src/core/event-consumers";
 import { GameStatusPublisher, RunningRoundInfoPublisher } from "sc-game-base/src/core/event-publishers";
 import { SettleGameRoundConsumer } from "../../consumers/settle-game-round-consumer";
 import CrashGameData from "../../game-data";
@@ -31,7 +32,8 @@ const runningRoundInfoPublisher = new RunningRoundInfoPublisher();
 const gameStatusPublisher = new GameStatusPublisher();
 const liveGameCrons = new LiveGameCrons({});
 const umInfoWatcher = new UmInfoWatcher(gameData);
-
+const unsettledRoundConsumer = stub(UnsettledRoundConsumer);
+const provablyFairConsumer = stub(ProvablyFairConsumer);
 /** @type {logger}*/
 const logService = {
     logError: jest.fn(),
@@ -97,6 +99,8 @@ const createBaseGameCron = function () {
         betLogsRepository,
         resultsRepository: {},
         umInfoWatcher,
+        unsettledRoundConsumer,
+        provablyFairConsumer
     });
 };
 let cron;

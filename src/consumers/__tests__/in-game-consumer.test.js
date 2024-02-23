@@ -1,8 +1,8 @@
 import { stub, stubMongoose } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
 import { Core, Table } from "sc-game-base";
+import { RoundQuery } from "sc-game-base/src/core/query-apis";
 import CrashGameData from "../../game-data";
-import { RoundQuery } from "../../query-apis/round-query";
 import { InGameConsumer } from "../in-game-consumer";
 
 describe("in game consumer instance", () => {
