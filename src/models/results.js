@@ -1,16 +1,6 @@
 import mongoose from "mongoose";
-
-const PFResultSchema = new mongoose.Schema({
-    roundId: { type: Number, required: true },
-    serverSeed: { type: String },
-    serverSeedHash: { type: String },
-    clientSeeds: { type: Array, default: [] },
-    mergeClientSeed: { type: String },
-    mergeSeed: { type: String },
-    finalHash: { type: String },
-    time: { type: Date, default: new Date() },
-});
+import { ResultSchema } from "sc-game-base/src/core/models";
 
 export default function (gameConfigName) {
-    return mongoose.model(`${gameConfigName}_pf_results`, PFResultSchema);
+    return mongoose.model(`${gameConfigName}_results`, ResultSchema);
 }

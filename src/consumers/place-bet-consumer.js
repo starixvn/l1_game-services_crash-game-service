@@ -1,6 +1,5 @@
 import { helpers } from "sc-common";
 import { BaseEventConsumers } from "sc-game-base/src/core";
-import { verifySeed } from "sc-pf-client-seed";
 import { Actions, MinMultiplierValue } from "../constants";
 import noticeHelper from "../helpers/notice-helper";
 import { roundFloat } from "../helpers/number-helper";
@@ -10,7 +9,6 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         Object.assign(payload, {
             amount: payload.amount >> 0,
             autoCashOut: roundFloat(payload.autoCashOut ?? 0),
-            clientSendTime: payload.clientSendTime,
             freeBet: payload.freeBet ?? false,
             roundId: payload.roundId ?? this.gameData.roundId,
             mode: payload.m ?? this.DisplayMode.Landscape,
@@ -18,10 +16,10 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
             receivedTime: new Date(),
         });
 
-        const { amount, freeBet, roundId, autoCashOut, clientSeed } = payload;
+        const { amount, freeBet, roundId, autoCashOut } = payload;
         const name = player.profile.name;
 
-        if (!this.validateBetRequest(player, amount, freeBet, roundId, autoCashOut, clientSeed)) {
+        if (!this.validateRequestParams(payload, player) || !this.validateBetRequest(player, amount, freeBet, roundId, autoCashOut)) {
             return;
         }
 
@@ -44,50 +42,11 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         this.gameData.ingame[name].betQueue.push({ player, payload });
     }
 
-    validateBetRequest(player, amount, freeBet, roundId, autoCashOut, clientSeed) {
-        if (!amount) {
-            return false;
-        }
-
-        const criteria = this.composeValidationCriteria(player, amount, freeBet, roundId, autoCashOut, clientSeed);
-        const failedCriterion = criteria.find((criterion) => criterion.failure);
-
-        if (failedCriterion) {
-            this.publisher.publishToUser(player.UID, { endBet: -1, notice: failedCriterion.notice });
-
-            return false;
-        }
-
-        return true;
-    }
-
-    composeValidationCriteria(player, amount, freeBet, roundId, autoCashOut, clientSeed) {
+    composeValidationCriteria(player, amount, freeBet, roundId, autoCashOut) {
         const bettingTimeValidationCriteria = this.composeBettingTimeValidationCriteria(roundId) ?? [];
         const betAmountValidationCriteria = this.composeBetAmountValidationCriteria(player, amount, freeBet, autoCashOut) || [];
-        const clientSeedValidationCriteria = this.composeClientSeedValidationCriteria(clientSeed);
 
-        return bettingTimeValidationCriteria.concat(betAmountValidationCriteria, clientSeedValidationCriteria);
-    }
-
-    composeBettingTimeValidationCriteria(roundId) {
-        const configs = this.gameData.gameConfigs;
-
-        return [
-            {
-                failure: !configs.enabled,
-                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
-            },
-            {
-                failure: roundId !== this.gameData.roundId,
-                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet, { gameRoundId: roundId }),
-            },
-            {
-                failure:
-                    this.gameData.remainingTime < this.definition.durations.lockingBet ||
-                    this.gameData.remainingTime >= this.definition.durations.placingBets,
-                notice: this.getNoticeObj(helpers.noticeHelper.placeBetNextRound),
-            },
-        ];
+        return bettingTimeValidationCriteria.concat(betAmountValidationCriteria);
     }
 
     composeBetAmountValidationCriteria(player, amount, freeBet, autoCashOut) {
@@ -117,15 +76,6 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
             {
                 failure: autoCashOut && (autoCashOut < MinMultiplierValue || autoCashOut > configs.crashConfig.maxMultiplier),
                 notice: this.getNoticeObj(noticeHelper.invalidValueCashOut, { autoCashOut }),
-            },
-        ];
-    }
-
-    composeClientSeedValidationCriteria(clientSeed) {
-        return [
-            {
-                failure: !verifySeed(clientSeed),
-                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
             },
         ];
     }

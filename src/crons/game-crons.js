@@ -107,7 +107,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
             this.runningRoundInfoPublisher.publish();
         }
 
-        if (this.gameData.remainingTime === 1) {
+        if (this.gameData.remainingTime === durations.mergeClientSeeds && this.resultsRepository) {
             await this.roundResultConsumer.generateResult();
         }
 

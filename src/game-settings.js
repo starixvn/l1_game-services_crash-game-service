@@ -5,6 +5,7 @@ export default {
         wholeRound: 14,
         placingBets: 10,
         lockingBet: 3,
+        mergeClientSeeds: 1,
         liveTime: 0,
     },
     choices: {},

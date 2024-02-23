@@ -1,6 +1,5 @@
 import awilix from "awilix";
 import { Table } from "sc-game-base";
-import { PFRoundResultConsumer, PFRoundResultPublisher, ProvablyFairConsumer } from "sc-provably-fair";
 import { MaxCombinedClientSeeds } from "./constants";
 import {
     CashOutConsumer,
@@ -8,7 +7,7 @@ import {
     PlaceBetConsumer,
     SettleCashOutConsumer,
     SettleGameRoundConsumer,
-    UnsettledRoundConsumer
+    UnsettledRoundConsumer,
 } from "./consumers";
 import { LiveGameCrons } from "./crons";
 import Bot from "./crons/bot";
@@ -66,11 +65,9 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             inGameConsumer: asClass(InGameConsumer).singleton(),
             placeBetConsumer: asClass(PlaceBetConsumer).singleton(),
             cashOutConsumer: asClass(CashOutConsumer).singleton(),
-            roundResultConsumer: asClass(PFRoundResultConsumer).singleton(),
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
             settleCashOutConsumer: asClass(SettleCashOutConsumer).singleton(),
             unsettledRoundConsumer: asClass(UnsettledRoundConsumer).singleton().proxy(),
-            provablyFairConsumer: asClass(ProvablyFairConsumer).singleton(),
         });
     }
 
@@ -80,7 +77,6 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
         this.container.register({
             liveGamePublisher: asClass(LiveGamePublisher).singleton(),
             placeBetPublisher: asClass(PlaceBetPublisher).singleton(),
-            roundResultPublisher: asClass(PFRoundResultPublisher).singleton(),
             userBetResultPublisher: asClass(UserBetResultPublisher).singleton(),
         });
     }

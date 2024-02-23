@@ -18,6 +18,7 @@ const player = {
         minBet: 6,
     },
 };
+
 describe("PlaceBetConsumer", () => {
     const chance = new Chance();
     const payload = {
@@ -65,78 +66,13 @@ describe("PlaceBetConsumer", () => {
             // Arrange
             spyOn(consumer, "composeBettingTimeValidationCriteria").and.returnValue([{ id: 1 }]);
             spyOn(consumer, "composeBetAmountValidationCriteria").and.returnValue([{ id: 2 }]);
-            spyOn(consumer, "composeClientSeedValidationCriteria").and.returnValue([{ id: 3 }]);
-            const expectedValue = [{ id: 1 }, { id: 2 }, { id: 3 }];
+            const expectedValue = [{ id: 1 }, { id: 2 }];
 
             // Act
             const actualValue = consumer.composeValidationCriteria();
 
             // Assert
             expect(actualValue).toStrictEqual(expectedValue);
-        });
-    });
-
-    describe("composeBettingTimeValidationCriteria", () => {
-        describe("when game's disabled", () => {
-            it("should return invalid bet", () => {
-                // arrange
-                const gameData = new Core.GameData();
-                gameData.gameConfigs = {
-                    enabled: false,
-                };
-
-                // act
-                const actualResult = consumer.composeBettingTimeValidationCriteria(1);
-
-                // assert
-                expect(actualResult[0].failure).toBe(true);
-            });
-        });
-
-        describe("When roundId not match running round", () => {
-            it("should return invalid notice ", () => {
-                //arrange
-                gameData.gameConfigs.enabled = true;
-                // act
-                var criterions = consumer.composeBettingTimeValidationCriteria(2);
-
-                // assert
-                expect(criterions).not.toBeEmpty();
-                expect(criterions.filter((x) => x.failure)[0]).toStrictEqual({
-                    failure: true,
-                    notice: { errorCode: helpers.noticeHelper.invalidBet, gameRoundId: 2 },
-                });
-            });
-        });
-
-        describe("return place next round", () => {
-            it("when place bet in lock bet time ", () => {
-                // arrange
-                gameData.gameConfigs.enabled = true;
-                gameData.remainingTime = 2;
-                // act
-                const criterions = consumer.composeBettingTimeValidationCriteria(1);
-
-                // assert
-                expect(criterions.filter((x) => x.failure)[0]).toStrictEqual({
-                    failure: true,
-                    notice: { errorCode: helpers.noticeHelper.placeBetNextRound },
-                });
-            });
-
-            it("when place bet in settle time ", () => {
-                // arrange
-                gameData.gameConfigs.enabled = true;
-                gameData.remainingTime = 11;
-                // act
-                const criterions = consumer.composeBettingTimeValidationCriteria(1);
-
-                // assert
-                expect(criterions.filter((x) => x.failure)[0]).toStrictEqual({
-                    failure: true,
-                    notice: { errorCode: helpers.noticeHelper.placeBetNextRound },
-                });
-            });
         });
     });
 
@@ -212,7 +148,7 @@ describe("PlaceBetConsumer", () => {
                 const actualValue = consumer.validateBetRequest(player, amount, false, 1);
 
                 // Assert
-                expect(actualValue).toBeFalse();
+                expect(actualValue).toBeFalsy();
             });
         });
 
@@ -227,35 +163,37 @@ describe("PlaceBetConsumer", () => {
                 const actualValue = consumer.validateBetRequest(player, amount, false, 2, autoCashOut);
 
                 // Assert
-                expect(actualValue).toBeTrue();
+                expect(actualValue).toBeTruthy();
             });
         });
     });
 
     describe("consume", () => {
         beforeEach(() => {
+            consumer.validateRequestParams = jest.fn();
             consumer.validateBetRequest = jest.fn();
             consumer.adjustBetTracks = jest.fn();
         });
 
-        it("should call validateBetRequest", () => {
+        it("should call validateRequestParams", () => {
             // Act
             consumer.consume(player, payload);
 
             // Assert
-            expect(consumer.validateBetRequest).toBeCalledWith(
-                player,
-                payload.amount,
-                payload.freeBet,
-                payload.roundId,
-                payload.autoCashOut,
-                payload.clientSeed
-            );
+            expect(consumer.validateRequestParams).toBeCalledWith(payload, player);
         });
 
-        describe("when bet request is invalid", () => {
+        describe("when requestParams is NOT valid", () => {
             beforeEach(() => {
-                consumer.validateBetRequest.mockReturnValueOnce(false);
+                consumer.validateRequestParams.mockReturnValueOnce(false);
+            });
+
+            it("should NOT call validateBetRequest", () => {
+                // Act
+                consumer.consume(player, payload);
+
+                // Assert
+                expect(consumer.validateBetRequest).not.toBeCalled();
             });
 
             it("should NOT call adjustBetTracks", () => {
@@ -275,37 +213,81 @@ describe("PlaceBetConsumer", () => {
             });
         });
 
-        describe("when bet request is valid", () => {
+        describe("when requestParams is valid", () => {
             beforeEach(() => {
-                consumer.validateBetRequest.mockReturnValueOnce(true);
+                consumer.validateRequestParams.mockReturnValueOnce(true);
             });
 
-            it("should call adjustBetTracks", () => {
+            it("should call validateBetRequest", () => {
                 // Act
                 consumer.consume(player, payload);
 
                 // Assert
-                expect(consumer.adjustBetTracks).toBeCalledWith(player.profile.name, payload);
+                expect(consumer.validateBetRequest).toBeCalledWith(
+                    player,
+                    payload.amount,
+                    payload.freeBet,
+                    payload.roundId,
+                    payload.autoCashOut
+                );
             });
 
-            it("should push bet to bet queue", () => {
-                // Act
-                consumer.consume(player, payload);
+            describe("when bet request is invalid", () => {
+                beforeEach(() => {
+                    consumer.validateBetRequest.mockReturnValueOnce(false);
+                });
 
-                // Assert
-                expect(gameData.ingame[player.profile.name]?.betQueue.includes((bet) => bet.player === player && bet.payload === payload));
-            });
-
-            describe("when player info is NOT exist on ingame data", () => {
-                it("should add player info to ingame data", () => {
-                    // Arrange
-                    gameData.ingame = {};
-
+                it("should NOT call adjustBetTracks", () => {
                     // Act
                     consumer.consume(player, payload);
 
                     // Assert
-                    expect(gameData.ingame[player.profile.name]).toBeDefined();
+                    expect(consumer.adjustBetTracks).not.toBeCalled();
+                });
+
+                it("should NOT push bet to bet queue", () => {
+                    // Act
+                    consumer.consume(player, payload);
+
+                    // Assert
+                    expect(gameData.ingame[player.profile.name]?.betQueue?.length ?? 0).toBe(0);
+                });
+            });
+
+            describe("when bet request is valid", () => {
+                beforeEach(() => {
+                    consumer.validateBetRequest.mockReturnValueOnce(true);
+                });
+
+                it("should call adjustBetTracks", () => {
+                    // Act
+                    consumer.consume(player, payload);
+
+                    // Assert
+                    expect(consumer.adjustBetTracks).toBeCalledWith(player.profile.name, payload);
+                });
+
+                it("should push bet to bet queue", () => {
+                    // Act
+                    consumer.consume(player, payload);
+
+                    // Assert
+                    expect(
+                        gameData.ingame[player.profile.name]?.betQueue.includes((bet) => bet.player === player && bet.payload === payload)
+                    );
+                });
+
+                describe("when player info is NOT exist on ingame data", () => {
+                    it("should add player info to ingame data", () => {
+                        // Arrange
+                        gameData.ingame = {};
+
+                        // Act
+                        consumer.consume(player, payload);
+
+                        // Assert
+                        expect(gameData.ingame[player.profile.name]).toBeDefined();
+                    });
                 });
             });
         });
@@ -323,73 +305,6 @@ describe("PlaceBetConsumer", () => {
                 // Assert
                 expect(gameData.ingame[player.profile.name].betTracks[payload.action].amount).toStrictEqual(payload.amount);
                 expect(gameData.ingame[player.profile.name].betTracks[payload.action].autoCashOut).toStrictEqual(payload.autoCashOut);
-            });
-        });
-    });
-
-    describe("composeClientSeedValidationCriteria", () => {
-        describe("when the clientSeed is an integer within the range", () => {
-            it("should return an array containing a true failure", () => {
-                const placeBetConsumer = new PlaceBetConsumer();
-                const clientSeed = "1234";
-                const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
-                expect(validationCriteria).toEqual([
-                    { failure: false, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidBet) },
-                ]);
-            });
-        });
-
-        describe("when the clientSeed is the minimum value of ClientSeedRange", () => {
-            it("should return an array containing a false failure", () => {
-                const placeBetConsumer = new PlaceBetConsumer();
-                const clientSeed = "0";
-                const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
-                expect(validationCriteria).toEqual([
-                    { failure: false, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidBet) },
-                ]);
-            });
-        });
-
-        describe("when the clientSeed is the maximum value of ClientSeedRange", () => {
-            it("should return an array containing a false failure", () => {
-                const placeBetConsumer = new PlaceBetConsumer();
-                const clientSeed = "9999";
-                const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
-                expect(validationCriteria).toEqual([
-                    { failure: false, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidBet) },
-                ]);
-            });
-        });
-
-        describe("when the clientSeed is not an integer", () => {
-            it("should return an array containing a true failure", () => {
-                const placeBetConsumer = new PlaceBetConsumer();
-                const clientSeed = "12.34";
-                const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
-                expect(validationCriteria).toEqual([
-                    { failure: true, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidBet) },
-                ]);
-            });
-        });
-
-        describe("when the clientSeed is a float", () => {
-            it("should return an array containing a failure", () => {
-                const placeBetConsumer = new PlaceBetConsumer();
-                const clientSeed = "12.34";
-                const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
-                expect(validationCriteria).toEqual([
-                    { failure: true, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidBet) },
-                ]);
-            });
-        });
-        describe("when the clientSeed is not within ClientSeedRange", () => {
-            it("should return an array containing a failure", () => {
-                const placeBetConsumer = new PlaceBetConsumer();
-                const clientSeed = "-1";
-                const validationCriteria = placeBetConsumer.composeClientSeedValidationCriteria(clientSeed);
-                expect(validationCriteria).toEqual([
-                    { failure: true, notice: placeBetConsumer.getNoticeObj(noticeHelper.invalidBet) },
-                ]);
             });
         });
     });
