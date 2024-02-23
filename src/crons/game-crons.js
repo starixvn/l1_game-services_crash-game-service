@@ -68,7 +68,6 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         await this.initRoundId();
         await this.queryLastResult();
         await this.updateExchangeRates();
-        await this.unsettledRoundConsumer.proceed();
         await this.getSettingForNewRound();
         this.startCron();
         this.umInfoWatcher.initChangeStream();
@@ -111,7 +110,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
             await this.roundResultConsumer.generateResult();
         }
 
-        if (this.gameData.remainingTime === -1) {
+        if (this.gameData.remainingTime === durations.liveTime) {
             this.startDelaySettleRound();
             this.gameData.result > 1 && this.liveGameCrons.start();
         }
