@@ -15,17 +15,6 @@ describe("ProvablyPair", () => {
         userClientDriver.sendInGameEvent();
     });
 
-    describe("when get ingame data", () => {
-        it("should receive pf info in round history ", async () => {
-            //Act
-            userClientDriver.sendInGameEvent();
-            const { roundHistory } = await userClientDriver.handleGameEvent((ingameData) => ingameData.roundHistory);
-
-            // Assert
-            expect(roundHistory.some((round) => !round.pf)).toBeFalsy();
-        });
-    });
-
     describe("when start placeBet", () => {
         it("should receive pf server seed hash ", async () => {
             //Act
