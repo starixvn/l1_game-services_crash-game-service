@@ -12,4 +12,5 @@ export default {
     choicesMapper: {},
     defaultBetTracks: {},
     numberOfRoundHistory: 11,
+    provablyFair: true,
 };
