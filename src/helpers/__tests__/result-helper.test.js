@@ -6,13 +6,16 @@ describe("resultHelper", () => {
 
     describe("generateResult", () => {
         const hexValue = chance.hash();
+        const maxHexValue = "ffffff";
+        const minHaxValue = "000000";
 
-        it("should return correct number", () => {
+        it.each([hexValue, maxHexValue, minHaxValue])("should return correct number", () => {
             // Act
             const result = generateResult(hexValue);
 
             // Assert
             expect(result).toBeGreaterThanOrEqual(1);
+            expect(result).toBeLessThanOrEqual(2000);
         });
     });
 
