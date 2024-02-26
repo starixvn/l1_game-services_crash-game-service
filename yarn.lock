@@ -7479,10 +7479,10 @@ sc-game-base@4.1.0, sc-game-base@4.1.3-beta.5:
     socket.io-msgpack-parser "^3.0.1"
     socket.io-prom-metrics "^1.0.3"
 
-sc-game-base@4.1.3-beta.6:
-  version "4.1.3-beta.6"
-  resolved "https://npm.lumigame.com/sc-game-base/-/sc-game-base-4.1.3-beta.6.tgz#8f7897cb4fd687ae15022b197d936b91e980f9dc"
-  integrity sha512-xEVd3k6N6n65HQAPrER5VnFUKBPW/Ad0uEZpsQWS9xLlP+zK/ESP0KjARfnyd3sbD+2jZ31oGl71D7/4O9kApQ==
+sc-game-base@4.1.3-beta.7:
+  version "4.1.3-beta.7"
+  resolved "https://npm.lumigame.com/sc-game-base/-/sc-game-base-4.1.3-beta.7.tgz#73ba1e3b593b11d5f91ab412de75969ce370ba21"
+  integrity sha512-ppiGd3ZQpAw/EzZGLdcHdymi/FAo8vwg32ND7e5x61+gRMe1HeR1k2uoMRtZhPNvsa2TTSXEk/zt19cjBg+4ZA==
   dependencies:
     awilix "^8.0.0"
     axios "^1.0.0"
