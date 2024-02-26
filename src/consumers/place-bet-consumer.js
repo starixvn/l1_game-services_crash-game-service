@@ -42,6 +42,21 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         this.gameData.ingame[name].betQueue.push({ player, payload });
     }
 
+    composeRequestParamsValidationCriteria(request) {
+        const { clientSeed, amount } = request;
+
+        return [
+            {
+                failure: !amount,
+                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
+            },
+            {
+                failure: this.definition.mergeClientSeeds !== undefined && !verifySeed(clientSeed),
+                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
+            },
+        ];
+    }
+
     composeValidationCriteria(player, amount, freeBet, roundId, autoCashOut) {
         const bettingTimeValidationCriteria = this.composeBettingTimeValidationCriteria(roundId) ?? [];
         const betAmountValidationCriteria = this.composeBetAmountValidationCriteria(player, amount, freeBet, autoCashOut) || [];
