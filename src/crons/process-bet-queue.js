@@ -136,7 +136,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     async handleSuccessBet(player, balance, roundId, bet) {
         const rate = this.calculateCurrencyRate(player.session);
 
-        await this.insertBet(player, roundId, bet, rate);
+        const time = await this.insertBet(player, roundId, bet, rate);
         this.provablyFairConsumer.addBets({ time, name: player.profile.name, clientSeed: bet.clientSeed });
         await this.insertBetLog(player, roundId, bet);
 
@@ -207,7 +207,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         }
 
         await this.betsRepository.create(newBet);
-        return newBet.time
+        return newBet.time;
     }
 
     decreaseBetTracks(playerName) {
