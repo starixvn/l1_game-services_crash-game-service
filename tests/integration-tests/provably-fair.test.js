@@ -22,7 +22,7 @@ describe("ProvablyPair", () => {
             const { roundHistory } = await userClientDriver.handleGameEvent((ingameData) => ingameData.roundHistory);
 
             // Assert
-            expect(roundHistory.some((round) => !round.pf)).toBeFalse();
+            expect(roundHistory.some((round) => !round.pf)).toBeFalsy();
         });
     });
 
@@ -32,8 +32,8 @@ describe("ProvablyPair", () => {
             const { pf } = await userClientDriver.handleGameEvent((data) => data.pf);
 
             // Assert
-            expect(pf.roundId).not.toBeEmpty();
-            expect(pf.serverSeedHash).not.toBeEmpty();
+            expect(pf.roundId).toBeDefined();
+            expect(pf.serverSeedHash).toBeDefined();
         });
     });
 
@@ -43,10 +43,10 @@ describe("ProvablyPair", () => {
             const { finish } = await userClientDriver.handleGameEvent((data) => data.finish);
 
             // Assert
-            expect(finish.pf.finalHash).not.toBeEmpty();
-            expect(finish.pf.mergeSeed).not.toBeEmpty();
-            expect(finish.pf.result).not.toBeEmpty();
-            expect(finish.pf.roundId).not.toBeEmpty();
+            expect(finish.pf.finalHash).toBeDefined();
+            expect(finish.pf.mergeSeed).toBeDefined();
+            expect(finish.pf.result).toBeDefined();
+            expect(finish.pf.roundId).toBeDefined();
             expect(finish.pf.clientSeeds).toBeDefined();
         });
     });

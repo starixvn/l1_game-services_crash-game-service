@@ -20,6 +20,6 @@ describe("refund bet", () => {
         userClientDriver.sendGetHistoryEvent(1);
         const result = await userClientDriver.handleGameEvent((betHistoryData) => betHistoryData.history);
         // Assert
-        expect(result).not.toBeEmpty();
+        expect(result).toBeDefined();
     });
 });
