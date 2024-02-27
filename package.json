@@ -47,7 +47,7 @@
         "sc-game-service-integration-utils": "^1.3.7"
     },
     "resolutions": {
-        "sc-game-base": "4.1.3-beta.5",
+        "sc-game-base": "4.1.3-beta.13",
         "sc-base-database": "1.11.3"
     }
 }
