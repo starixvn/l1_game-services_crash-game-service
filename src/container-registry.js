@@ -18,6 +18,7 @@ import { BetLogs, Bets, Results, Rounds, tempBetLogs, tempBets, umInfo } from ".
 import liveGameLogs from "./models/live-game-logs";
 import { HttpRouter, SocketRouter } from "./routers";
 import UmInfoWatcher from "./watchers/um-info-watcher";
+import { HistoryQuery } from "./query-apis";
 
 const { asClass, asValue } = awilix;
 
@@ -98,6 +99,14 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
         this.container.register({
             socketRouter: asClass(SocketRouter).proxy(),
             httpRouter: asClass(HttpRouter),
+        });
+    }
+
+    registerApis() {
+        super.registerApis();
+
+        this.container.register({
+            historyQuery: asClass(HistoryQuery).singleton(),
         });
     }
 }
