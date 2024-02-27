@@ -10,7 +10,7 @@ module.exports = async () => {
         ],
         testEnvironment: "node",
         testResultsProcessor: "jest-sonar-reporter",
-        setupFilesAfterEnv: ["jest-extended"],
+        setupFilesAfterEnv: ["jest-extended/all"],
         testRunner: "jest-jasmine2",
         testTimeout: 120000,
     };
