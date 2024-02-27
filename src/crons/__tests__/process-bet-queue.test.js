@@ -6,7 +6,7 @@ import logger from "sc-common/logger";
 import { GameDefinition } from "sc-game-base/src/core";
 import BaseMetrics from "sc-game-base/src/core/base-metrics";
 import { PlaceBetPublisher } from "sc-game-base/src/core/event-publishers";
-import { ProvablyFairConsumer } from "sc-provably-fair";
+import { ProvablyFairConsumer } from "sc-game-base/src/core/event-consumers";
 import { Actions } from "../../constants";
 import { SettleCashOutConsumer } from "../../consumers";
 import CrashGameData from "../../game-data";
@@ -457,14 +457,11 @@ describe("ProcessBetQueue", () => {
         });
 
         it("should call gameData.addClientSeed", async () => {
-            //Arrange
-            const spy = jest.spyOn(gameData, "addClientSeed");
-
             // Act
             await proceedBetQueue.handleSuccessBet(player, balance, roundId, payload);
 
             // Assert
-            expect(spy).toBeCalledWith({ name: player.profile.name, clientSeed: payload.clientSeed });
+            expect(provablyFairConsumer.addBets).toBeCalledWith({ name: player.profile.name, clientSeed: payload.clientSeed });
         });
 
         describe("when bet is free bet", () => {
@@ -527,6 +524,8 @@ describe("ProcessBetQueue", () => {
                 rate: rate,
                 operatorId: player.session.operatorId,
                 playerId: player.session.playerId,
+                clientSeed: payload.clientSeed,
+                autoCashOut: payload.autoCashOut,
             };
 
             // Act
@@ -549,7 +548,7 @@ describe("ProcessBetQueue", () => {
             userInfosRepository,
             baseMetrics,
             settleCashOutConsumer,
-            provablyFairConsumer
+            provablyFairConsumer,
         });
     };
 
