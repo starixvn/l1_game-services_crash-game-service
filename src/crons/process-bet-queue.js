@@ -195,6 +195,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             amount: bet.amount,
             autoCashOut: bet.autoCashOut,
             clientSeed: bet.clientSeed,
+            totalAmount: bet.amount,
         };
 
         if (player.session) {
