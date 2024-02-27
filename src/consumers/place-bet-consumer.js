@@ -43,15 +43,11 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     }
 
     composeRequestParamsValidationCriteria(request) {
-        const { clientSeed, amount } = request;
+        const { amount } = request;
 
         return [
             {
                 failure: !amount,
-                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
-            },
-            {
-                failure: this.definition.mergeClientSeeds !== undefined && !verifySeed(clientSeed),
                 notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
             },
         ];
