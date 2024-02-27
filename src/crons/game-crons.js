@@ -86,7 +86,6 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
 
         if (this.gameData.remainingTime === durations.placingBets && this.resultsRepository) {
             await this.roundResultConsumer.generateServerSeedAndPublishHash(this.gameData.lastResultRecord);
-            this.gameData.settlementResultFromAdmin = {};
         }
 
         if (this.gameData.remainingTime === durations.placingBets) {
@@ -105,6 +104,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         if (this.gameData.remainingTime === durations.mergeClientSeeds && this.resultsRepository) {
             await this.provablyFairConsumer.updateClientSeedFromBets();
             await this.roundResultConsumer.generateResult();
+            this.gameData.settlementResultFromAdmin = {};
         }
 
         if (this.gameData.remainingTime === durations.liveTime) {

@@ -2,7 +2,7 @@ import { stub, stubMongoose } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
 import { BaseEventPublisher } from "sc-game-base/src/core/event-publishers";
 import { TableGameDefinition } from "sc-game-base/src/table";
-import { ProvablyFairConsumer } from "sc-provably-fair";
+import { ProvablyFairConsumer } from "sc-game-base/src/core/event-consumers";
 import CrashGameData from "../../game-data";
 import gameSettings from "../../game-settings";
 import { calculateMultiplier } from "../../helpers/crash-point-helper";

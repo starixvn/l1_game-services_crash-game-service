@@ -11,6 +11,7 @@ import UmInfoWatcher from "../../watchers/um-info-watcher";
 import Bot from "../bot";
 import GameCrons from "../game-crons";
 import LiveGameCrons from "../live-game-cron";
+import { BaseGameCron } from "sc-game-base/src/core/crons";
 
 jest.mock("sc-game-base/src/core/event-publishers");
 jest.mock("../../consumers/settle-game-round-consumer");
@@ -100,7 +101,7 @@ const createBaseGameCron = function () {
         resultsRepository: {},
         umInfoWatcher,
         unsettledRoundConsumer,
-        provablyFairConsumer
+        provablyFairConsumer,
     });
 };
 let cron;
@@ -126,69 +127,24 @@ describe("gameCrons", () => {
 
     describe("start", () => {
         beforeEach(() => {
-            cron.initRoundId = jest.fn();
-            cron.queryLastResult = jest.fn();
-            cron.updateExchangeRates = jest.fn();
-            cron.proceedUnsettledBets = jest.fn();
-            cron.initResultHash = jest.fn();
-            cron.getSettingForNewRound = jest.fn();
-            cron.startCron = jest.fn();
+            cron.bot.resetInRoomTrackings = jest.fn();
+            spyOn(BaseGameCron.prototype, "start").mockImplementation(() => {});
         });
 
-        it("should call initRoundId", async () => {
+        it("should call bot.resetInRoomTrackings", async () => {
             // Act
             await cron.start();
 
             // Assert
-            expect(cron.initRoundId).toBeCalled();
+            expect(cron.bot.resetInRoomTrackings).toBeCalled();
         });
 
-        it("should call queryLastResult", async () => {
+        it("should call super.start()", async () => {
             // Act
             await cron.start();
 
             // Assert
-            expect(cron.queryLastResult).toBeCalled();
-        });
-
-        it("should call updateExchangeRates", async () => {
-            // Act
-            await cron.start();
-
-            // Assert
-            expect(cron.updateExchangeRates).toBeCalled();
-        });
-
-        it("should call proceedUnsettledBets", async () => {
-            // Act
-            await cron.start();
-
-            // Assert
-            expect(cron.proceedUnsettledBets).toBeCalled();
-        });
-
-        it("should call initResultHash", async () => {
-            // Act
-            await cron.start();
-
-            // Assert
-            expect(cron.initResultHash).toBeCalled();
-        });
-
-        it("should call getSettingForNewRound", async () => {
-            // Act
-            await cron.start();
-
-            // Assert
-            expect(cron.getSettingForNewRound).toBeCalled();
-        });
-
-        it("should call startCron", async () => {
-            // Act
-            await cron.start();
-
-            // Assert
-            expect(cron.startCron).toBeCalled();
+            expect(cron.bot.resetInRoomTrackings).toBeCalled();
         });
     });
 
