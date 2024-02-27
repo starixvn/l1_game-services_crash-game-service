@@ -25,70 +25,13 @@ describe("liveGameCrons", () => {
     const logService = {};
     const chance = new Chance();
     let cron;
+
     beforeEach(() => {
         cron = new LiveGameCrons({ liveGamePublisher, logService, gameData, liveGameLogsRepository, settleCashOutConsumer });
     });
 
     afterEach(() => {
         jest.clearAllMocks();
-    });
-
-    describe("start", () => {
-        beforeEach(() => {
-            cron.proceed = jest.fn();
-            jest.useFakeTimers();
-        });
-
-        afterEach(() => {
-            jest.useRealTimers();
-            clearTimeout(cron.timeoutId);
-        });
-
-        it("should call proceed", () => {
-            // Act
-            cron.start();
-
-            // Assert
-            expect(cron.proceed).toBeCalled();
-        });
-
-        it("should call setTimeOut", () => {
-            // Act
-            cron.start();
-
-            // Assert
-            expect(setTimeout).toBeCalledWith(expect.any(Function), 100);
-        });
-
-        it("should call proceed every 100ms", () => {
-            // Act
-            cron.start();
-            jest.advanceTimersByTime(1000);
-
-            // Assert
-            expect(cron.proceed).toHaveBeenCalledTimes(11);
-        });
-    });
-
-    describe("stop", () => {
-        beforeEach(() => {
-            jest.useFakeTimers();
-        });
-
-        afterEach(() => {
-            jest.useRealTimers();
-        });
-
-        it("should remove timeOut", () => {
-            // Arrange
-            cron.timeoutId = chance.natural();
-
-            // Act
-            cron.stop();
-
-            // Assert
-            expect(clearTimeout).toBeCalledWith(cron.timeoutId);
-        });
     });
 
     describe("proceed", () => {
@@ -124,6 +67,58 @@ describe("liveGameCrons", () => {
 
             // Assert
             expect(cron.settleCashOutConsumer.proceedAutoCashOut).toBeCalledWith(m);
+        });
+    });
+
+    describe("stop", () => {
+        it("should remove timeOut", () => {
+            // Arrange
+            jest.spyOn(global, "clearTimeout");
+            cron.timeoutId = chance.natural();
+
+            // Act
+            cron.stop();
+
+            // Assert
+            expect(clearTimeout).toBeCalledWith(cron.timeoutId);
+        });
+    });
+
+    describe("start", () => {
+        beforeEach(() => {
+            cron.proceed = jest.fn();
+            jest.useFakeTimers();
+        });
+
+        afterEach(() => {
+            jest.useRealTimers();
+            cron.timeoutId && clearTimeout(cron.timeoutId);
+        });
+
+        it("should call proceed every 100ms", () => {
+            // Act
+            cron.start();
+            jest.advanceTimersByTime(1000);
+
+            // Assert
+            expect(cron.proceed).toHaveBeenCalledTimes(11);
+        });
+
+        it("should call proceed", () => {
+            // Act
+            cron.start();
+
+            // Assert
+            expect(cron.proceed).toBeCalled();
+        });
+
+        it("should call setTimeOut", () => {
+            // Act
+            jest.spyOn(global, "setTimeout");
+            cron.start();
+
+            // Assert
+            expect(setTimeout).toBeCalledWith(expect.any(Function), 100);
         });
     });
 });
