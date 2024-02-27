@@ -526,6 +526,7 @@ describe("ProcessBetQueue", () => {
                 playerId: player.session.playerId,
                 clientSeed: payload.clientSeed,
                 autoCashOut: payload.autoCashOut,
+                totalAmount: payload.amount,
             };
 
             // Act

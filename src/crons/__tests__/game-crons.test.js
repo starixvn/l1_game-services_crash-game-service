@@ -74,7 +74,7 @@ const betsRepository = stubMongoose(mongoose.Model);
 /** @type {mongoose.Model}*/
 const betLogsRepository = stubMongoose(mongoose.Model);
 
-const roundResultConsumer = { generateResultAndPublishHash: jest.fn() };
+const roundResultConsumer = { generateServerSeedAndPublishHash: jest.fn(), generateResult: jest.fn() };
 
 const createBaseGameCron = function () {
     return new GameCrons({
@@ -127,11 +127,17 @@ describe("gameCrons", () => {
 
     describe("start", () => {
         beforeEach(() => {
+            cron.initRoundId = jest.fn();
+            cron.queryLastResult = jest.fn();
+            cron.updateExchangeRates = jest.fn();
+            cron.proceedUnsettledBets = jest.fn();
+            cron.initResultHash = jest.fn();
+            cron.getSettingForNewRound = jest.fn();
+            cron.startCron = jest.fn();
             cron.bot.resetInRoomTrackings = jest.fn();
-            spyOn(BaseGameCron.prototype, "start").mockImplementation(() => {});
         });
 
-        it("should call bot.resetInRoomTrackings", async () => {
+        it("should call initRoundId", async () => {
             // Act
             await cron.start();
 
@@ -139,12 +145,23 @@ describe("gameCrons", () => {
             expect(cron.bot.resetInRoomTrackings).toBeCalled();
         });
 
-        it("should call super.start()", async () => {
+        it("should call super.start", async () => {
+            // Arrange
+            spyOn(BaseGameCron.prototype, "start");
+
             // Act
             await cron.start();
 
             // Assert
-            expect(cron.bot.resetInRoomTrackings).toBeCalled();
+            expect(BaseGameCron.prototype.start).toBeCalled();
+        });
+
+        it("should call umInfoWatcher.initChangeStream", async () => {
+            // Act
+            await cron.start();
+
+            // Assert
+            expect(umInfoWatcher.initChangeStream).toBeCalled();
         });
     });
 
@@ -202,7 +219,7 @@ describe("gameCrons", () => {
             });
 
             describe("when exist resultsRepository", () => {
-                it("should call generateResultAndPublishHash", async () => {
+                it("should call generateServerSeedAndPublishHash", async () => {
                     // Arrange
                     cron.gameData.remainingTime = durations.placingBets;
 
@@ -210,21 +227,7 @@ describe("gameCrons", () => {
                     await cron.proceed();
 
                     // Assert
-                    expect(cron.roundResultConsumer.generateResultAndPublishHash).toBeCalled();
-                });
-
-                it("should reset settlementResultFromAdmin", async () => {
-                    // Arrange
-                    cron.gameData.remainingTime = durations.placingBets;
-                    cron.gameData.settlementResultFromAdmin = {
-                        result: 100,
-                    };
-
-                    // Act
-                    await cron.proceed();
-
-                    // Assert
-                    expect(cron.gameData.settlementResultFromAdmin).toStrictEqual({});
+                    expect(cron.roundResultConsumer.generateServerSeedAndPublishHash).toBeCalled();
                 });
             });
 
@@ -241,7 +244,42 @@ describe("gameCrons", () => {
                 });
             });
 
-            describe("when remaining time is -1", () => {
+            describe("when remaining time is mergeClientSeeds time", () => {
+                beforeEach(() => {
+                    cron.gameData.remainingTime = 0;
+                });
+
+                it("should call provablyFairConsumer.updateClientSeedFromBets", async () => {
+                    // Act
+                    await cron.proceed();
+
+                    // Assert
+                    expect(provablyFairConsumer.updateClientSeedFromBets).toBeCalled();
+                });
+
+                it("should call roundResultConsumer.generateResult", async () => {
+                    // Act
+                    await cron.proceed();
+
+                    // Assert
+                    expect(roundResultConsumer.generateResult).toBeCalled();
+                });
+
+                it("should reset settlementResultFromAdmin", async () => {
+                    // Arrange
+                    cron.gameData.settlementResultFromAdmin = {
+                        result: 100,
+                    };
+
+                    // Act
+                    await cron.proceed();
+
+                    // Assert
+                    expect(cron.gameData.settlementResultFromAdmin).toStrictEqual({});
+                });
+            });
+
+            describe("when remaining time is liveTime", () => {
                 beforeEach(() => {
                     cron.gameData.remainingTime = -1;
                     cron.startDelaySettleRound = jest.fn();
@@ -282,6 +320,9 @@ describe("gameCrons", () => {
         });
 
         it("should sets a timeout to settle the round after the specified delay", () => {
+            // Assert
+            jest.spyOn(global, "setTimeout");
+
             // Act
             cron.startDelaySettleRound(gameData, definition);
 
