@@ -456,14 +456,6 @@ describe("ProcessBetQueue", () => {
             expect(proceedBetQueue.notifyPlacingBetResult).toBeCalledWith(player, balance, payload, rate);
         });
 
-        it("should call gameData.addClientSeed", async () => {
-            // Act
-            await proceedBetQueue.handleSuccessBet(player, balance, roundId, payload);
-
-            // Assert
-            expect(provablyFairConsumer.addBets).toBeCalledWith({ name: player.profile.name, clientSeed: payload.clientSeed });
-        });
-
         describe("when bet is free bet", () => {
             it("should not call updateUserStakeLevel", async () => {
                 // Act
