@@ -42,7 +42,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         this.gameData.ingame[name].betQueue.push({ player, payload });
     }
 
-    composeRequestParamsValidationCriteria(request) {
+    validateBetRequestParams(request) {
         const { amount } = request;
 
         return [
