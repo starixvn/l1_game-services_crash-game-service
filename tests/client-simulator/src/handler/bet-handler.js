@@ -11,7 +11,7 @@ const autoPlaceBet = (socket, gameInfo) => {
         if (data.spb) {
             setTimeout(async () => {
                 isPlaceBet = true;
-                await placeBet(socket, { amount: betAmount }, gameInfo);
+                await placeBet(socket, { amount: betAmount, clientSeed: "1234", clientSendTime: new Date() }, gameInfo);
             }, 1000);
         }
 
