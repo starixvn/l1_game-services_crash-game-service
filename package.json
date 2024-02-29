@@ -46,6 +46,7 @@
     },
     "resolutions": {
         "sc-game-base": "4.2.0",
-        "sc-base-database": "1.11.3"
+        "sc-base-database": "1.11.3",
+        "sc-base-apis": "1.18.2"
     }
 }
