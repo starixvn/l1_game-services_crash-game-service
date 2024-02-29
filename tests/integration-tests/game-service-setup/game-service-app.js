@@ -6,7 +6,7 @@ import gameSettings from "../../../src/game-settings";
 import { generateRawResultForHash, getSettlementResult } from "../../../src/helpers/result-helper";
 import IGTContainerRegistry from "./igt-container-registry";
 
-const igtGenerateResult = () => 1.1;
+const igtGenerateResult = () => 1.2;
 
 export const run = async () => {
     initAPIStub(appConfigs.apiSettings.apiUrl);
