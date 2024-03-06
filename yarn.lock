@@ -2226,7 +2226,7 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
-"@types/jest@^29.0.0", "@types/jest@^29.5.11":
+"@types/jest@^29.0.0":
   version "29.5.12"
   resolved "https://npm.lumigame.com/@types/jest/-/jest-29.5.12.tgz#7f7dc6eb4cf246d2474ed78744b05d06ce025544"
   integrity sha512-eDC8bTvT/QhYdxJAulQikueigY5AsdBRH2yDKW3yveW7svY3+DzN84/2NUgkw10RTiJbWqZrTtoGVdYlvFJdLw==
@@ -7443,10 +7443,10 @@ sc-common@1.8.1:
     mongoose-long "^0.3.0"
     numeral "^2.0.6"
 
-sc-game-base@4.1.0, sc-game-base@4.1.3-beta.16:
-  version "4.1.3-beta.16"
-  resolved "http://npm.lumigame.com/sc-game-base/-/sc-game-base-4.1.3-beta.16.tgz#cf6fc6192a8f6c19972d687983d0fc6938df0e7a"
-  integrity sha512-jnBu2j6DC/BFAtQO2Q2gRtKMuP7/itTHQO0AkDnXD920EMiKv+Y1pYryY78QanCx3QqoVnlDaSp1ny9DYE8eOA==
+sc-game-base@4.1.0, sc-game-base@4.2.0:
+  version "4.2.0"
+  resolved "http://npm.lumigame.com/sc-game-base/-/sc-game-base-4.2.0.tgz#8e92a003439322d0545e4355d59df61084ca49b5"
+  integrity sha512-RsJzvP7FfikTqbWv7SObt4RwqzYxx4dhGZ359tQ3NZb21jgrB0ZUPKnLKSMfHRIw4g+hkfrPPtLUuOuTk+I1FQ==
   dependencies:
     awilix "^8.0.0"
     axios "^1.0.0"
@@ -7469,7 +7469,7 @@ sc-game-base@4.1.0, sc-game-base@4.1.3-beta.16:
     sc-common "1.8.1"
     sc-instrument "1.0.0"
     sc-instrument-helper "1.0.0"
-    sc-pf-client-seed "^1.0.1-beta.0"
+    sc-pf-client-seed "^1.0.1"
     socket.io "^4.5.4"
     socket.io-msgpack-parser "^3.0.1"
     socket.io-prom-metrics "^1.0.3"
@@ -7532,12 +7532,11 @@ sc-instrument@1.1.0:
     opentelemetry-instrumentation-socket.io "0.34.0"
     socket.io "4.6.1"
 
-sc-pf-client-seed@1.0.1-beta.0, sc-pf-client-seed@^1.0.1-beta.0:
-  version "1.0.1-beta.0"
-  resolved "https://npm.lumigame.com/sc-pf-client-seed/-/sc-pf-client-seed-1.0.1-beta.0.tgz#31fbba5f6f3742cf04e26f73621fb3758f951e88"
-  integrity sha512-LzkOATrCNX6l9KJKRcDRynDdoHP8McppYS7TR10RHn6ewUhM8iwIYxEQwpeYsQQw7l19R1l93uqq1Zez5V/nFg==
+sc-pf-client-seed@^1.0.1:
+  version "1.0.1"
+  resolved "http://npm.lumigame.com/sc-pf-client-seed/-/sc-pf-client-seed-1.0.1.tgz#93f80cc8a07e1ed7c29c7e145497bb828cb0a870"
+  integrity sha512-2yK+gxoA2CkDrsQZKILA29EWzPHAuUZC4eXtJcy5ni0j3Ks5TONKRUY9NIsRiOkCudLfuG/xD7XVmMNsxn/egA==
   dependencies:
-    "@types/jest" "^29.5.11"
     chance "^1.1.11"
 
 semver-diff@^3.1.1:
@@ -8516,6 +8515,11 @@ validate-npm-package-license@^3.0.1:
   dependencies:
     spdx-correct "^3.0.0"
     spdx-expression-parse "^3.0.0"
+
+validatorjs@^3.22.1:
+  version "3.22.1"
+  resolved "http://npm.lumigame.com/validatorjs/-/validatorjs-3.22.1.tgz#13dbbe6556cf4ab87759105d13b1d31a9a54ce54"
+  integrity sha512-451KiCt/3E8qV/8fOUdO0YkA8zUdQBNVxubg9jvgEB+JAg9IlRKrClzwq2ir2ndj7TWmPYQ7bXFb4BxcyX2iWw==
 
 vary@^1, vary@~1.1.2:
   version "1.1.2"
