@@ -8,7 +8,7 @@ const Actions = {
 
 const MinMultiplierValue = 1.01;
 
-const MaxDeltaTime = 3000;
+const MaxDeltaTime = 60000;
 
 const MaxCombinedClientSeeds = 5;
 
@@ -19,4 +19,3 @@ const Chips = [
 ];
 
 export { Actions, Chips, ClientSeedRange, MaxCombinedClientSeeds, MaxDeltaTime, MinMultiplierValue };
-
