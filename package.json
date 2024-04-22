@@ -25,7 +25,7 @@
         "chance": "^1.1.7",
         "lodash": "^4.17.19",
         "sc-game-base": "4.2.0",
-        "sc-instrument": "1.1.0"
+        "sc-instrument": "1.1.1"
     },
     "devDependencies": {
         "@babel/preset-env": "^7.12.11",
