@@ -244,9 +244,18 @@ describe("gameCrons", () => {
                 });
             });
 
-            describe("when remaining time is mergeClientSeeds time", () => {
+            describe("when remaining time is liveTime", () => {
                 beforeEach(() => {
-                    cron.gameData.remainingTime = 0;
+                    cron.gameData.remainingTime = -1;
+                    cron.startDelaySettleRound = jest.fn();
+                });
+
+                it("should call startDelaySettleRound", async () => {
+                    // Act
+                    await cron.proceed();
+
+                    // Assert
+                    expect(cron.startDelaySettleRound).toBeCalled();
                 });
 
                 it("should call provablyFairConsumer.updateClientSeedFromBets", async () => {
@@ -276,21 +285,6 @@ describe("gameCrons", () => {
 
                     // Assert
                     expect(cron.gameData.settlementResultFromAdmin).toStrictEqual({});
-                });
-            });
-
-            describe("when remaining time is liveTime", () => {
-                beforeEach(() => {
-                    cron.gameData.remainingTime = -1;
-                    cron.startDelaySettleRound = jest.fn();
-                });
-
-                it("should call startDelaySettleRound", async () => {
-                    // Act
-                    await cron.proceed();
-
-                    // Assert
-                    expect(cron.startDelaySettleRound).toBeCalled();
                 });
 
                 describe("when round result > 1", () => {

@@ -101,13 +101,13 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
             this.runningRoundInfoPublisher.publish();
         }
 
-        if (this.gameData.remainingTime === durations.mergeClientSeeds && this.resultsRepository) {
-            await this.provablyFairConsumer.updateClientSeedFromBets();
-            await this.roundResultConsumer.generateResult();
-            this.gameData.settlementResultFromAdmin = {};
-        }
-
         if (this.gameData.remainingTime === durations.liveTime) {
+            if (this.resultsRepository) {
+                await this.provablyFairConsumer.updateClientSeedFromBets();
+                await this.roundResultConsumer.generateResult();
+                this.gameData.settlementResultFromAdmin = {};
+            }
+
             this.startDelaySettleRound();
             this.gameData.result > 1 && this.liveGameCrons.start();
         }
