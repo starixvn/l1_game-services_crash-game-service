@@ -59,9 +59,6 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             case Actions.Bet:
                 await this.proceedBet(player, payload);
                 break;
-            case Actions.HalfCashOut:
-                await this.proceedHalfCashOut(player, payload);
-                break;
             case Actions.CashOut:
                 await this.proceedCashOut(player, payload);
                 break;
@@ -77,21 +74,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         }
 
         const halfCashOutBetLog = betLogs.find((log) => log.action === Actions.HalfCashOut);
-
         const amount = bet.amount - (halfCashOutBetLog?.amount ?? 0);
-
-        await this.settleCashOutConsumer.settleCashOut(player, payload, amount, multiplier, halfCashOutBetLog?.winAmount);
-    }
-
-    async proceedHalfCashOut(player, payload) {
-        const { multiplier, bet, betLogs } = await this.getCashOutBet(payload, player);
-        const isValidCashOut = this.validateCashOut(multiplier, bet, player, betLogs);
-
-        if (!isValidCashOut) {
-            return;
-        }
-
-        const amount = bet.amount / 2;
 
         await this.settleCashOutConsumer.settleCashOut(player, payload, amount, multiplier);
     }
@@ -106,26 +89,27 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     }
 
     calculateCashOutMultiplier(payload) {
-        const { receivedTime } = payload;
-        const { startTime } = this.gameData;
-
-        const timeFromStart = receivedTime - startTime;
-
-        return calculateMultiplier(timeFromStart);
+        const playerName = payload.player?.profile?.name;
+        const playerInGame = this.gameData.ingame[playerName];
+        return playerInGame?.currentMultiplier ?? 0;
     }
 
     validateCashOut(multiplier, bet, player, betLogs) {
         const { result, roundId } = this.gameData;
         const cashOutBetLogs = betLogs.find((log) => log.action === Actions.CashOut);
 
-        if (!bet || multiplier >= result || roundId !== bet.roundId || !!cashOutBetLogs) {
+        if (this.isInvalidCashOut(bet, multiplier, result, roundId, cashOutBetLogs)) {
             this.publishCashOutFailed(player);
-
             return false;
         }
 
         return true;
     }
+
+    isInvalidCashOut(bet, multiplier, result, roundId, cashOutBetLogs) {
+        return !bet || multiplier >= result || roundId !== bet.roundId || !!cashOutBetLogs;
+    }
+
     publishCashOutFailed(player) {
         this.placeBetPublisher.publishGameFailedBet(player.UID, {
             endBet: -1,

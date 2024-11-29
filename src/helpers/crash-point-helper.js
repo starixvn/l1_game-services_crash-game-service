@@ -16,4 +16,21 @@ function calculateCrashTimeInMillisecond(crashPoint) {
     return (1000 * ((crashPoint - c) ** (1 / nthPower) - b)) / a;
 }
 
-export { calculateMultiplier, calculateCrashTimeInMillisecond };
+function calculateNextTapMultiplier(current, stageConfigs) {
+    const { stages } = stageConfigs;
+
+    const currentStage = stages.find((stage) => current >= stage.minMultiplier && current <= stage.maxMultiplier);
+
+    if (!currentStage) {
+        return current;
+    }
+
+    const nextMultiplier = roundFloat(current + currentStage.increment);
+    return Math.min(nextMultiplier, currentStage.maxMultiplier);
+}
+
+function getInitialTapMultiplier(stageConfigs) {
+    return stageConfigs.initialMultiplier;
+}
+
+export { calculateMultiplier, calculateCrashTimeInMillisecond, calculateNextTapMultiplier, getInitialTapMultiplier };

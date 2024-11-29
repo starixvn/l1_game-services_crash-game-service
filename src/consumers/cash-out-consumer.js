@@ -10,13 +10,13 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
             clientSendTime: payload.clientSendTime,
             mode: payload.m ?? this.DisplayMode.Landscape,
             receivedTime: new Date(),
-            action: payload.halfCashOut ? Actions.HalfCashOut : Actions.CashOut,
+            action: Actions.CashOut,
         });
 
-        const { roundId, halfCashOut, clientSendTime, receivedTime } = payload;
+        const { roundId, clientSendTime, receivedTime } = payload;
         const name = player.profile.name;
 
-        if (!this.validateRequest(player, roundId, halfCashOut, clientSendTime, receivedTime)) {
+        if (!this.validateRequest(player, roundId, clientSendTime, receivedTime)) {
             return;
         }
 
@@ -25,8 +25,8 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
         this.gameData.ingame[name].betQueue.push({ player, payload });
     }
 
-    validateRequest(player, roundId, halfCashOut, clientSendTime, receivedTime) {
-        const criteria = this.composeValidationCriteria(roundId, player, halfCashOut, clientSendTime, receivedTime);
+    validateRequest(player, roundId, clientSendTime, receivedTime) {
+        const criteria = this.composeValidationCriteria(roundId, player, clientSendTime, receivedTime);
         const failedCriterion = criteria.find((criterion) => criterion.failure);
 
         if (failedCriterion) {
@@ -38,17 +38,17 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
         return true;
     }
 
-    composeValidationCriteria(roundId, player, isHalfCashOut, clientSendTime, receivedTime) {
+    composeValidationCriteria(roundId, player, clientSendTime, receivedTime) {
         const name = player.profile.name;
         const betTracks = this.gameData.ingame?.[name]?.betTracks;
 
         const bettingTimeValidationCriteria = this.composeBettingTimeValidationCriteria(roundId, clientSendTime, receivedTime);
-        const betTrackValidationCriteria = this.composeBetTrackValidationCriteria(betTracks, isHalfCashOut);
+        const betTrackValidationCriteria = this.composeBetTrackValidationCriteria(betTracks);
 
         return bettingTimeValidationCriteria.concat(betTrackValidationCriteria);
     }
 
-    composeBetTrackValidationCriteria(betTracks, isHalfCashOut) {
+    composeBetTrackValidationCriteria(betTracks) {
         return [
             {
                 failure: !betTracks?.[Actions.Bet]?.time,
@@ -58,16 +58,11 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 failure: !!betTracks?.[Actions.CashOut]?.time,
                 notice: this.getNoticeObj(noticeHelper.invalidCashOut),
             },
-            {
-                failure: isHalfCashOut && betTracks?.[Actions.HalfCashOut]?.time,
-                notice: this.getNoticeObj(noticeHelper.invalidCashOut),
-            },
         ];
     }
 
     composeBettingTimeValidationCriteria(roundId, clientSendTime, receivedTime) {
         const configs = this.gameData.gameConfigs;
-        const deltaTime = receivedTime - clientSendTime;
 
         return [
             {
@@ -80,10 +75,6 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
             },
             {
                 failure: this.gameData.remainingTime > this.definition.durations.liveTime,
-                notice: this.getNoticeObj(noticeHelper.invalidCashOut),
-            },
-            {
-                failure: Math.abs(deltaTime) > MaxDeltaTime,
                 notice: this.getNoticeObj(noticeHelper.invalidCashOut),
             },
         ];

@@ -1,8 +1,8 @@
 import { helpers } from "sc-common";
 import { BaseEventConsumers } from "sc-game-base/src/core";
-import { Actions, MinMultiplierValue } from "../constants";
+import { Actions } from "../constants";
 import noticeHelper from "../helpers/notice-helper";
-import { roundFloat } from "../helpers/number-helper";
+import { getInitialTapMultiplier } from "../helpers/crash-point-helper";
 
 export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     consume(player, payload) {
@@ -32,6 +32,7 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 betQueue: [],
                 operatorId: player.session.operatorId,
                 playerData: { ...player },
+                currentMultiplier: getInitialTapMultiplier(this.gameData.gameConfigs.stageConfigs),
             };
 
             this.gameData.ingame[name] = newPlayer;

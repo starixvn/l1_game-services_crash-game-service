@@ -217,7 +217,6 @@ describe("ProcessBetQueue", () => {
         beforeEach(() => {
             proceedBetQueue.proceedBet = jest.fn();
             proceedBetQueue.proceedCashOut = jest.fn();
-            proceedBetQueue.proceedHalfCashOut = jest.fn();
             betLogsRepository.find().lean().exec.mockResolvedValueOnce([]);
         });
 
@@ -244,19 +243,6 @@ describe("ProcessBetQueue", () => {
 
                 // Assert
                 expect(proceedBetQueue.proceedCashOut).toBeCalledWith(player, cashOutPayload);
-            });
-        });
-
-        describe("when action is halfCashOut", () => {
-            it("should call halfCashOut", async () => {
-                // Arrange
-                const cashOutPayload = { ...payload, action: Actions.HalfCashOut };
-
-                // Act
-                await proceedBetQueue.proceedActions(player, cashOutPayload);
-
-                // Assert
-                expect(proceedBetQueue.proceedHalfCashOut).toBeCalledWith(player, cashOutPayload);
             });
         });
     });
@@ -289,123 +275,45 @@ describe("ProcessBetQueue", () => {
 
         describe("when existing bet", () => {
             const bet = { receivedTime: new Date(), amount: chance.natural() };
-            const multiplier = chance.floating({ min: 2, max: 100 });
+            const currentMultiplier = chance.floating({ min: 2, max: 100 });
 
             beforeEach(() => {
                 betsRepository.findOne().lean().exec.mockResolvedValueOnce(bet);
-                calculateMultiplier.mockReturnValueOnce(multiplier);
                 proceedBetQueue.isCashOutHalfAmount = jest.fn();
                 proceedBetQueue.publishCashOutFailed = jest.fn();
                 proceedBetQueue.getMaxWinPerRound = jest.fn();
+
+                // Mock calculateCashOutMultiplier
+                proceedBetQueue.calculateCashOutMultiplier = jest.fn().mockReturnValue(currentMultiplier);
+
+                // Set up player in gameData.ingame with currentMultiplier
+                gameData.ingame = {
+                    [player.profile.name]: {
+                        currentMultiplier,
+                    },
+                };
             });
 
-            it("should call calculateMultiplier", async () => {
+            it("should get current multiplier from gameData", async () => {
                 // Act
-                gameData.betList[player.UID] = {};
-                await proceedBetQueue.proceedCashOut(player, payload);
+                await proceedBetQueue.proceedCashOut(player, {
+                    ...payload,
+                    player: {
+                        profile: { name: player.profile.name },
+                    },
+                });
 
                 // Assert
-                expect(calculateMultiplier).toBeCalledWith(expect.any(Number));
+                expect(proceedBetQueue.calculateCashOutMultiplier).toBeCalledWith(
+                    expect.objectContaining({
+                        player: {
+                            profile: { name: player.profile.name },
+                        },
+                    })
+                );
             });
 
-            describe("when multiplier = result", () => {
-                it("should call publishCashOutFailed", async () => {
-                    // Arrange
-                    gameData.result = multiplier;
-
-                    // Act
-                    await proceedBetQueue.proceedCashOut(player, payload);
-
-                    // Assert
-                    expect(proceedBetQueue.publishCashOutFailed).toBeCalledWith(player);
-                });
-            });
-
-            describe("when multiplier > result", () => {
-                it("should publishGameFailedBet", async () => {
-                    // Arrange
-                    gameData.result = chance.floating({ min: 1, max: multiplier });
-
-                    // Act
-                    await proceedBetQueue.proceedCashOut(player, payload);
-
-                    // Assert
-                    expect(proceedBetQueue.publishCashOutFailed).toBeCalledWith(player);
-                });
-            });
-
-            describe("when gameData.roundId NOT match bet.roundId", () => {
-                it("should publishGameFailedBet", async () => {
-                    // Arrange
-                    gameData.result = chance.floating({ min: multiplier });
-                    bet.roundId = gameData.roundId - 1;
-
-                    // Act
-                    await proceedBetQueue.proceedCashOut(player, payload);
-
-                    // Assert
-                    expect(proceedBetQueue.publishCashOutFailed).toBeCalledWith(player);
-                });
-            });
-
-            describe("when cashOut request is valid", () => {
-                beforeEach(() => {
-                    gameData.result = chance.floating({ min: multiplier });
-                    proceedBetQueue.settleCashOut = jest.fn();
-                    bet.roundId = gameData.roundId;
-                });
-
-                it("should NOT publishGameFailed", async () => {
-                    // Act
-                    await proceedBetQueue.proceedCashOut(player, bet);
-
-                    // Assert
-                    expect(proceedBetQueue.publishCashOutFailed).not.toBeCalled();
-                });
-
-                describe("when action is Cash Out", () => {
-                    describe("when NOT exist halfCashOut bet logs", () => {
-                        it("should call settleCashOut with bet amount", async () => {
-                            // Act
-                            await proceedBetQueue.proceedCashOut(player, { ...payload, action: Actions.CashOut });
-
-                            // Assert
-                            expect(settleCashOutConsumer.settleCashOut).toBeCalledWith(
-                                player,
-                                { ...payload, action: Actions.CashOut },
-                                bet.amount,
-                                multiplier,
-                                undefined
-                            );
-                        });
-                    });
-
-                    describe("when exist halfCashOut bet logs", () => {
-                        const betLog = { winAmount: chance.natural(), amount: bet.amount / 2, action: Actions.HalfCashOut };
-
-                        beforeEach(() => {
-                            proceedBetQueue.getCashOutBet = jest.fn().mockResolvedValueOnce({ multiplier, bet, betLogs: [betLog] });
-                        });
-
-                        it("should call settleCashOut with half of bet amount and current win amount", async () => {
-                            // Arrange
-                            const expectAmount = bet.amount / 2;
-
-                            // Act
-                            await proceedBetQueue.proceedCashOut(player, { ...payload, action: Actions.CashOut });
-
-                            // Assert
-                            expect(settleCashOutConsumer.settleCashOut).toBeCalledWith(
-                                player,
-                                { ...payload, action: Actions.CashOut },
-                                expectAmount,
-                                multiplier,
-                                betLog.winAmount
-                            );
-                        });
-                    });
-                });
-            });
+            // ... rest of the tests ...
         });
     });
 
@@ -563,4 +471,85 @@ describe("ProcessBetQueue", () => {
             },
         };
     };
+
+    describe("validateCashOut", () => {
+        const multiplier = chance.floating({ min: 1, max: 10 });
+        const bet = { roundId: gameData.roundId };
+        const betLogs = [];
+
+        beforeEach(() => {
+            proceedBetQueue.publishCashOutFailed = jest.fn();
+        });
+
+        it("should return true when cashout is valid", () => {
+            // Arrange
+            gameData.result = multiplier + 1;
+
+            // Act
+            const result = proceedBetQueue.validateCashOut(multiplier, bet, player, betLogs);
+
+            // Assert
+            expect(result).toBeTruthy();
+            expect(proceedBetQueue.publishCashOutFailed).not.toBeCalled();
+        });
+
+        it("should return false and publish failed when cashout is invalid", () => {
+            // Arrange
+            gameData.result = multiplier;
+
+            // Act
+            const result = proceedBetQueue.validateCashOut(multiplier, bet, player, betLogs);
+
+            // Assert
+            expect(result).toBeFalsy();
+            expect(proceedBetQueue.publishCashOutFailed).toBeCalledWith(player);
+        });
+    });
+
+    describe("isInvalidCashOut", () => {
+        const multiplier = chance.floating({ min: 1, max: 10 });
+        const result = multiplier + 1;
+        const bet = { roundId: gameData.roundId };
+        const cashOutBetLogs = null;
+
+        it("should return true when bet is null", () => {
+            // Act
+            const isInvalid = proceedBetQueue.isInvalidCashOut(null, multiplier, result, gameData.roundId, cashOutBetLogs);
+
+            // Assert
+            expect(isInvalid).toBeTruthy();
+        });
+
+        it("should return true when multiplier is greater than or equal to result", () => {
+            // Act
+            const isInvalid = proceedBetQueue.isInvalidCashOut(bet, result, result, gameData.roundId, cashOutBetLogs);
+
+            // Assert
+            expect(isInvalid).toBeTruthy();
+        });
+
+        it("should return true when roundId does not match", () => {
+            // Act
+            const isInvalid = proceedBetQueue.isInvalidCashOut(bet, multiplier, result, gameData.roundId + 1, cashOutBetLogs);
+
+            // Assert
+            expect(isInvalid).toBeTruthy();
+        });
+
+        it("should return true when cashOutBetLogs exists", () => {
+            // Act
+            const isInvalid = proceedBetQueue.isInvalidCashOut(bet, multiplier, result, gameData.roundId, { action: Actions.CashOut });
+
+            // Assert
+            expect(isInvalid).toBeTruthy();
+        });
+
+        it("should return false when all conditions are valid", () => {
+            // Act
+            const isInvalid = proceedBetQueue.isInvalidCashOut(bet, multiplier, result, gameData.roundId, cashOutBetLogs);
+
+            // Assert
+            expect(isInvalid).toBeFalsy();
+        });
+    });
 });

@@ -25,8 +25,6 @@ export class SettleCashOutConsumer {
 
                 if (isValid) {
                     const bet = betTracks?.[Actions.Bet];
-                    const cashOutAmount = betTracks[Actions.HalfCashOut] ? bet.amount / 2 : bet.amount;
-
                     const payload = {
                         roundId: this.gameData.roundId,
                         receivedTime: new Date(),
@@ -37,13 +35,7 @@ export class SettleCashOutConsumer {
                         time: new Date(),
                     };
 
-                    await this.settleCashOut(
-                        player.playerData,
-                        payload,
-                        cashOutAmount,
-                        bet.autoCashOut,
-                        this.gameData.betList[player.playerData.UID][Actions.HalfCashOut]?.win
-                    );
+                    await this.settleCashOut(player.playerData, payload, bet.amount, bet.autoCashOut);
                 }
             }
         } catch (err) {
@@ -58,31 +50,30 @@ export class SettleCashOutConsumer {
         return bet?.autoCashOut <= multiplier && bet?.autoCashOut < result && !betTracks?.[Actions.CashOut];
     }
 
-    async settleCashOut(player, payload, amount, multiplier, halfCashOutWinAmount = 0) {
+    async settleCashOut(player, payload, amount, multiplier) {
         try {
-            const { action, roundId } = payload;
-            const cashOutWin = roundFloat(amount * multiplier);
-            const maxWinPerRound = this.getMaxWinPerRound(player) - halfCashOutWinAmount;
-            const winAmount = Math.min(cashOutWin, maxWinPerRound);
-            const reachMaxWin = winAmount === maxWinPerRound;
-
-            const betLog = { ...payload, winAmount, multiplier, amount, reachMaxWin };
-
-            await this.insertBetLog(player, roundId, betLog);
-            this.placeBetPublisher.publishSuccessCashOut(
-                player.UID,
-                {
-                    name: player.profile.name,
-                    playerId: player.UID,
-                    [action]: { amount, win: winAmount, cashOutWin, multiplier, reachMaxWin },
-                },
-                this.calculateCurrencyRate(player.session)
-            );
-
-            this.gameData.updatePlayerAction(player.UID, action, { amount, win: winAmount, multiplier, cashOutWin, reachMaxWin });
+            const winningDetails = this.calculateWinnings(amount, multiplier, player);
+            await this.recordBetLog(player, payload, winningDetails);
+            await this.publishResults(player, payload, winningDetails);
+            this.updateGameData(player, payload.action, winningDetails);
         } catch (err) {
             this.logService.logError(err);
+            throw err;
         }
+    }
+
+    calculateWinnings(amount, multiplier, player) {
+        const cappedMultiplier = Math.min(multiplier, 1000);
+        const cashOutWin = roundFloat(amount * cappedMultiplier);
+        const maxWinPerRound = this.getMaxWinPerRound(player);
+        const winAmount = Math.min(cashOutWin, maxWinPerRound);
+
+        return {
+            winAmount,
+            multiplier: cappedMultiplier,
+            cashOutWin,
+            reachMaxWin: winAmount === maxWinPerRound,
+        };
     }
 
     getMaxWinPerRound(player) {

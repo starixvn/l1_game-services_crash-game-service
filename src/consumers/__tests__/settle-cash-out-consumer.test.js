@@ -108,74 +108,76 @@ describe("SettleCashOutConsumer", () => {
                 await consumer.proceedAutoCashOut(multiplier);
 
                 // Assert
-                expect(consumer.settleCashOut).toBeCalledWith(realPlayer, expectedPayload, amount / 2, autoCashOut, 1.1);
+                expect(consumer.settleCashOut).toBeCalledWith(realPlayer, expectedPayload, amount, autoCashOut);
             });
         });
     });
 
     describe("settleCashOut", () => {
-        const payload = { roundId: chance.natural(), action: chance.pickone(Object.values(Actions)) };
-        const amount = chance.natural({ min: 1, max: 100 });
-        const multiplier = chance.floating({ min: 1, max: 2000 });
-        const maxWinPerRound = 200000;
-        const halfCashOutWinAmount = chance.floating({ min: 1.01, max: 10000 });
-        const winAmount = roundFloat(multiplier * amount);
-        const reachMaxWin = winAmount === maxWinPerRound;
-        const currencyRate = chance.floating({ min: 0.1, max: 1000 });
+        let payload;
+        let amount;
+        let multiplier;
+        let maxWinPerRound;
+        let winningDetails;
+        let currencyRate;
 
         beforeEach(() => {
-            consumer.getMaxWinPerRound = jest.fn().mockReturnValueOnce(maxWinPerRound);
-            consumer.insertBetLog = jest.fn();
-            consumer.calculateCurrencyRate = jest.fn().mockReturnValueOnce(currencyRate);
+            payload = {
+                roundId: chance.natural(),
+                action: Actions.CashOut,
+            };
+            amount = 13; // Use a fixed amount for predictable results
+            multiplier = 1000; // Use max multiplier for predictable results
+            maxWinPerRound = 200000;
+            currencyRate = chance.floating({ min: 0.1, max: 1000 });
+
+            // Calculate the actual winning details
+            const cashOutWin = roundFloat(amount * multiplier);
+            const winAmount = Math.min(cashOutWin, maxWinPerRound);
+            winningDetails = {
+                winAmount,
+                multiplier,
+                cashOutWin,
+                reachMaxWin: winAmount === maxWinPerRound,
+            };
+
+            consumer.getMaxWinPerRound = jest.fn().mockReturnValue(maxWinPerRound);
+            consumer.calculateCurrencyRate = jest.fn().mockReturnValue(currencyRate);
+            consumer.recordBetLog = jest.fn();
+            consumer.publishResults = jest.fn();
+            consumer.updateGameData = jest.fn();
         });
 
-        it("should call getMaxWinPerRound", async () => {
+        it("should call getMaxWinPerRound through calculateWinnings", async () => {
             // Act
-            await consumer.settleCashOut(realPlayer, payload, amount, multiplier, halfCashOutWinAmount);
+            await consumer.settleCashOut(realPlayer, payload, amount, multiplier);
 
             // Assert
             expect(consumer.getMaxWinPerRound).toBeCalledWith(realPlayer);
         });
 
-        it("should call insertBetLog", async () => {
-            // Arrange
-            const expectBetLog = { ...payload, winAmount, multiplier, amount, reachMaxWin };
-
+        it("should call recordBetLog", async () => {
             // Act
-            await consumer.settleCashOut(realPlayer, payload, amount, multiplier, halfCashOutWinAmount);
+            await consumer.settleCashOut(realPlayer, payload, amount, multiplier);
 
             // Assert
-            expect(consumer.insertBetLog).toBeCalledWith(realPlayer, payload.roundId, expectBetLog);
+            expect(consumer.recordBetLog).toBeCalledWith(realPlayer, payload, winningDetails);
         });
 
-        it("should call placeBetPublisher.publishSuccessCashOut", async () => {
+        it("should call publishResults", async () => {
             // Act
-            await consumer.settleCashOut(realPlayer, payload, amount, multiplier, halfCashOutWinAmount);
+            await consumer.settleCashOut(realPlayer, payload, amount, multiplier);
 
             // Assert
-            expect(placeBetPublisher.publishSuccessCashOut).toBeCalledWith(
-                realPlayer.UID,
-                {
-                    name: realPlayer.profile.name,
-                    playerId: realPlayer.UID,
-                    [payload.action]: { amount, win: winAmount, multiplier, reachMaxWin: false, cashOutWin: winAmount },
-                },
-                currencyRate
-            );
+            expect(consumer.publishResults).toBeCalledWith(realPlayer, payload, winningDetails);
         });
 
-        it("should call gameData.updatePlayerAction", async () => {
+        it("should call updateGameData", async () => {
             // Act
-            await consumer.settleCashOut(realPlayer, payload, amount, multiplier, halfCashOutWinAmount);
+            await consumer.settleCashOut(realPlayer, payload, amount, multiplier);
 
             // Assert
-            expect(gameData.updatePlayerAction).toBeCalledWith(realPlayer.UID, payload.action, {
-                amount,
-                win: winAmount,
-                multiplier,
-                cashOutWin: winAmount,
-                reachMaxWin: false,
-            });
+            expect(consumer.updateGameData).toBeCalledWith(realPlayer, payload.action, winningDetails);
         });
     });
 
@@ -242,6 +244,169 @@ describe("SettleCashOutConsumer", () => {
                 operatorId: realPlayer.session.operatorId,
                 playerId: realPlayer.session.playerId,
             });
+        });
+    });
+
+    describe("validateAutoCashOut", () => {
+        beforeEach(() => {
+            gameData.result = 100;
+        });
+
+        it("should return false when betTracks is null", () => {
+            // Act
+            const result = consumer.validateAutoCashOut(null, 1.5);
+
+            // Assert
+            expect(result).toBeFalsy();
+        });
+
+        it("should return false when multiplier is null", () => {
+            // Act
+            const result = consumer.validateAutoCashOut({ [Actions.Bet]: { autoCashOut: 1.5 } }, null);
+
+            // Assert
+            expect(result).toBeFalsy();
+        });
+
+        it("should return false when bet has no autoCashOut value", () => {
+            // Arrange
+            const betTracks = {
+                [Actions.Bet]: { amount: 100 },
+            };
+
+            // Act
+            const result = consumer.validateAutoCashOut(betTracks, 1.5);
+
+            // Assert
+            expect(result).toBeFalsy();
+        });
+
+        it("should return false when autoCashOut is greater than current multiplier", () => {
+            // Arrange
+            const betTracks = {
+                [Actions.Bet]: { autoCashOut: 2.0 },
+            };
+
+            // Act
+            const result = consumer.validateAutoCashOut(betTracks, 1.5);
+
+            // Assert
+            expect(result).toBeFalsy();
+        });
+
+        it("should return false when player has already cashed out", () => {
+            // Arrange
+            const betTracks = {
+                [Actions.Bet]: { autoCashOut: 1.5 },
+                [Actions.CashOut]: { time: new Date() },
+            };
+
+            // Act
+            const result = consumer.validateAutoCashOut(betTracks, 2.0);
+
+            // Assert
+            expect(result).toBeFalsy();
+        });
+
+        it("should return true for valid auto cash out", () => {
+            // Arrange
+            const betTracks = {
+                [Actions.Bet]: { autoCashOut: 1.5 },
+            };
+
+            // Act
+            const result = consumer.validateAutoCashOut(betTracks, 2.0);
+
+            // Assert
+            expect(result).toBeTruthy();
+        });
+    });
+
+    describe("calculateWinnings", () => {
+        const amount = 100;
+        const maxWinPerRound = 1000;
+
+        beforeEach(() => {
+            consumer.getMaxWinPerRound = jest.fn().mockReturnValue(maxWinPerRound);
+        });
+
+        it("should cap multiplier at 1000", () => {
+            // Arrange
+            const multiplier = 1500;
+
+            // Act
+            const result = consumer.calculateWinnings(amount, multiplier, realPlayer);
+
+            // Assert
+            expect(result.multiplier).toBe(1000);
+        });
+
+        it("should calculate correct win amount", () => {
+            // Arrange
+            const multiplier = 2.5;
+            const expectedWin = roundFloat(amount * multiplier);
+
+            // Act
+            const result = consumer.calculateWinnings(amount, multiplier, realPlayer);
+
+            // Assert
+            expect(result.winAmount).toBe(expectedWin);
+        });
+
+        it("should cap win amount at maxWinPerRound", () => {
+            // Arrange
+            const multiplier = 20; // Would result in win > maxWinPerRound
+
+            // Act
+            const result = consumer.calculateWinnings(amount, multiplier, realPlayer);
+
+            // Assert
+            expect(result.winAmount).toBe(maxWinPerRound);
+            expect(result.reachMaxWin).toBeTruthy();
+        });
+
+        it("should handle small numbers correctly", () => {
+            // Arrange
+            const smallAmount = 0.0001;
+            const multiplier = 1.5;
+            const expectedWin = roundFloat(smallAmount * multiplier);
+
+            // Act
+            const result = consumer.calculateWinnings(smallAmount, multiplier, realPlayer);
+
+            // Assert
+            expect(result.winAmount).toBe(expectedWin);
+        });
+    });
+
+    describe("error handling", () => {
+        it("should log error when settleCashOut fails", async () => {
+            // Arrange
+            consumer.calculateWinnings = jest.fn().mockImplementation(() => {
+                throw new Error("Test error");
+            });
+
+            try {
+                // Act
+                await consumer.settleCashOut(realPlayer, {}, 100, 1.5);
+            } catch (error) {
+                // Ignore the error as we expect it to be thrown
+            }
+
+            // Assert
+            expect(logService.logError).toHaveBeenCalled();
+        });
+
+        it("should propagate error from settleCashOut", async () => {
+            // Arrange
+            consumer.calculateWinnings = jest.fn().mockImplementation(() => {
+                throw new Error("Test error");
+            });
+
+            // Act & Assert
+            await expect(async () => {
+                await consumer.settleCashOut(realPlayer, {}, 100, 1.5);
+            }).rejects.toThrow("Test error");
         });
     });
 });
