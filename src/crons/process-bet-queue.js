@@ -1,7 +1,7 @@
 import { Core } from "sc-game-base";
 import { tracer } from "sc-instrument";
 import { Actions } from "../constants";
-import { calculateMultiplier } from "../helpers/crash-point-helper";
+import { generateTapResult } from "../helpers/crash-point-helper";
 import noticeHelper from "../helpers/notice-helper";
 
 export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
@@ -17,6 +17,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         baseMetrics,
         settleCashOutConsumer,
         provablyFairConsumer,
+        roundResultConsumer,
     }) {
         super({
             definition,
@@ -32,6 +33,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
         this.settleCashOutConsumer = settleCashOutConsumer;
         this.provablyFairConsumer = provablyFairConsumer;
+        this.roundResultConsumer = roundResultConsumer;
     }
 
     dequeueBets() {
@@ -57,7 +59,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     async proceedActions(player, payload) {
         switch (payload.action) {
             case Actions.Bet:
-                await this.proceedBet(player, payload);
+                await this.handlePlayerBet(player, payload);
                 break;
             case Actions.CashOut:
                 await this.proceedCashOut(player, payload);
@@ -119,13 +121,27 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
     async handleSuccessBet(player, balance, roundId, bet) {
         const rate = this.calculateCurrencyRate(player.session);
+        const playerName = player.profile.name;
 
         await this.insertBet(player, roundId, bet, rate);
         await this.insertBetLog(player, roundId, bet);
 
         this.notifyPlacingBetResult(player, balance, bet, rate);
 
-        this.gameData.addPlayerToBetList(player.UID, { name: player.profile.name, amount: bet.amount, rate, autoCashOut: bet.autoCashOut });
+        if (this.gameData.ingame[playerName]) {
+            this.gameData.ingame[playerName].activeBet = {
+                id: bet.id,
+                amount: bet.amount,
+                createdAt: new Date(),
+            };
+        }
+
+        this.gameData.addPlayerToBetList(player.UID, {
+            name: playerName,
+            amount: bet.amount,
+            rate,
+            autoCashOut: bet.autoCashOut,
+        });
 
         if (!bet.freeBet && (player.profile.minBet !== balance.minBet || player.profile.maxBet !== balance.maxBet)) {
             await this.updateUserStakeLevel(player, balance.minBet, balance.maxBet);
@@ -151,6 +167,9 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             amount: bet.amount,
             winAmount: bet.winAmount,
             freeBet: bet.freeBet,
+            increment: bet.increment,
+            result: bet.result,
+            multiplier: bet.multiplier,
             clientSendTime: bet.clientSendTime,
             receivedTime: bet.receivedTime,
             roundId,
@@ -200,5 +219,51 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
             delete playerInGame.betTracks[Actions.Bet];
         }
+    }
+
+    async handlePlayerBet(player, payload) {
+        const playerGameData = this.gameData[player.id];
+
+        if (playerGameData?.activeBet) {
+            await this.handleExistingBet(player, playerGameData.activeBet, payload.clientSendTime);
+        } else {
+            await this.proceedBet(player, payload);
+        }
+    }
+
+    async handleExistingBet(player, activeBet, clientSendTime) {
+        const multiplier = this.gameData.ingame[playerName].currentMultiplier;
+        const increment = this.calculateIncrement(multiplier);
+        const updatedMultiplier = multiplier + increment;
+
+        const playerName = player.profile.name;
+        const result = this.roundResultConsumer.generateResult();
+
+        await this.insertBetLog(player, this.gameData.roundId, {
+            action: Actions.Bet,
+            amount: activeBet.amount,
+            winAmount: activeBet.amount * updatedMultiplier,
+            clientSendTime: clientSendTime,
+            receivedTime: new Date(),
+            freeBet: false,
+            increment,
+            result: generateTapResult(result),
+            multiplier: updatedMultiplier,
+        });
+
+        if (this.gameData.ingame?.[playerName]) {
+            this.gameData.ingame[playerName].currentMultiplier = updatedMultiplier;
+        }
+
+        this.io.to(player.socketId).emit("bet_result", {
+            multiplier: updatedMultiplier,
+            betId: activeBet.id,
+        });
+    }
+
+    calculateIncrement(multiplier) {
+        const { stages } = this.gameData.gameConfigs.stageConfigs;
+        const stage = stages.find((stage) => multiplier >= stage.minMultiplier && multiplier <= stage.maxMultiplier);
+        return stage ? stage.increment : stages[stages.length - 1].increment;
     }
 }

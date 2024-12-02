@@ -5,6 +5,7 @@ const Schema = new mongoose.Schema({
     result: { type: Number, required: true },
     time: { type: Date, default: new Date() },
     exchangeRateId: { type: Number, required: true },
+    tapCount: { type: Number, required: true },
 });
 
 export default function (gameConfigName) {

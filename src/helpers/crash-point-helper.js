@@ -33,4 +33,8 @@ function getInitialTapMultiplier(stageConfigs) {
     return stageConfigs.initialMultiplier;
 }
 
-export { calculateMultiplier, calculateCrashTimeInMillisecond, calculateNextTapMultiplier, getInitialTapMultiplier };
+function generateTapResult(result) {
+    return result > 1.0;
+}
+
+export { calculateMultiplier, calculateCrashTimeInMillisecond, calculateNextTapMultiplier, getInitialTapMultiplier, generateTapResult };
