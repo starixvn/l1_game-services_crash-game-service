@@ -1,14 +1,12 @@
 import { helpers } from "sc-common";
 import { BaseEventConsumers } from "sc-game-base/src/core";
 import { Actions } from "../constants";
-import noticeHelper from "../helpers/notice-helper";
 import { getInitialTapMultiplier } from "../helpers/crash-point-helper";
 
 export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
     consume(player, payload) {
         Object.assign(payload, {
             amount: payload.amount >> 0,
-            autoCashOut: roundFloat(payload.autoCashOut ?? 0),
             freeBet: payload.freeBet ?? false,
             roundId: payload.roundId ?? this.gameData.roundId,
             mode: payload.m ?? this.DisplayMode.Landscape,
@@ -16,10 +14,10 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
             receivedTime: new Date(),
         });
 
-        const { amount, freeBet, roundId, autoCashOut } = payload;
+        const { amount, freeBet, roundId } = payload;
         const name = player.profile.name;
 
-        if (!this.validateRequestParams(payload, player) || !this.validateBetRequest(player, amount, freeBet, roundId, autoCashOut)) {
+        if (!this.validateRequestParams(payload, player) || !this.validateBetRequest(player, amount, freeBet, roundId)) {
             return;
         }
 
@@ -54,25 +52,20 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
         ];
     }
 
-    composeValidationCriteria(player, amount, freeBet, roundId, autoCashOut) {
+    composeValidationCriteria(player, amount, freeBet, roundId) {
         const bettingTimeValidationCriteria = this.composeBettingTimeValidationCriteria(roundId) ?? [];
-        const betAmountValidationCriteria = this.composeBetAmountValidationCriteria(player, amount, freeBet, autoCashOut) || [];
+        const betAmountValidationCriteria = this.composeBetAmountValidationCriteria(player, amount, freeBet) || [];
 
         return bettingTimeValidationCriteria.concat(betAmountValidationCriteria);
     }
 
-    composeBetAmountValidationCriteria(player, amount, freeBet, autoCashOut) {
+    composeBetAmountValidationCriteria(player, amount, freeBet) {
         const settings = this.gameData.currencyGroupGames.find((x) => x.groupId.toString() === player.session.currencyGroupId);
         const configs = this.gameData.gameConfigs;
         const minBet = Math.max(player.profile.minBet, settings.minBet);
         const maxBet = Math.min(player.profile.maxBet, settings.maxBet);
-        const playerIngame = this.gameData.ingame[player.profile.name];
 
         return [
-            {
-                failure: !!playerIngame?.betTracks[Actions.Bet],
-                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
-            },
             {
                 failure: freeBet && !configs.enableFreeBet,
                 notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
@@ -85,15 +78,11 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 failure: amount > maxBet,
                 notice: this.getNoticeObj(helpers.noticeHelper.maxBet, { maxBet }),
             },
-            {
-                failure: autoCashOut && (autoCashOut < MinMultiplierValue || autoCashOut > configs.crashConfig.maxMultiplier),
-                notice: this.getNoticeObj(noticeHelper.invalidValueCashOut, { autoCashOut }),
-            },
         ];
     }
 
     adjustBetTracks(playerName, bet) {
-        const { amount, receivedTime, autoCashOut, action } = bet;
+        const { amount, receivedTime, action } = bet;
 
         if (this.gameData.ingame?.[playerName]) {
             const playerInGame = this.gameData.ingame[playerName];
@@ -101,7 +90,6 @@ export class PlaceBetConsumer extends BaseEventConsumers.PlaceBetConsumer {
             playerInGame.betTracks[action] = {
                 amount,
                 time: receivedTime,
-                autoCashOut: autoCashOut > 0 ? autoCashOut : undefined,
             };
         }
     }

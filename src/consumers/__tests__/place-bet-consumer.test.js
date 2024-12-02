@@ -37,6 +37,9 @@ describe("PlaceBetConsumer", () => {
             crashConfig: {
                 maxMultiplier: 5000,
             },
+            stageConfigs: {
+                initialMultiplier: 1.0,
+            },
         },
         exchangeRates: { code: {} },
         currencyGroupGames: [{ groupId: player.session.currencyGroupId, minBet: 4, maxBet: 18 }],
@@ -77,6 +80,20 @@ describe("PlaceBetConsumer", () => {
     });
 
     describe("composeBetAmountValidationCriteria", () => {
+        describe("when freeBet is true but not enabled", () => {
+            it("should return failure with invalid bet", () => {
+                // Arrange
+                const amount = 7;
+                const expectedValue = { failure: true, notice: { errorCode: helpers.noticeHelper.invalidBet } };
+
+                // Act
+                const actualValue = consumer.composeBetAmountValidationCriteria(player, amount, true);
+
+                // Assert
+                expect(actualValue[0]).toStrictEqual(expectedValue);
+            });
+        });
+
         describe("when amount < min bet", () => {
             it("should return failure with min bet", () => {
                 // Arrange
@@ -84,54 +101,24 @@ describe("PlaceBetConsumer", () => {
                 const expectedValue = { failure: true, notice: { errorCode: helpers.noticeHelper.minBet, minBet: 6 } };
 
                 // Act
-                const actualValue = consumer.composeBetAmountValidationCriteria(player, amount, false, 1);
+                const actualValue = consumer.composeBetAmountValidationCriteria(player, amount, false);
 
                 // Assert
-                expect(actualValue[2]).toStrictEqual(expectedValue);
+                expect(actualValue[1]).toStrictEqual(expectedValue);
             });
         });
 
-        describe("when amount > max bet ", () => {
-            it("should return failure with", () => {
+        describe("when amount > max bet", () => {
+            it("should return failure with max bet", () => {
                 // Arrange
                 const amount = 19;
                 const expectedValue = { failure: true, notice: { errorCode: helpers.noticeHelper.maxBet, maxBet: 8 } };
 
                 // Act
-                const actualValue = consumer.composeBetAmountValidationCriteria(player, amount, false, 1);
+                const actualValue = consumer.composeBetAmountValidationCriteria(player, amount, false);
 
                 // Assert
-                expect(actualValue[3]).toStrictEqual(expectedValue);
-            });
-        });
-
-        describe("when autoCashOut > max multiplier ", () => {
-            it("should return failure with invalid value cash out", () => {
-                // Arrange
-                const amount = 7;
-                const autoCashOut = 10000.1;
-                const expectedValue = { failure: true, notice: { errorCode: noticeHelper.invalidValueCashOut, autoCashOut: autoCashOut } };
-
-                // Act
-                const actualValue = consumer.composeBetAmountValidationCriteria(player, amount, false, autoCashOut);
-
-                // Assert
-                expect(actualValue[4]).toStrictEqual(expectedValue);
-            });
-        });
-
-        describe("when autoCashOut < min multiplier value ", () => {
-            it("should return failure with invalid cash out", () => {
-                // Arrange
-                const amount = 7;
-                const autoCashOut = 1;
-                const expectedValue = { failure: true, notice: { errorCode: noticeHelper.invalidValueCashOut, autoCashOut: autoCashOut } };
-
-                // Act
-                const actualValue = consumer.composeBetAmountValidationCriteria(player, amount, false, autoCashOut);
-
-                // Assert
-                expect(actualValue[4]).toStrictEqual(expectedValue);
+                expect(actualValue[2]).toStrictEqual(expectedValue);
             });
         });
     });
@@ -170,9 +157,10 @@ describe("PlaceBetConsumer", () => {
 
     describe("consume", () => {
         beforeEach(() => {
-            consumer.validateRequestParams = jest.fn();
-            consumer.validateBetRequest = jest.fn();
+            consumer.validateRequestParams = jest.fn().mockReturnValue(true);
+            consumer.validateBetRequest = jest.fn().mockReturnValue(true);
             consumer.adjustBetTracks = jest.fn();
+            gameData.ingame = {};
         });
 
         it("should call validateRequestParams", () => {
@@ -183,17 +171,9 @@ describe("PlaceBetConsumer", () => {
             expect(consumer.validateRequestParams).toBeCalledWith(payload, player);
         });
 
-        describe("when requestParams is NOT valid", () => {
+        describe("when bet request is invalid", () => {
             beforeEach(() => {
-                consumer.validateRequestParams.mockReturnValueOnce(false);
-            });
-
-            it("should NOT call validateBetRequest", () => {
-                // Act
-                consumer.consume(player, payload);
-
-                // Assert
-                expect(consumer.validateBetRequest).not.toBeCalled();
+                consumer.validateBetRequest.mockReturnValue(false);
             });
 
             it("should NOT call adjustBetTracks", () => {
@@ -215,7 +195,7 @@ describe("PlaceBetConsumer", () => {
 
         describe("when requestParams is valid", () => {
             beforeEach(() => {
-                consumer.validateRequestParams.mockReturnValueOnce(true);
+                consumer.validateRequestParams.mockReturnValue(true);
             });
 
             it("should call validateBetRequest", () => {
@@ -223,70 +203,48 @@ describe("PlaceBetConsumer", () => {
                 consumer.consume(player, payload);
 
                 // Assert
-                expect(consumer.validateBetRequest).toBeCalledWith(
+                expect(consumer.validateBetRequest).toBeCalledWith(player, payload.amount, payload.freeBet, payload.roundId);
+            });
+
+            it("should call adjustBetTracks", () => {
+                // Act
+                consumer.consume(player, payload);
+
+                // Assert
+                expect(consumer.adjustBetTracks).toBeCalledWith(player.profile.name, payload);
+            });
+
+            it("should push bet to bet queue", () => {
+                // Act
+                consumer.consume(player, payload);
+
+                // Assert
+                expect(gameData.ingame[player.profile.name].betQueue.length).toBe(1);
+                expect(gameData.ingame[player.profile.name].betQueue[0]).toEqual({
                     player,
-                    payload.amount,
-                    payload.freeBet,
-                    payload.roundId,
-                    payload.autoCashOut
-                );
-            });
-
-            describe("when bet request is invalid", () => {
-                beforeEach(() => {
-                    consumer.validateBetRequest.mockReturnValueOnce(false);
-                });
-
-                it("should NOT call adjustBetTracks", () => {
-                    // Act
-                    consumer.consume(player, payload);
-
-                    // Assert
-                    expect(consumer.adjustBetTracks).not.toBeCalled();
-                });
-
-                it("should NOT push bet to bet queue", () => {
-                    // Act
-                    consumer.consume(player, payload);
-
-                    // Assert
-                    expect(gameData.ingame[player.profile.name]?.betQueue?.length ?? 0).toBe(0);
+                    payload,
                 });
             });
 
-            describe("when bet request is valid", () => {
-                beforeEach(() => {
-                    consumer.validateBetRequest.mockReturnValueOnce(true);
-                });
+            describe("when player info is NOT exist on ingame data", () => {
+                it("should add player info to ingame data", () => {
+                    // Arrange
+                    gameData.ingame = {};
 
-                it("should call adjustBetTracks", () => {
                     // Act
                     consumer.consume(player, payload);
 
                     // Assert
-                    expect(consumer.adjustBetTracks).toBeCalledWith(player.profile.name, payload);
-                });
-
-                it("should push bet to bet queue", () => {
-                    // Act
-                    consumer.consume(player, payload);
-
-                    // Assert
-                    expect(
-                        gameData.ingame[player.profile.name]?.betQueue.includes((bet) => bet.player === player && bet.payload === payload)
-                    );
-                });
-
-                describe("when player info is NOT exist on ingame data", () => {
-                    it("should add player info to ingame data", () => {
-                        // Arrange
-                        gameData.ingame = {};
-
-                        // Act
-                        consumer.consume(player, payload);
-
-                        // Assert
-                        expect(gameData.ingame[player.profile.name]).toBeDefined();
+                    expect(gameData.ingame[player.profile.name]).toBeDefined();
+                    expect(gameData.ingame[player.profile.name]).toMatchObject({
+                        name: player.profile.name,
+                        currency: player.session.currencyName,
+                        system: player.session.system,
+                        betTracks: {},
+                        betQueue: expect.any(Array),
+                        operatorId: player.session.operatorId,
+                        playerData: expect.objectContaining(player),
+                        currentMultiplier: expect.any(Number),
                     });
                 });
             });
@@ -304,7 +262,6 @@ describe("PlaceBetConsumer", () => {
 
                 // Assert
                 expect(gameData.ingame[player.profile.name].betTracks[payload.action].amount).toStrictEqual(payload.amount);
-                expect(gameData.ingame[player.profile.name].betTracks[payload.action].autoCashOut).toStrictEqual(payload.autoCashOut);
             });
         });
     });
