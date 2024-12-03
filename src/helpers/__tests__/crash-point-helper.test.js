@@ -12,48 +12,101 @@ describe("crash-point-helper", () => {
 
     describe("findStage", () => {
         it("should find correct stage for given multiplier", () => {
-            expect(findStage(1.5, mockStageConfigs.stages)).toEqual(mockStageConfigs.stages[0]);
-            expect(findStage(3.0, mockStageConfigs.stages)).toEqual(mockStageConfigs.stages[1]);
-            expect(findStage(7.0, mockStageConfigs.stages)).toEqual(mockStageConfigs.stages[2]);
+            const stages = mockStageConfigs.stages;
+            const multiplier1 = 1.5;
+            const multiplier2 = 3.0;
+            const multiplier3 = 7.0;
+
+            const result1 = findStage(multiplier1, stages);
+            const result2 = findStage(multiplier2, stages);
+            const result3 = findStage(multiplier3, stages);
+
+            expect(result1).toEqual(stages[0]);
+            expect(result2).toEqual(stages[1]);
+            expect(result3).toEqual(stages[2]);
         });
 
         it("should return undefined for multiplier outside stages range", () => {
-            expect(findStage(0.5, mockStageConfigs.stages)).toBeUndefined();
-            expect(findStage(11.0, mockStageConfigs.stages)).toBeUndefined();
+            const stages = mockStageConfigs.stages;
+            const multiplier1 = 0.5;
+            const multiplier2 = 11.0;
+
+            const result1 = findStage(multiplier1, stages);
+            const result2 = findStage(multiplier2, stages);
+
+            expect(result1).toBeUndefined();
+            expect(result2).toBeUndefined();
         });
     });
 
     describe("calculateIncrement", () => {
         it("should return correct increment for given multiplier", () => {
-            expect(calculateIncrement(1.5, mockStageConfigs)).toBe(0.1);
-            expect(calculateIncrement(3.0, mockStageConfigs)).toBe(0.2);
-            expect(calculateIncrement(7.0, mockStageConfigs)).toBe(0.5);
+            const multiplier1 = 1.5;
+            const multiplier2 = 3.0;
+            const multiplier3 = 7.0;
+
+            const result1 = calculateIncrement(multiplier1, mockStageConfigs);
+            const result2 = calculateIncrement(multiplier2, mockStageConfigs);
+            const result3 = calculateIncrement(multiplier3, mockStageConfigs);
+
+            expect(result1).toBe(0.1);
+            expect(result2).toBe(0.2);
+            expect(result3).toBe(0.5);
         });
 
         it("should return last stage increment for multiplier above max range", () => {
-            expect(calculateIncrement(11.0, mockStageConfigs)).toBe(0.5);
+            const multiplier = 11.0;
+
+            const result = calculateIncrement(multiplier, mockStageConfigs);
+
+            expect(result).toBe(0.5);
         });
 
         it("should return 0 when stages array is empty", () => {
-            expect(calculateIncrement(1.5, { stages: [] })).toBe(0);
+            const emptyStageConfig = { stages: [] };
+            const multiplier = 1.5;
+
+            const result = calculateIncrement(multiplier, emptyStageConfig);
+
+            expect(result).toBe(0);
         });
     });
 
     describe("calculateNextTapMultiplier", () => {
         it("should calculate next multiplier within stage limits", () => {
-            expect(calculateNextTapMultiplier(1.5, mockStageConfigs)).toBe(1.6);
-            expect(calculateNextTapMultiplier(3.0, mockStageConfigs)).toBe(3.2);
-            expect(calculateNextTapMultiplier(7.0, mockStageConfigs)).toBe(7.5);
+            const currentMultiplier1 = 1.5;
+            const currentMultiplier2 = 3.0;
+            const currentMultiplier3 = 7.0;
+
+            const result1 = calculateNextTapMultiplier(currentMultiplier1, mockStageConfigs);
+            const result2 = calculateNextTapMultiplier(currentMultiplier2, mockStageConfigs);
+            const result3 = calculateNextTapMultiplier(currentMultiplier3, mockStageConfigs);
+
+            expect(result1).toBe(1.6);
+            expect(result2).toBe(3.2);
+            expect(result3).toBe(7.5);
         });
 
         it("should not exceed stage max multiplier", () => {
-            expect(calculateNextTapMultiplier(1.95, mockStageConfigs)).toBe(2.0);
-            expect(calculateNextTapMultiplier(4.9, mockStageConfigs)).toBe(5.0);
-            expect(calculateNextTapMultiplier(9.8, mockStageConfigs)).toBe(10.0);
+            const currentMultiplier1 = 1.95;
+            const currentMultiplier2 = 4.9;
+            const currentMultiplier3 = 9.8;
+
+            const result1 = calculateNextTapMultiplier(currentMultiplier1, mockStageConfigs);
+            const result2 = calculateNextTapMultiplier(currentMultiplier2, mockStageConfigs);
+            const result3 = calculateNextTapMultiplier(currentMultiplier3, mockStageConfigs);
+
+            expect(result1).toBe(2.0);
+            expect(result2).toBe(5.0);
+            expect(result3).toBe(10.0);
         });
 
         it("should handle multiplier outside stages range", () => {
-            expect(calculateNextTapMultiplier(11.0, mockStageConfigs)).toBe(11.5);
+            const currentMultiplier = 11.0;
+
+            const result = calculateNextTapMultiplier(currentMultiplier, mockStageConfigs);
+
+            expect(result).toBe(11.5);
         });
     });
 });
