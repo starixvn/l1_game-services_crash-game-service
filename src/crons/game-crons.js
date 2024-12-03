@@ -73,7 +73,7 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         const { durations } = this.definition;
 
         if (this.gameData.remainingTime === durations.wholeRound) {
-            await this.checkGameStatus();
+            await this.ba();
         }
 
         if (!this.gameData.disabled) {

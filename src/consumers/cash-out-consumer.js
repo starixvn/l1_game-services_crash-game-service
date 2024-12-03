@@ -49,6 +49,8 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
     }
 
     composeBetTrackValidationCriteria(betTracks, isHalfCashOut) {
+        const configs = this.gameData.gameConfigs;
+
         return [
             {
                 failure: !betTracks?.[Actions.Bet]?.time,
@@ -59,7 +61,7 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
                 notice: this.getNoticeObj(noticeHelper.invalidCashOut),
             },
             {
-                failure: isHalfCashOut && betTracks?.[Actions.HalfCashOut]?.time,
+                failure: isHalfCashOut && !configs.disableHalfCashOut && betTracks?.[Actions.HalfCashOut]?.time,
                 notice: this.getNoticeObj(noticeHelper.invalidCashOut),
             },
         ];
