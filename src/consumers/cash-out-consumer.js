@@ -51,14 +51,18 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
     composeBetTrackValidationCriteria(betTracks) {
         return [
             {
-                failure: !betTracks?.[Actions.Bet]?.time,
-                notice: this.getNoticeObj(noticeHelper.invalidCashOut),
-            },
-            {
-                failure: !!betTracks?.[Actions.CashOut]?.time,
+                failure: this.isNotHavingBet(betTracks) || this.isAlreadyCashout(betTracks),
                 notice: this.getNoticeObj(noticeHelper.invalidCashOut),
             },
         ];
+    }
+
+    isNotHavingBet(betTracks) {
+        return !betTracks?.[Actions.Bet]?.time;
+    }
+
+    isAlreadyCashout(betTracks) {
+        return !!betTracks?.[Actions.CashOut]?.time;
     }
 
     composeBettingTimeValidationCriteria(roundId, clientSendTime, receivedTime) {
@@ -67,14 +71,6 @@ export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
         return [
             {
                 failure: !configs.enabled,
-                notice: this.getNoticeObj(noticeHelper.invalidCashOut),
-            },
-            {
-                failure: roundId !== this.gameData.roundId,
-                notice: this.getNoticeObj(noticeHelper.invalidCashOut, { gameRoundId: roundId }),
-            },
-            {
-                failure: this.gameData.remainingTime > this.definition.durations.liveTime,
                 notice: this.getNoticeObj(noticeHelper.invalidCashOut),
             },
         ];

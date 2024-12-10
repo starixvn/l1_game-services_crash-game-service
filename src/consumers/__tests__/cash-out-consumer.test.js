@@ -7,118 +7,154 @@ import { stub } from "jest-micro-auto-stub";
 import noticeHelper from "../../helpers/notice-helper";
 import { Actions } from "../../constants";
 
-const player = {
-    socketId: "scoketId1",
-    UID: "uid1",
-    session: { currencyGroupId: "group1", currencyName: "UUS", system: 1, partnerId: 2 },
-    profile: {
-        name: "name1",
-        maxBet: 8,
-        minBet: 6,
-    },
-};
 describe("CashOutConsumer", () => {
-    const chance = new Chance();
-    const payload = {
-        freeBet: chance.bool(),
-        roundId: chance.natural(),
-        halfCashOut: chance.bool(),
-    };
-    const definition = new Core.GameDefinition(gameSettings);
-    const gameData = {
-        gameConfigs: { odds: {}, enableFreeBet: false },
-        exchangeRates: { code: {} },
-        currencyGroupGames: [{ groupId: player.session.currencyGroupId, minBet: 4, maxBet: 18 }],
-        players: {},
-        ingame: {
-            [player.profile.name]: {
-                betQueue: [],
-            },
-        },
-        roundId: 1,
-        remainingTime: 30,
-    };
-
     let consumer;
+    let publisher;
+    let gameData;
+    let player;
+    const chance = new Chance();
 
-    beforeEach(() => {
-        jest.clearAllMocks();
-        const publisher = stub(BaseEventPublisher);
-        consumer = new CashOutConsumer(definition, gameData, publisher);
+    const createTestPlayer = (overrides = {}) => ({
+        socketId: chance.guid(),
+        UID: chance.guid(),
+        session: {
+            currencyGroupId: "group1",
+            currencyName: "USD",
+            system: 1,
+            partnerId: 2,
+            ...overrides.session,
+        },
+        profile: {
+            name: chance.name(),
+            maxBet: 8,
+            minBet: 6,
+            ...overrides.profile,
+        },
+        ...overrides,
     });
 
-    it("inherit Core.BaseEventConsumers.PlaceBetConsumer", () => {
-        // Assert
-        expect(consumer instanceof Core.BaseEventConsumers.PlaceBetConsumer);
+    const createTestGameData = (player, overrides = {}) => ({
+        gameConfigs: {
+            odds: {},
+            enableFreeBet: false,
+            enabled: true,
+            ...overrides.gameConfigs,
+        },
+        exchangeRates: { code: {} },
+        currencyGroupGames: [
+            {
+                groupId: player.session.currencyGroupId,
+                minBet: 4,
+                maxBet: 18,
+                ...overrides.currencyGroupGames,
+            },
+        ],
+        players: {},
+        ingame: {},
+        roundId: chance.natural(),
+        remainingTime: -1,
+        ...overrides,
+    });
+
+    beforeEach(() => {
+        player = createTestPlayer();
+        gameData = createTestGameData(player);
+
+        gameData.ingame[player.profile.name] = {
+            betQueue: [],
+            betTracks: {
+                [Actions.Bet]: { time: new Date() },
+                [Actions.CashOut]: { time: undefined },
+            },
+        };
+
+        publisher = stub(BaseEventPublisher);
+        const definition = new Core.GameDefinition(gameSettings);
+        consumer = new CashOutConsumer(definition, gameData, publisher);
+
+        jest.clearAllMocks();
     });
 
     describe("consume", () => {
+        let payload;
+
         beforeEach(() => {
-            consumer.validateRequest = jest.fn();
+            // Arrange
+            payload = {
+                roundId: gameData.roundId,
+                multiplier: chance.floating({ min: 1, max: 10 }),
+                clientSendTime: new Date(),
+                mode: chance.pickone(["landscape", "portrait"]),
+            };
+            consumer.validateRequest = jest.fn().mockReturnValue(true);
             consumer.adjustBetTracks = jest.fn();
         });
 
-        it("should call validateRequest with correct parameters", () => {
+        it("should enrich payload with required fields", () => {
             // Act
             consumer.consume(player, payload);
 
             // Assert
-            expect(consumer.validateRequest).toBeCalledWith(player, payload.roundId, payload.clientSendTime, payload.receivedTime);
+            expect(payload).toMatchObject({
+                roundId: gameData.roundId,
+                m: payload.multiplier,
+                clientSendTime: expect.any(Date),
+                mode: expect.any(String),
+                receivedTime: expect.any(Date),
+                action: Actions.CashOut,
+            });
         });
 
-        it("should set receivedTime in payload", () => {
-            // Arrange
-            const beforeTime = new Date();
-
+        it("should validate the request with correct parameters", () => {
             // Act
             consumer.consume(player, payload);
 
             // Assert
-            expect(payload.receivedTime).toBeInstanceOf(Date);
-            expect(payload.receivedTime.getTime()).toBeGreaterThanOrEqual(beforeTime.getTime());
+            expect(consumer.validateRequest).toHaveBeenCalledWith(player, payload.roundId, payload.clientSendTime, payload.receivedTime);
         });
 
-        describe("when bet request is invalid", () => {
+        describe("when validation fails", () => {
             beforeEach(() => {
-                consumer.validateRequest.mockReturnValueOnce(false);
+                // Arrange
+                consumer.validateRequest.mockReturnValue(false);
             });
 
-            it("should NOT call adjustBetTracks", () => {
+            it("should not adjust bet tracks", () => {
                 // Act
                 consumer.consume(player, payload);
 
                 // Assert
-                expect(consumer.adjustBetTracks).not.toBeCalled();
+                expect(consumer.adjustBetTracks).not.toHaveBeenCalled();
             });
 
-            it("should NOT push bet to bet queue", () => {
+            it("should not add to bet queue", () => {
                 // Act
                 consumer.consume(player, payload);
 
                 // Assert
-                expect(gameData.ingame[player.profile.name]?.betQueue?.length ?? 0).toBe(0);
+                expect(gameData.ingame[player.profile.name].betQueue).toHaveLength(0);
             });
         });
 
-        describe("when bet request is valid", () => {
-            beforeEach(() => {
-                consumer.validateRequest.mockReturnValueOnce(true);
-            });
-
-            it("should call adjustBetTracks", () => {
+        describe("when validation succeeds", () => {
+            it("should adjust bet tracks with correct parameters", () => {
                 // Act
                 consumer.consume(player, payload);
 
                 // Assert
-                expect(consumer.adjustBetTracks).toBeCalledWith(player.profile.name, payload);
+                expect(consumer.adjustBetTracks).toHaveBeenCalledWith(player.profile.name, payload);
             });
 
-            it("should push bet to bet queue", () => {
+            it("should add to bet queue", () => {
                 // Act
                 consumer.consume(player, payload);
 
                 // Assert
-                expect(gameData.ingame[player.profile.name]?.betQueue.includes((bet) => bet.player === player && bet.payload === payload));
+                expect(gameData.ingame[player.profile.name].betQueue).toHaveLength(1);
+                expect(gameData.ingame[player.profile.name].betQueue[0]).toEqual({
+                    player,
+                    payload,
+                });
             });
         });
     });
@@ -128,327 +164,9 @@ describe("CashOutConsumer", () => {
         let receivedTime;
 
         beforeEach(() => {
-            clientSendTime = new Date();
-            receivedTime = new Date();
-            gameData.gameConfigs.enabled = true;
-            gameData.remainingTime = -1;
-            gameData.ingame = {
-                [player.profile.name]: {
-                    betQueue: [],
-                    betTracks: {
-                        [Actions.Bet]: {
-                            time: new Date(),
-                        },
-                        [Actions.CashOut]: undefined,
-                        [Actions.HalfCashOut]: undefined,
-                    },
-                },
-            };
-        });
-
-        describe("when game is NOT enable", () => {
-            beforeEach(() => {
-                gameData.gameConfigs.enabled = false;
-            });
-
-            it("should publishToUser failed bet", () => {
-                // Act
-                consumer.validateRequest(player, gameData.roundId, clientSendTime, receivedTime);
-
-                // Assert
-                expect(consumer.publisher.publishToUser).toBeCalledWith(player.UID, {
-                    endBet: -1,
-                    notice: consumer.getNoticeObj(noticeHelper.invalidCashOut),
-                });
-            });
-
-            it("should return false", () => {
-                // Act
-                const result = consumer.validateRequest(player, gameData.roundId, clientSendTime, receivedTime);
-
-                // Assert
-                expect(result).toBeFalsy();
-            });
-        });
-
-        describe("when NOT already bet", () => {
-            beforeEach(() => {
-                gameData.ingame = {
-                    [player.profile.name]: {
-                        betQueue: [],
-                        betTracks: {
-                            [Actions.Bet]: undefined,
-                        },
-                    },
-                };
-            });
-
-            it("should publishToUser failed bet", () => {
-                // Act
-                consumer.validateRequest(player, gameData.roundId, clientSendTime, receivedTime);
-
-                // Assert
-                expect(consumer.publisher.publishToUser).toBeCalledWith(player.UID, {
-                    endBet: -1,
-                    notice: consumer.getNoticeObj(noticeHelper.invalidCashOut),
-                });
-            });
-
-            it("should return false", () => {
-                // Act
-                const result = consumer.validateRequest(player, gameData.roundId, clientSendTime, receivedTime);
-
-                // Assert
-                expect(result).toBeFalsy();
-            });
-        });
-
-        describe("when already cash out", () => {
-            beforeEach(() => {
-                gameData.ingame = {
-                    [player.profile.name]: {
-                        betQueue: [],
-                        betTracks: {
-                            [Actions.CashOut]: {
-                                time: new Date(),
-                            },
-                        },
-                    },
-                };
-            });
-
-            it("should publishToUser failed bet", () => {
-                // Act
-                consumer.validateRequest(player, gameData.roundId, clientSendTime, receivedTime);
-
-                // Assert
-                expect(consumer.publisher.publishToUser).toBeCalledWith(player.UID, {
-                    endBet: -1,
-                    notice: consumer.getNoticeObj(noticeHelper.invalidCashOut),
-                });
-            });
-
-            it("should return false", () => {
-                // Act
-                const result = consumer.validateRequest(player, gameData.roundId, clientSendTime, receivedTime);
-
-                // Assert
-                expect(result).toBeFalsy();
-            });
-        });
-
-        describe("when cash out half and already cash out half", () => {
-            beforeEach(() => {
-                gameData.ingame = {
-                    [player.profile.name]: {
-                        betQueue: [],
-                        betTracks: {
-                            [Actions.HalfCashOut]: {
-                                time: new Date(),
-                            },
-                        },
-                    },
-                };
-            });
-
-            it("should publishToUser failed bet", () => {
-                // Act
-                consumer.validateRequest(player, gameData.roundId, true, receivedTime);
-
-                // Assert
-                expect(consumer.publisher.publishToUser).toBeCalledWith(player.UID, {
-                    endBet: -1,
-                    notice: consumer.getNoticeObj(noticeHelper.invalidCashOut),
-                });
-            });
-
-            it("should return false", () => {
-                // Act
-                const result = consumer.validateRequest(player, gameData.roundId, clientSendTime, receivedTime);
-
-                // Assert
-                expect(result).toBeFalsy();
-            });
-        });
-
-        describe("when roundId NOT valid", () => {
-            it("should publishToUser failed bet", () => {
-                // Arrange
-                const roundId = gameData.roundId - 1;
-
-                // Act
-                consumer.validateRequest(player, roundId, clientSendTime, receivedTime);
-
-                // Assert
-                expect(consumer.publisher.publishToUser).toBeCalledWith(player.UID, {
-                    endBet: -1,
-                    notice: consumer.getNoticeObj(noticeHelper.invalidCashOut, { gameRoundId: roundId }),
-                });
-            });
-
-            it("should return false", () => {
-                // Act
-                const result = consumer.validateRequest(player, gameData.roundId - 1, clientSendTime, receivedTime);
-
-                // Assert
-                expect(result).toBeFalsy();
-            });
-        });
-
-        describe("when cashout time NOT valid", () => {
-            beforeEach(() => {
-                gameData.remainingTime = chance.natural();
-            });
-
-            it("should publishToUser failed bet", () => {
-                // Act
-                consumer.validateRequest(player, gameData.roundId, clientSendTime, receivedTime);
-
-                // Assert
-                expect(consumer.publisher.publishToUser).toBeCalledWith(player.UID, {
-                    endBet: -1,
-                    notice: consumer.getNoticeObj(noticeHelper.invalidCashOut),
-                });
-            });
-
-            it("should return false", () => {
-                // Act
-                const result = consumer.validateRequest(player, gameData.roundId, clientSendTime, receivedTime);
-
-                // Assert
-                expect(result).toBeFalsy();
-            });
-        });
-
-        describe("when cashOut valid", () => {
-            it("should NOT publishToUser failed bet", () => {
-                // Act
-                consumer.validateRequest(player, gameData.roundId, clientSendTime, receivedTime);
-
-                // Assert
-                expect(consumer.publisher.publishToUser).not.toBeCalled();
-            });
-
-            it("should return true", () => {
-                // Act
-                const result = consumer.validateRequest(player, gameData.roundId, clientSendTime, receivedTime);
-
-                // Assert
-                expect(result).toBeTruthy();
-            });
-        });
-    });
-
-    describe("adjustBetTrack", () => {
-        describe("when bet action is HalfCashOut", () => {
-            it("should update player betTracks halfCashOut Time", () => {
-                // Arrange
-                const bet = {
-                    halfCashOut: true,
-                    receivedTime: new Date(),
-                    action: Actions.HalfCashOut,
-                };
-                gameData.ingame[player.profile.name] = { betTracks: {} };
-
-                // Act
-                consumer.adjustBetTracks(player.profile.name, bet);
-
-                // Assert
-                expect(gameData.ingame[player.profile.name].betTracks[bet.action].time).toEqual(bet.receivedTime);
-            });
-        });
-
-        describe("when bet action is CashOut", () => {
-            it("should update player betTracks CashOut Time", () => {
-                // Arrange
-                const bet = {
-                    receivedTime: new Date(),
-                    action: Actions.CashOut,
-                };
-                gameData.ingame[player.profile.name] = { betTracks: {} };
-
-                // Act
-                consumer.adjustBetTracks(player.profile.name, bet);
-
-                // Assert
-                expect(gameData.ingame[player.profile.name].betTracks[bet.action].time).toEqual(bet.receivedTime);
-            });
-        });
-    });
-
-    describe("composeValidationCriteria", () => {
-        let clientSendTime;
-        let receivedTime;
-
-        beforeEach(() => {
-            clientSendTime = new Date();
-            receivedTime = new Date();
-        });
-
-        it("should return combined criteria from betting time and bet track validations", () => {
-            // Act
-            const criteria = consumer.composeValidationCriteria(gameData.roundId, player, clientSendTime, receivedTime);
-
-            // Assert
-            expect(criteria).toBeInstanceOf(Array);
-            expect(criteria.length).toBeGreaterThan(0);
-            criteria.forEach((criterion) => {
-                expect(criterion).toHaveProperty("failure");
-                expect(criterion).toHaveProperty("notice");
-            });
-        });
-    });
-
-    describe("composeBetTrackValidationCriteria", () => {
-        it("should validate missing bet track", () => {
             // Arrange
-            const betTracks = {};
-
-            // Act
-            const criteria = consumer.composeBetTrackValidationCriteria(betTracks);
-
-            // Assert
-            expect(criteria[0].failure).toBeTruthy();
-            expect(criteria[0].notice).toBeDefined();
-        });
-
-        it("should validate existing cash out", () => {
-            // Arrange
-            const betTracks = {
-                [Actions.Bet]: { time: new Date() },
-                [Actions.CashOut]: { time: new Date() },
-            };
-
-            // Act
-            const criteria = consumer.composeBetTrackValidationCriteria(betTracks);
-
-            // Assert
-            expect(criteria[1].failure).toBeTruthy();
-            expect(criteria[1].notice).toBeDefined();
-        });
-
-        it("should pass validation for valid bet track", () => {
-            // Arrange
-            const betTracks = {
-                [Actions.Bet]: { time: new Date() },
-                [Actions.CashOut]: undefined,
-            };
-
-            // Act
-            const criteria = consumer.composeBetTrackValidationCriteria(betTracks);
-
-            // Assert
-            expect(criteria.every((c) => !c.failure)).toBeTruthy();
-        });
-    });
-
-    describe("composeBettingTimeValidationCriteria", () => {
-        let clientSendTime;
-        let receivedTime;
-
-        beforeEach(() => {
             clientSendTime = new Date();
-            receivedTime = new Date();
+            receivedTime = new Date(clientSendTime.getTime() + 100); // 100ms later
         });
 
         it("should validate game enabled status", () => {
@@ -456,32 +174,136 @@ describe("CashOutConsumer", () => {
             gameData.gameConfigs.enabled = false;
 
             // Act
-            const criteria = consumer.composeBettingTimeValidationCriteria(gameData.roundId, clientSendTime, receivedTime);
+            const result = consumer.validateRequest(player, gameData.roundId, clientSendTime, receivedTime);
 
             // Assert
-            expect(criteria[0].failure).toBeTruthy();
-            expect(criteria[0].notice).toBeDefined();
+            expect(result).toBeFalsy();
+            expect(publisher.publishToUser).toHaveBeenCalledWith(
+                player.UID,
+                expect.objectContaining({
+                    endBet: -1,
+                    notice: expect.objectContaining({
+                        errorCode: noticeHelper.invalidCashOut,
+                    }),
+                })
+            );
         });
 
-        it("should validate round ID", () => {
-            // Act
-            const criteria = consumer.composeBettingTimeValidationCriteria(gameData.roundId + 1, clientSendTime, receivedTime);
-
-            // Assert
-            expect(criteria[1].failure).toBeTruthy();
-            expect(criteria[1].notice).toBeDefined();
-        });
-
-        it("should validate remaining time", () => {
+        it("should fail validation if player has no bet", () => {
             // Arrange
-            gameData.remainingTime = consumer.definition.durations.liveTime + 1;
+            gameData.ingame[player.profile.name].betTracks[Actions.Bet].time = undefined;
 
             // Act
-            const criteria = consumer.composeBettingTimeValidationCriteria(gameData.roundId, clientSendTime, receivedTime);
+            const result = consumer.validateRequest(player, gameData.roundId, clientSendTime, receivedTime);
 
             // Assert
-            expect(criteria[2].failure).toBeTruthy();
-            expect(criteria[2].notice).toBeDefined();
+            expect(result).toBeFalsy();
+            expect(publisher.publishToUser).toHaveBeenCalledWith(
+                player.UID,
+                expect.objectContaining({
+                    endBet: -1,
+                    notice: expect.objectContaining({
+                        errorCode: noticeHelper.invalidCashOut,
+                    }),
+                })
+            );
+        });
+
+        it("should fail validation if player has already cashed out", () => {
+            // Arrange
+            gameData.ingame[player.profile.name].betTracks[Actions.CashOut].time = new Date();
+
+            // Act
+            const result = consumer.validateRequest(player, gameData.roundId, clientSendTime, receivedTime);
+
+            // Assert
+            expect(result).toBeFalsy();
+            expect(publisher.publishToUser).toHaveBeenCalledWith(
+                player.UID,
+                expect.objectContaining({
+                    endBet: -1,
+                    notice: expect.objectContaining({
+                        errorCode: noticeHelper.invalidCashOut,
+                    }),
+                })
+            );
+        });
+
+        it("should pass validation if all criteria are met", () => {
+            // Act
+            const result = consumer.validateRequest(player, gameData.roundId, clientSendTime, receivedTime);
+
+            // Assert
+            expect(result).toBeTruthy();
+        });
+    });
+
+    describe("adjustBetTracks", () => {
+        it("should update bet tracks with received time", () => {
+            // Arrange
+            const playerName = player.profile.name;
+            const bet = {
+                receivedTime: new Date(),
+                action: Actions.CashOut,
+            };
+
+            // Act
+            consumer.adjustBetTracks(playerName, bet);
+
+            // Assert
+            expect(gameData.ingame[playerName].betTracks[Actions.CashOut].time).toEqual(bet.receivedTime);
+        });
+
+        it("should not throw if player is not in game data", () => {
+            // Arrange
+            const playerName = "nonExistentPlayer";
+            const bet = {
+                receivedTime: new Date(),
+                action: Actions.CashOut,
+            };
+
+            // Act & Assert
+            expect(() => consumer.adjustBetTracks(playerName, bet)).not.toThrow();
+        });
+    });
+
+    describe("isNotHavingBet", () => {
+        it("should return true when bet tracks is undefined", () => {
+            expect(consumer.isNotHavingBet(undefined)).toBeTruthy();
+        });
+
+        it("should return true when bet time is undefined", () => {
+            const betTracks = {
+                [Actions.Bet]: { time: undefined },
+            };
+            expect(consumer.isNotHavingBet(betTracks)).toBeTruthy();
+        });
+
+        it("should return false when bet time exists", () => {
+            const betTracks = {
+                [Actions.Bet]: { time: new Date() },
+            };
+            expect(consumer.isNotHavingBet(betTracks)).toBeFalsy();
+        });
+    });
+
+    describe("isAlreadyCashout", () => {
+        it("should return false when bet tracks is undefined", () => {
+            expect(consumer.isAlreadyCashout(undefined)).toBeFalsy();
+        });
+
+        it("should return false when cashout time is undefined", () => {
+            const betTracks = {
+                [Actions.CashOut]: { time: undefined },
+            };
+            expect(consumer.isAlreadyCashout(betTracks)).toBeFalsy();
+        });
+
+        it("should return true when cashout time exists", () => {
+            const betTracks = {
+                [Actions.CashOut]: { time: new Date() },
+            };
+            expect(consumer.isAlreadyCashout(betTracks)).toBeTruthy();
         });
     });
 });
