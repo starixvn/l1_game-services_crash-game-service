@@ -247,7 +247,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             receivedTime: new Date(),
             freeBet: false,
             increment,
-            result: generateTapResult(result),
+            result: generateTapResult(result), // TODO: reuse generated result at place bet
             multiplier: updatedMultiplier,
         });
 
@@ -259,11 +259,5 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             multiplier: updatedMultiplier,
             betId: activeBet.id,
         });
-    }
-
-    calculateIncrement(multiplier) {
-        const { stages } = this.gameData.gameConfigs.stageConfigs;
-        const stage = stages.find((stage) => multiplier >= stage.minMultiplier && multiplier <= stage.maxMultiplier);
-        return stage ? stage.increment : stages[stages.length - 1].increment;
     }
 }

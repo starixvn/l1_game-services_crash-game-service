@@ -7,7 +7,6 @@
         "integration-test": "jest --config ./jest.integration-test.config.cjs --testPathPattern=tests/integration-tests/ --ci --forceExit --runInBand",
         "test": "jest --testPathPattern=src/ ",
         "test-coverage": "jest --testPathPattern=src/ --collect-coverage",
-        "dev": "set APP_NAME=spaceflight_service&& nodemon --es-module-specifier-resolution=node --watch ./src ./src/app.js",
         "debug": "set APP_NAME=spaceflight_service && nodemon --es-module-specifier-resolution=node --watch ./ --inspect ./src/app.js",
         "prod": "node --max-old-space-size=8192 --es-module-specifier-resolution=node ./src/app.js",
         "reg": "npm set registry http://npm.lumigame.com",
