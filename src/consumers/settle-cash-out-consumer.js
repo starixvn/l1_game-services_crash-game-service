@@ -11,10 +11,13 @@ export class SettleCashOutConsumer {
      */
     constructor(gameData, placeBetPublisher, logService, betLogsRepository) {
         this.gameData = gameData;
+
+        //TODO should use specific publisher for cashout
         this.placeBetPublisher = placeBetPublisher;
         this.logService = logService;
         this.betLogsRepository = betLogsRepository;
     }
+    //TODO call for player disconnected
     async proceedAutoCashOut(multiplier) {
         try {
             const players = Object.values(this.gameData.ingame).filter((playerInGame) => !playerInGame.isUm);
@@ -43,6 +46,7 @@ export class SettleCashOutConsumer {
         }
     }
 
+    //TODO just verify player have existing bet or not
     validateAutoCashOut(betTracks, multiplier) {
         const { result } = this.gameData;
         const bet = betTracks?.[Actions.Bet];
@@ -54,12 +58,39 @@ export class SettleCashOutConsumer {
         try {
             const winningDetails = this.calculateWinnings(amount, multiplier, player);
             await this.recordBetLog(player, payload, winningDetails);
-            await this.publishResults(player, payload, winningDetails);
+            await this.publishCashOut(player, payload, winningDetails);
             this.updateGameData(player, payload.action, winningDetails);
+
+            await this.updateRounds(player, payload.action, winningDetails);
         } catch (err) {
             this.logService.logError(err);
             throw err;
         }
+    }
+
+    async recordBetLog(player, payload, winningDetails) {
+        const betLog = { ...payload, ...winningDetails };
+        await this.insertBetLog(player, this.gameData.roundId, betLog);
+    }
+
+    async publishCashOut(player, payload, winningDetails) {
+        this.placeBetPublisher.publishSuccessCashOut(
+            player.UID,
+            {
+                name: player.profile.name,
+                playerId: player.UID,
+                [payload.action]: winningDetails,
+            },
+            this.calculateCurrencyRate(player.session)
+        );
+    }
+
+    async updateGameData(player, action, winningDetails) {
+        this.gameData.updatePlayerAction(player.UID, action, winningDetails);
+    }
+
+    async updateRounds(player, action, winningDetails) {
+        //TODO update rounds for settlement
     }
 
     calculateWinnings(amount, multiplier, player) {
@@ -100,6 +131,8 @@ export class SettleCashOutConsumer {
             roundId,
             multiplier: bet.multiplier,
             reachMaxWin: bet.reachMaxWin,
+            tapCount: bet.tapCount,
+            increment: 0,
         };
 
         if (player.session) {

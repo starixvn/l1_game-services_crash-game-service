@@ -156,6 +156,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         return result;
     }
 
+    //TODO update betlog for tapCount
     async insertBetLog(player, roundId, bet) {
         const rate = this.calculateCurrencyRate(player.session);
 
@@ -173,6 +174,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             clientSendTime: bet.clientSendTime,
             receivedTime: bet.receivedTime,
             roundId,
+            tapCount: bet.tapCount,
         };
 
         if (player.session) {
