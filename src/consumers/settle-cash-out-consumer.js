@@ -90,11 +90,33 @@ export class SettleCashOutConsumer {
     }
 
     async updateRounds(player, action, winningDetails) {
-        //TODO update rounds for settlement
+        const playerInGame = this.gameData.ingame[player.profile.name];
+        if (!playerInGame) {
+            throw new Error(`Player in-game data not found for ${player.profile.name}`);
+        }
+
+        const betTracks = playerInGame.betTracks;
+        const bet = betTracks[Actions.Bet];
+        const result = this.gameData.result;
+        const settlementResult = [...result];
+        const betwin = winningDetails.winAmount;
+
+        await this.gameData.roundsRepository.updateOne(
+            { id: this.gameData.roundId },
+            {
+                $set: {
+                    betwin,
+                    result,
+                    tapCount: bet?.tapCount || 1,
+                    settlementResult,
+                },
+            }
+        );
     }
 
     calculateWinnings(amount, multiplier, player) {
-        const cappedMultiplier = Math.min(multiplier, 1000);
+        const maxMultiplier = 1000;
+        const cappedMultiplier = Math.min(multiplier, maxMultiplier);
         const cashOutWin = roundFloat(amount * cappedMultiplier);
         const maxWinPerRound = this.getMaxWinPerRound(player);
         const winAmount = Math.min(cashOutWin, maxWinPerRound);
