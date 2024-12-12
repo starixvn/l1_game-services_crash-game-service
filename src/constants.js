@@ -1,5 +1,6 @@
 const Actions = {
     Bet: "bet",
+    Mine: "mine",
     CashOut: "cashOut",
     HalfCashOut: "halfCashOut",
     Refund: "refund",

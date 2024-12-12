@@ -1,7 +1,9 @@
+import Chance from "chance";
 import { Core } from "sc-game-base";
-import { calculateCrashTimeInMillisecond } from "../helpers/crash-point-helper";
+import { cardRanks } from "../cards";
+import { choiceNames } from "../game-settings";
 
-export default class GameCrons extends Core.Crons.BaseGameCron {
+export default class GameCron extends Core.Crons.BaseGameCron {
     constructor({
         definition,
         gameData,
@@ -19,17 +21,8 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
         partnerConfigRepository,
         currencyGroupRepository,
         currencyRepository,
-        roundResultConsumer,
-        resultsRepository,
-        promotionRepository,
-        appConfigs,
-        liveGameCrons,
-        betsRepository,
-        betLogsRepository,
-        umInfoWatcher,
-        settleCashOutConsumer,
-        unsettledRoundConsumer,
-        provablyFairConsumer,
+        collectConsumer,
+        settleTurnConsumer,
     }) {
         super({
             definition,
@@ -48,25 +41,23 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
             partnerConfigRepository,
             currencyGroupRepository,
             currencyRepository,
-            roundResultConsumer,
-            resultsRepository,
-            promotionRepository,
-            appConfigs,
-            unsettledRoundConsumer,
-            provablyFairConsumer,
         });
 
-        this.liveGameCrons = liveGameCrons;
-        this.betsRepository = betsRepository;
-        this.betLogsRepository = betLogsRepository;
-        this.umInfoWatcher = umInfoWatcher;
-        this.settleCashOutConsumer = settleCashOutConsumer;
+        this.collectConsumer = collectConsumer;
+        this.settleTurnConsumer = settleTurnConsumer;
+        this.chance = new Chance();
     }
 
     async start() {
-        this.bot && (await this.bot.resetInRoomTrackings());
         await super.start();
-        this.umInfoWatcher.initChangeStream();
+        await this.proceedUnsettledBets();
+    }
+
+    async getLastArchiveRound() {
+        const { configName } = this.definition;
+        const archiveStatus = await this.archiveStatusesRepository.findOne({ name: configName }, "lastArcId").lean().exec();
+
+        return archiveStatus ? archiveStatus.lastArcId["_rounds"] + 1 : 1;
     }
 
     async proceed() {
@@ -78,64 +69,53 @@ export default class GameCrons extends Core.Crons.BaseGameCron {
 
         if (!this.gameData.disabled) {
             this.gameData.remainingTime--;
+            await this.processRunningRounds();
         }
 
         if (this.isStartingTime(this.gameData.remainingTime, durations)) {
-            await this.resetForNewRound();
+            this.bot && (await this.bot.reset());
         }
 
-        if (this.gameData.remainingTime === durations.placingBets && this.resultsRepository) {
-            await this.roundResultConsumer.generateServerSeedAndPublishHash(this.gameData.lastResultRecord);
-        }
-
-        if (this.gameData.remainingTime === durations.placingBets) {
-            this.gameStatusPublisher.publishStartPlacingBetStatus();
-        }
-
-        if (this.gameData.remainingTime === durations.lockingBet - 1) {
-            this.gameStatusPublisher.publishEndPlacingBetStatus();
-        }
-
-        if (this.gameData.remainingTime < durations.placingBets && this.gameData.remainingTime > 0) {
+        if (this.gameData.remainingTime < 0) {
+            this.gameData.remainingTime = durations.wholeRound;
+        } else if (this.gameData.remainingTime < durations.placingBets) {
             this.bot && (await this.bot.run());
-            this.runningRoundInfoPublisher.publish();
-        }
-
-        if (this.gameData.remainingTime === durations.liveTime) {
-            if (this.resultsRepository) {
-                await this.provablyFairConsumer.updateClientSeedFromBets();
-                await this.roundResultConsumer.generateResult();
-                this.gameData.settlementResultFromAdmin = {};
-            }
-
-            this.startDelaySettleRound();
-            this.gameData.result > 1 && this.liveGameCrons.start();
         }
     }
 
-    startDelaySettleRound() {
-        const { durations } = this.definition;
-        const gameResult = this.gameData.result;
-        const settleTimeOut = calculateCrashTimeInMillisecond(gameResult);
+    async processRunningRounds() {}
 
-        setTimeout(async () => {
-            try {
-                this.liveGameCrons.stop();
-                await this.settleCashOutConsumer.proceedAutoCashOut(this.gameData.result);
-                this.gameData.remainingTime = durations.wholeRound;
-                await this.settleGameRoundConsumer.settleRound(this.gameData);
-            } catch (err) {
-                this.logService.logError(err);
-            }
-        }, settleTimeOut);
+    async proceedUnsettledBets() {
+        const unsettledBets = await this.roundsRepository.find({ paid: false }).lean().exec();
+        unsettledBets.forEach((bet) => {
+            this.gameData.ingame[bet.name] = {
+                betTracks: {
+                    ...bet,
+                    turnResult: { isLose: false, betwin: bet.totalTurns === 0 ? bet.amount : bet.betwin },
+                },
+            };
+        });
 
-        this.gameData.startTime = new Date();
+        await Promise.all(
+            Object.values(this.gameData.ingame).map((player) => this.settleGameRoundConsumer.settleBets(player.betTracks.name))
+        );
     }
 
-    async resetForNewRound() {
-        super.resetForNewRound();
-        this.gameData.betList = {};
-        this.bot && (await this.bot.reset());
-        this.appConfigs.enabledBoostedOdds && (await this.updatePromotionOddsAndNotify());
+    async enableGame() {
+        await Promise.all(
+            Object.values(this.gameData.ingame).map(async (player) => {
+                if (player.betTracks && Object.keys(player.betTracks).length) {
+                    const bet = player.betTracks;
+                    bet.turnResult = {
+                        isLose: false,
+                        betwin: bet.totalTurns === 0 ? bet.amount : bet.betwin,
+                    };
+
+                    await this.settleGameRoundConsumer.settleBets(bet.name);
+                }
+            })
+        );
+
+        await super.enableGame();
     }
 }

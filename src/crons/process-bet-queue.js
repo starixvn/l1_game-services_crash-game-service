@@ -59,7 +59,10 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     async proceedActions(player, payload) {
         switch (payload.action) {
             case Actions.Bet:
-                await this.handlePlayerBet(player, payload);
+                await this.proceedBet(player, payload);
+                break;
+            case Actions.Mine:
+                await this.proceedMine(player, payload);
                 break;
             case Actions.CashOut:
                 await this.proceedCashOut(player, payload);
@@ -223,17 +226,16 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         }
     }
 
-    async handlePlayerBet(player, payload) {
+    async proceedMine(player, payload) {
         const playerGameData = this.gameData[player.id];
 
         if (playerGameData?.activeBet) {
-            await this.handleExistingBet(player, playerGameData.activeBet, payload.clientSendTime);
+            await this.handlePlayerMine(player, playerGameData.activeBet, payload.clientSendTime);
         } else {
-            await this.proceedBet(player, payload);
         }
     }
 
-    async handleExistingBet(player, activeBet, clientSendTime) {
+    async handlePlayerMine(player, activeBet, clientSendTime) {
         const multiplier = this.gameData.ingame[playerName].currentMultiplier;
         const increment = this.calculateIncrement(multiplier);
         const updatedMultiplier = multiplier + increment;
