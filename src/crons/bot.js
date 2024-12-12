@@ -75,6 +75,14 @@ export default class Bot extends Table.Crons.TableGameBot {
         return botIds?.length > totalRemoval ? this.chance.pickset(botIds, totalRemoval) : botIds;
     }
 
+    getBotsToBet() {
+        const botsToBet = super.getBotsToBet();
+
+        botsToBet.forEach((bot) => bot.remainTickets--);
+
+        return botsToBet;
+    }
+
     async placeBet(bot) {
         if (this.gameData.remainingTime > this.definition.durations.lockingBet) {
             const maxBet = this.gameData.gameConfigs.bot_maxbet;
@@ -164,7 +172,6 @@ export default class Bot extends Table.Crons.TableGameBot {
     updateBotInRoomData(bot, amount, balance) {
         bot.totalBet += amount;
         bot.red = balance;
-        bot.remainTickets--;
         bot.expectCashOut = this.getCashOutPoint();
     }
 
