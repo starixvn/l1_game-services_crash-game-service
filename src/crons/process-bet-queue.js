@@ -18,6 +18,8 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         settleCashOutConsumer,
         provablyFairConsumer,
         roundResultConsumer,
+        roundsRepository,
+        mineConsumer,
     }) {
         super({
             definition,
@@ -34,6 +36,8 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         this.settleCashOutConsumer = settleCashOutConsumer;
         this.provablyFairConsumer = provablyFairConsumer;
         this.roundResultConsumer = roundResultConsumer;
+        this.roundsRepository = roundsRepository;
+        this.mineConsumer = mineConsumer;
     }
 
     dequeueBets() {
@@ -159,7 +163,6 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         return result;
     }
 
-    //TODO update betlog for tapCount
     async insertBetLog(player, roundId, bet) {
         const rate = this.calculateCurrencyRate(player.session);
 
@@ -227,41 +230,48 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     }
 
     async proceedMine(player, payload) {
-        const playerGameData = this.gameData[player.id];
+        const playerGameData = this.gameData.ingame[player.profile.name];
 
         if (playerGameData?.activeBet) {
-            await this.handlePlayerMine(player, playerGameData.activeBet, payload.clientSendTime);
+            await this.mineConsumer.mine(player, payload);
         } else {
+            await this.initializeNewBet(player, payload);
         }
     }
 
-    async handlePlayerMine(player, activeBet, clientSendTime) {
-        const multiplier = this.gameData.ingame[playerName].currentMultiplier;
-        const increment = this.calculateIncrement(multiplier);
-        const updatedMultiplier = multiplier + increment;
-
+    async initializeNewBet(player, payload) {
         const playerName = player.profile.name;
+        const roundId = this.gameData.roundId;
         const result = this.roundResultConsumer.generateResult();
 
-        await this.insertBetLog(player, this.gameData.roundId, {
-            action: Actions.Bet,
-            amount: activeBet.amount,
-            winAmount: activeBet.amount * updatedMultiplier,
-            clientSendTime: clientSendTime,
-            receivedTime: new Date(),
-            freeBet: false,
-            increment,
-            result: generateTapResult(result), // TODO: reuse generated result at place bet
-            multiplier: updatedMultiplier,
-        });
+        // Initialize round document
+        await this.initializeRound(roundId, result, playerName, payload.amount);
 
-        if (this.gameData.ingame?.[playerName]) {
-            this.gameData.ingame[playerName].currentMultiplier = updatedMultiplier;
-        }
+        // Initialize player game state
+        await this.initializePlayerGameState(player, payload, roundId);
 
-        this.io.to(player.socketId).emit("bet_result", {
-            multiplier: updatedMultiplier,
-            betId: activeBet.id,
+        // Proceed with bet handling
+        await this.proceedBet(player, payload);
+    }
+
+    async initializeRound(roundId, result, playerName, betAmount) {
+        await this.roundsRepository.create({
+            id: roundId,
+            result: result,
+            time: new Date(),
+            exchangeRateId: this.gameData.exchangeRates.id,
+            tapCount: 1,
+            playerName: playerName,
+            betAmount: betAmount,
         });
+    }
+
+    async initializePlayerGameState(player, payload, roundId) {
+        const playerName = player.profile.name;
+        const playerGameData = this.gameData.ingame[playerName];
+        const playerBetTracks = playerGameData?.betTracks ?? {};
+
+        playerBetTracks[Actions.Bet].roundId = roundId;
+        playerBetTracks[Actions.Bet].tapCount = 1;
     }
 }
