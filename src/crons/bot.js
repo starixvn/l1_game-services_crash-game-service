@@ -90,13 +90,15 @@ export default class Bot extends Table.Crons.TableGameBot {
             const amount = this.getBetAmount(minBet, maxBet);
             bot.clientSeed = this.generateClientSeed();
 
+            const currentBet = await this.tempBetsRepository.findOne({ uid: bot.id, roundId: this.gameData.roundId }).lean().exec();
+
             const user = await this.userInfosRepository.findOneAndUpdate(
                 { id: bot.id, red: { $gt: amount } },
                 { $inc: { red: -amount } },
                 { new: true, lean: true }
             );
 
-            if (user) {
+            if (user && !currentBet) {
                 await this.insertBet(bot, amount);
 
                 this.totalTickets += 1;
