@@ -1,6 +1,6 @@
 import { Core } from "sc-game-base";
 import { helpers } from "sc-common";
-import gameSettings from "../game-settings";
+import { Actions } from "../constants";
 
 export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetConsumer {
     composeValidationCriteria(player, amount) {
@@ -11,6 +11,8 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
     }
 
     composeBettingTimeValidationCriteria(player) {
+        //TODO: consider using the Bet consumer for both Bet and Mine action
+        //TODO: if so, need to check runningRound to determine action Bet or Mine
         const runningRound = this.gameData.ingame[player.profile.name]?.betTracks;
         const configs = this.gameData.gameConfigs;
 
@@ -53,10 +55,17 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
     }
 
     consume(player, payload) {
-        payload.roundId = this.gameData.roundId;
+        //TODO: do not increment roundId here, it should be done in ProcessBetQueue
+        const currentRoundId = this.gameData.roundId;
         this.gameData.roundId++;
 
-        Object.assign(payload, { amount: payload.amount >> 0, receivedTime: new Date(), mode: payload.m ?? this.DisplayMode.Landscape });
+        Object.assign(payload, {
+            amount: payload.amount >> 0,
+            receivedTime: new Date(),
+            mode: payload.m ?? this.DisplayMode.Landscape,
+            roundId: currentRoundId,
+        });
+
         if (!this.validateBetRequest(player, payload.amount)) {
             return;
         }
@@ -80,6 +89,6 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
             this.gameData.ingame[name].betQueue = [];
         }
 
-        this.gameData.ingame[name].betQueue.push({ player, payload: { action: gameSettings.actions.bet, bet: payload } });
+        this.gameData.ingame[name].betQueue.push({ player, payload: { action: Actions.Bet, bet: payload } });
     }
 }

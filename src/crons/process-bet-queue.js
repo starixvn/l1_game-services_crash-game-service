@@ -69,79 +69,21 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
                 await this.proceedMine(player, payload);
                 break;
             case Actions.CashOut:
-                await this.proceedCashOut(player, payload);
+                await this.settleCashOutConsumer.proceedCashOut(player, payload);
+                //TODO: call settle-game-round-consumer to settle player bet
                 break;
         }
-    }
-
-    async proceedCashOut(player, payload) {
-        const { multiplier, bet, betLogs } = await this.getCashOutBet(payload, player);
-        const isValidCashOut = this.validateCashOut(multiplier, bet, player, betLogs);
-
-        if (!isValidCashOut) {
-            return;
-        }
-
-        const halfCashOutBetLog = betLogs.find((log) => log.action === Actions.HalfCashOut);
-        const amount = bet.amount - (halfCashOutBetLog?.amount ?? 0);
-
-        await this.settleCashOutConsumer.settleCashOut(player, payload, amount, multiplier);
-    }
-
-    async getCashOutBet(payload, player) {
-        const { freeBet, roundId } = payload;
-        const multiplier = this.calculateCashOutMultiplier(payload);
-        const bet = await this.betsRepository.findOne({ uid: player.UID, roundId, freeBet: !!freeBet }).lean().exec();
-        const betLogs = await this.betLogsRepository.find({ uid: player.UID, roundId }).lean().exec();
-
-        return { multiplier, bet, roundId, freeBet, betLogs };
-    }
-
-    calculateCashOutMultiplier(payload) {
-        const playerName = payload.player?.profile?.name;
-        const playerInGame = this.gameData.ingame[playerName];
-        return playerInGame?.currentMultiplier ?? 0;
-    }
-
-    validateCashOut(multiplier, bet, player, betLogs) {
-        const { result, roundId } = this.gameData;
-        const cashOutBetLogs = betLogs.find((log) => log.action === Actions.CashOut);
-
-        if (this.isInvalidCashOut(bet, multiplier, result, roundId, cashOutBetLogs)) {
-            this.publishCashOutFailed(player);
-            return false;
-        }
-
-        return true;
-    }
-
-    isInvalidCashOut(bet, multiplier, result, roundId, cashOutBetLogs) {
-        return !bet || multiplier >= result || roundId !== bet.roundId || !!cashOutBetLogs;
-    }
-
-    publishCashOutFailed(player) {
-        this.placeBetPublisher.publishGameFailedBet(player.UID, {
-            endBet: -1,
-            notice: { errorCode: noticeHelper.invalidCashOut },
-        });
     }
 
     async handleSuccessBet(player, balance, roundId, bet) {
         const rate = this.calculateCurrencyRate(player.session);
         const playerName = player.profile.name;
 
+        //TODO: insert new round, with roundId increment by 1
         await this.insertBet(player, roundId, bet, rate);
         await this.insertBetLog(player, roundId, bet);
 
         this.notifyPlacingBetResult(player, balance, bet, rate);
-
-        if (this.gameData.ingame[playerName]) {
-            this.gameData.ingame[playerName].activeBet = {
-                id: bet.id,
-                amount: bet.amount,
-                createdAt: new Date(),
-            };
-        }
 
         this.gameData.addPlayerToBetList(player.UID, {
             name: playerName,

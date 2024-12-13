@@ -1,76 +1,62 @@
 import { Actions } from "../constants";
-import { roundFloat } from "../helpers/number-helper";
+import helpers from "../helpers/notice-helper";
 
 export class SettleCashOutConsumer {
     /**
      * @param {Object} dependencies
      * @param {GameData} dependencies.gameData
-     * @param {PlaceBetPublisher} dependencies.placeBetPublisher
+     * @param {BaseEventPublisher} dependencies.baseEventPublisher
      * @param {logger} dependencies.logService
      * @param {mongoose.Model} dependencies.betLogsRepository
      */
-    constructor(gameData, placeBetPublisher, logService, betLogsRepository) {
+    constructor(gameData, baseEventPublisher, logService, betLogsRepository) {
         this.gameData = gameData;
 
-        //TODO should use specific publisher for cashout
-        this.placeBetPublisher = placeBetPublisher;
+        this.baseEventPublisher = baseEventPublisher;
         this.logService = logService;
         this.betLogsRepository = betLogsRepository;
     }
-    //TODO call for player disconnected
-    async proceedAutoCashOut(multiplier) {
-        try {
-            const players = Object.values(this.gameData.ingame).filter((playerInGame) => !playerInGame.isUm);
 
-            for (const player of players) {
-                const betTracks = player?.betTracks;
-                const isValid = this.validateAutoCashOut(betTracks, multiplier);
+    validateCashOut(player) {
+        const playerData = this.gameData.ingame[player.profile.name];
+        const betTracks = playerData?.betTracks;
 
-                if (isValid) {
-                    const bet = betTracks?.[Actions.Bet];
-                    const payload = {
-                        roundId: this.gameData.roundId,
-                        receivedTime: new Date(),
-                        action: Actions.CashOut,
-                    };
-
-                    betTracks[Actions.CashOut] = {
-                        time: new Date(),
-                    };
-
-                    await this.settleCashOut(player.playerData, payload, bet.amount, bet.autoCashOut);
-                }
-            }
-        } catch (err) {
-            this.logService.logError(err);
-        }
+        // Check if player has placed a bet and hasn't cashed out yet
+        return betTracks?.[Actions.Bet] && !betTracks?.[Actions.CashOut];
     }
 
-    //TODO just verify player have existing bet or not
-    validateAutoCashOut(betTracks, multiplier) {
-        const { result } = this.gameData;
+    async proceedCashOut(player, payload) {
+        const isValidCashOut = this.validateCashOut(player);
+
+        if (!isValidCashOut) {
+            this.baseEventPublisher.publishToUser(player.UID, { endBet: -1, notice: helpers.invalidCashOut });
+
+            return null;
+        }
+
+        const { multiplier, roundId, tapCount, amount } = await this.getCashOutBet(player);
+
+        await this.insertBetLog(player, roundId, { multiplier, roundId, tapCount, amount });
+        this.updateGameData(player, { multiplier, roundId, tapCount });
+
+        return { player, multiplier, roundId, tapCount, amount };
+    }
+
+    async getCashOutBet(player) {
+        const playerData = this.gameData.ingame[player.profile.name];
+        const betTracks = playerData?.betTracks;
         const bet = betTracks?.[Actions.Bet];
 
-        return bet?.autoCashOut <= multiplier && bet?.autoCashOut < result && !betTracks?.[Actions.CashOut];
-    }
-
-    async settleCashOut(player, payload, amount, multiplier) {
-        try {
-            const winningDetails = this.calculateWinnings(amount, multiplier, player);
-            await this.recordBetLog(player, payload, winningDetails);
-            await this.publishCashOut(player, payload, winningDetails);
-            this.updateGameData(player, payload.action, winningDetails);
-
-            await this.updateRounds(player, payload.action, winningDetails);
-        } catch (err) {
-            this.logService.logError(err);
-            throw err;
+        if (!bet) {
+            return null;
         }
-    }
 
-    async recordBetLog(player, payload, winningDetails) {
-        const betLog = { ...payload, ...winningDetails };
-        await this.insertBetLog(player, this.gameData.roundId, betLog);
+        return {
+            multiplier: bet.multiplier,
+            tapCount: bet.tapCount,
+            roundId: bet.roundId,
+            amount: bet.amount,
+        };
     }
 
     async publishCashOut(player, payload, winningDetails) {
@@ -85,56 +71,17 @@ export class SettleCashOutConsumer {
         );
     }
 
-    async updateGameData(player, action, winningDetails) {
-        this.gameData.updatePlayerAction(player.UID, action, winningDetails);
-    }
+    async updateGameData(player, bet) {
+        const playerName = player.profile.name;
+        const playerGameData = this.gameData.ingame[playerName];
+        const playerBetTracks = playerGameData?.betTracks ?? {};
 
-    async updateRounds(player, action, winningDetails) {
-        const playerInGame = this.gameData.ingame[player.profile.name];
-        if (!playerInGame) {
-            throw new Error(`Player in-game data not found for ${player.profile.name}`);
-        }
-
-        const betTracks = playerInGame.betTracks;
-        const bet = betTracks[Actions.Bet];
-        const result = this.gameData.result;
-        const settlementResult = [...result];
-        const betwin = winningDetails.winAmount;
-
-        await this.gameData.roundsRepository.updateOne(
-            { id: this.gameData.roundId },
-            {
-                $set: {
-                    betwin,
-                    result,
-                    tapCount: bet?.tapCount || 1,
-                    settlementResult,
-                },
-            }
-        );
-    }
-
-    calculateWinnings(amount, multiplier, player) {
-        const maxMultiplier = 1000;
-        const cappedMultiplier = Math.min(multiplier, maxMultiplier);
-        const cashOutWin = roundFloat(amount * cappedMultiplier);
-        const maxWinPerRound = this.getMaxWinPerRound(player);
-        const winAmount = Math.min(cashOutWin, maxWinPerRound);
-
-        return {
-            winAmount,
-            multiplier: cappedMultiplier,
-            cashOutWin,
-            reachMaxWin: winAmount === maxWinPerRound,
+        playerBetTracks[Actions.CashOut] = {
+            time: new Date(),
+            multiplier: bet.multiplier,
+            roundId: bet.roundId,
+            tapCount: bet.tapCount,
         };
-    }
-
-    getMaxWinPerRound(player) {
-        const { maxWinPerRound } = this.gameData.gameConfigs.crashConfig;
-        const settings = this.gameData.currencyGroupGames.find((x) => x.groupId.toString() === player.session.currencyGroupId);
-        const maxBet = Math.min(player.profile.maxBet, settings.maxBet);
-
-        return maxWinPerRound * maxBet;
     }
 
     async insertBetLog(player, roundId, bet) {
@@ -144,17 +91,13 @@ export class SettleCashOutConsumer {
             uid: player.UID,
             name: player.profile.name,
             time: new Date(),
-            action: bet.action,
+            action: Actions.CashOut,
             amount: bet.amount,
-            winAmount: bet.winAmount,
-            freeBet: bet.freeBet,
             clientSendTime: bet.clientSendTime,
             receivedTime: bet.receivedTime,
             roundId,
             multiplier: bet.multiplier,
-            reachMaxWin: bet.reachMaxWin,
             tapCount: bet.tapCount,
-            increment: 0,
         };
 
         if (player.session) {
