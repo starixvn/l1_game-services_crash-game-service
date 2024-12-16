@@ -54,9 +54,9 @@ describe("getRemovalBotIds", () => {
     describe("when totalRemoval < bots in room", () => {
         it("should return an array with length = totalRemoval", () => {
             bot.botsInRoom = {
-                1: { totalBet: 0 },
-                2: { totalBet: 0 },
-                3: { totalBet: 0 },
+                1: { totalBet: 0, remainTickets: 1 },
+                2: { totalBet: 0, remainTickets: 1 },
+                3: { totalBet: 0, remainTickets: 1 },
             };
             const botIds = bot.getRemovalBotIds(2);
             expect(botIds).toHaveLength(2);
@@ -65,9 +65,9 @@ describe("getRemovalBotIds", () => {
     describe("when totalRemoval >= bots in room", () => {
         it("should return all bot ids", () => {
             bot.botsInRoom = {
-                1: { totalBet: 0 },
-                2: { totalBet: 0 },
-                3: { totalBet: 0 },
+                1: { totalBet: 0, remainTickets: 1 },
+                2: { totalBet: 0, remainTickets: 1 },
+                3: { totalBet: 0, remainTickets: 1 },
             };
             const botIds = bot.getRemovalBotIds(4);
             expect(botIds).toHaveLength(3);
