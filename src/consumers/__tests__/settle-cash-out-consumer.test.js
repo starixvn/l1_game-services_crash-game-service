@@ -3,9 +3,9 @@ import { stub, stubMongoose } from "jest-micro-auto-stub";
 import GameData from "../../game-data";
 import PlaceBetPublisher from "../../event-publishers/place-bet-publisher";
 import { SettleCashOutConsumer } from "../settle-cash-out-consumer";
-import { Actions, MinMultiplierValue } from "../../constants";
+import { Actions } from "../../constants";
 import Chance from "chance";
-import { roundFloat } from "../../helpers/number-helper";
+import helpers from "../../helpers/notice-helper";
 
 const chance = new Chance();
 
@@ -176,49 +176,166 @@ describe("SettleCashOutConsumer", () => {
     });
 
     describe("proceedCashOut", () => {
+        const setupValidBetDetails = () => ({
+            multiplier: 1.5,
+            roundId: chance.natural(),
+            tapCount: 1,
+            amount: 100,
+        });
+
         beforeEach(() => {
+            // Setup basic game data structure
             gameData.ingame = {
                 [playerName]: {
                     betTracks: {},
                 },
             };
+
+            // Setup exchange rates
+            gameData.exchangeRates = {
+                code: {
+                    USD: 1,
+                },
+            };
+
+            // Mock baseEventPublisher
+            consumer.baseEventPublisher = {
+                publishToUser: jest.fn(),
+            };
+
+            // Spy on internal methods
+            jest.spyOn(consumer, "validateCashOut");
+            jest.spyOn(consumer, "getCashOutBet");
+            jest.spyOn(consumer, "insertBetLog");
+            jest.spyOn(consumer, "updateGameData");
         });
 
-        it("should return null and publish invalid notice when cash out is invalid", async () => {
-            // Arrange
-            const payload = { action: Actions.CashOut };
+        const setupSuccessfulCashOut = (betDetails = setupValidBetDetails()) => {
+            consumer.validateCashOut.mockReturnValue(true);
+            consumer.getCashOutBet.mockResolvedValue(betDetails);
+            return betDetails;
+        };
 
-            // Act
-            const result = await consumer.proceedCashOut(realPlayer, payload);
+        describe("when validation fails", () => {
+            it("should return null", async () => {
+                // Arrange
+                const payload = { action: Actions.CashOut };
+                consumer.validateCashOut.mockReturnValue(false);
 
-            // Assert
-            expect(result).toBeNull();
-            expect(consumer.baseEventPublisher.publishToUser).toHaveBeenCalledWith(realPlayer.UID, {
-                endBet: -1,
-                notice: helpers.invalidCashOut,
+                // Act
+                const result = await consumer.proceedCashOut(realPlayer, payload);
+
+                // Assert
+                expect(result).toBeNull();
+            });
+
+            it("should publish invalid notice", async () => {
+                // Arrange
+                const payload = { action: Actions.CashOut };
+                consumer.validateCashOut.mockReturnValue(false);
+
+                // Act
+                await consumer.proceedCashOut(realPlayer, payload);
+
+                // Assert
+                expect(consumer.baseEventPublisher.publishToUser).toHaveBeenCalledTimes(1);
+                expect(consumer.baseEventPublisher.publishToUser).toHaveBeenCalledWith(realPlayer.UID, {
+                    endBet: -1,
+                    notice: helpers.invalidCashOut,
+                });
+            });
+
+            it("should not proceed with further processing", async () => {
+                // Arrange
+                const payload = { action: Actions.CashOut };
+                consumer.validateCashOut.mockReturnValue(false);
+
+                // Act
+                await consumer.proceedCashOut(realPlayer, payload);
+
+                // Assert
+                expect(consumer.getCashOutBet).not.toHaveBeenCalled();
+                expect(consumer.insertBetLog).not.toHaveBeenCalled();
+                expect(consumer.updateGameData).not.toHaveBeenCalled();
             });
         });
 
-        it("should process valid cash out successfully", async () => {
-            // Arrange
-            const payload = { action: Actions.CashOut };
-            const bet = {
-                multiplier: 1.5,
-                roundId: 123,
-                tapCount: 1,
-                amount: 100,
-            };
-            gameData.ingame[playerName].betTracks = {
-                [Actions.Bet]: bet,
-            };
+        describe("when validation succeeds", () => {
+            let betDetails;
 
-            // Act
-            const result = await consumer.proceedCashOut(realPlayer, payload);
+            beforeEach(() => {
+                // Create betDetails once and reuse it
+                betDetails = {
+                    multiplier: 1.5,
+                    roundId: chance.natural(),
+                    tapCount: 1,
+                    amount: 100,
+                };
 
-            // Assert
-            expect(result).toEqual({
-                player: realPlayer,
-                ...bet,
+                // Setup for successful validation scenario
+                consumer.validateCashOut.mockReturnValue(true);
+                consumer.getCashOutBet.mockReturnValue(betDetails);
+                consumer.insertBetLog.mockResolvedValue();
+                consumer.updateGameData.mockResolvedValue();
+            });
+
+            it("should return player with bet details", async () => {
+                // Arrange
+                const payload = { action: Actions.CashOut };
+
+                // Act
+                const result = await consumer.proceedCashOut(realPlayer, payload);
+
+                // Assert
+                expect(result).toEqual({
+                    player: realPlayer,
+                    ...betDetails,
+                });
+            });
+
+            it("should insert bet log with correct details", async () => {
+                // Arrange
+                const payload = { action: Actions.CashOut };
+
+                // Act
+                await consumer.proceedCashOut(realPlayer, payload);
+
+                // Assert
+                expect(consumer.insertBetLog).toHaveBeenCalledTimes(1);
+                expect(consumer.insertBetLog).toHaveBeenCalledWith(realPlayer, betDetails.roundId, betDetails);
+            });
+
+            it("should update game data", async () => {
+                // Arrange
+                const payload = { action: Actions.CashOut };
+
+                // Act
+                await consumer.proceedCashOut(realPlayer, payload);
+
+                // Assert
+                expect(consumer.updateGameData).toHaveBeenCalledTimes(1);
+                expect(consumer.updateGameData).toHaveBeenCalledWith(realPlayer, {
+                    multiplier: betDetails.multiplier,
+                    roundId: betDetails.roundId,
+                    tapCount: betDetails.tapCount,
+                });
+            });
+        });
+
+        describe("when getCashOutBet returns null", () => {
+            it("should return null without further processing", async () => {
+                // Arrange
+                const payload = { action: Actions.CashOut };
+                consumer.validateCashOut.mockReturnValue(true);
+                consumer.getCashOutBet.mockReturnValue(null);
+
+                // Act
+                const result = await consumer.proceedCashOut(realPlayer, payload);
+
+                // Assert
+                expect(result).toBeNull();
+                expect(consumer.insertBetLog).not.toHaveBeenCalled();
+                expect(consumer.updateGameData).not.toHaveBeenCalled();
             });
         });
     });
@@ -232,15 +349,15 @@ describe("SettleCashOutConsumer", () => {
             };
         });
 
-        it("should return null when no bet exists", async () => {
+        it("should return null when no bet exists", () => {
             // Act
-            const result = await consumer.getCashOutBet(realPlayer);
+            const result = consumer.getCashOutBet(realPlayer);
 
             // Assert
             expect(result).toBeNull();
         });
 
-        it("should return bet details when bet exists", async () => {
+        it("should return bet details when bet exists", () => {
             // Arrange
             const expectedBet = {
                 multiplier: 1.5,
@@ -253,7 +370,7 @@ describe("SettleCashOutConsumer", () => {
             };
 
             // Act
-            const result = await consumer.getCashOutBet(realPlayer);
+            const result = consumer.getCashOutBet(realPlayer);
 
             // Assert
             expect(result).toEqual(expectedBet);

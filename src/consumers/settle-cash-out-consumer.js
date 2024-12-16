@@ -34,7 +34,15 @@ export class SettleCashOutConsumer {
             return null;
         }
 
-        const { multiplier, roundId, tapCount, amount } = await this.getCashOutBet(player);
+        const bet = this.getCashOutBet(player);
+
+        if (!bet) {
+            this.baseEventPublisher.publishToUser(player.UID, { endBet: -1, notice: helpers.invalidCashOut });
+
+            return null;
+        }
+
+        const { multiplier, roundId, tapCount, amount } = bet;
 
         await this.insertBetLog(player, roundId, { multiplier, roundId, tapCount, amount });
         this.updateGameData(player, { multiplier, roundId, tapCount });
@@ -42,7 +50,7 @@ export class SettleCashOutConsumer {
         return { player, multiplier, roundId, tapCount, amount };
     }
 
-    async getCashOutBet(player) {
+    getCashOutBet(player) {
         const playerData = this.gameData.ingame[player.profile.name];
         const betTracks = playerData?.betTracks;
         const bet = betTracks?.[Actions.Bet];
