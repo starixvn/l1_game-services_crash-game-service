@@ -13,6 +13,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
         betLogsRepository,
         tempBetsRepository,
         tempBetLogsRepository,
+        logService,
     }) {
         super({
             definition,
@@ -27,126 +28,83 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
 
         this.betLogsRepository = betLogsRepository;
         this.tempBetLogsRepository = tempBetLogsRepository;
+        this.logService = logService;
+    }
+
+    queryRound(roundId) {
+        return this.roundsRepository.find({ id: roundId }).exec();
     }
 
     async queryBetLogs(roundId) {
-        const realPlayerBetLogs = await this.betLogsRepository.find({ roundId }).lean().exec();
-        const botBetLogs = await this.tempBetLogsRepository.find({ roundId }).lean().exec();
+        const [realPlayerBetLogs, botBetLogs] = await Promise.all([
+            this.betLogsRepository.find({ roundId }).lean().exec(),
+            this.tempBetLogsRepository.find({ roundId }).lean().exec(),
+        ]);
 
-        return realPlayerBetLogs.concat(botBetLogs);
+        return [...realPlayerBetLogs, ...botBetLogs];
     }
 
-    async settleBets({ roundId, time }) {
-        const bets = await this.queryBets(roundId);
-        const betLogs = await this.queryBetLogs(roundId);
+    async settleRound({ roundId, time }) {
+        try {
+            const round = await this.queryRound(roundId);
+            const betLogs = await this.queryBetLogs(roundId);
 
-        const refundBetlogs = await this.addRefundBetLogForPlayersOnUM(bets, betLogs);
-        betLogs.push(...refundBetlogs);
-
-        const crashBetLogs = await this.addCrashBetLog(bets, betLogs, time);
-        betLogs.push(...crashBetLogs);
-
-        if (bets && bets.length) {
-            await Promise.all(
-                bets.map(async (bet) => {
-                    const betLog = betLogs?.filter((log) => log.uid === bet.uid);
-                    const betResult = this.calculateBetResult(bet, betLog);
-
-                    bet.betwin = betResult.totalWin;
-                    bet.paid = true;
-
-                    await bet.save();
-                    await this.callEndGame(bet, roundId, time, betResult);
-                    await this.userBetResultPublisher.publish(bet.uid, {
-                        ...betResult,
-                        reachMaxWin: betLog?.some((log) => log.reachMaxWin),
-                    });
-                })
-            );
-        }
-    }
-
-    async addRefundBetLogForPlayersOnUM(bets, betLogs) {
-        const playersOnUM = Object.values(this.gameData.ingame).filter((x) => x.isUm);
-        const refundBetLogs = [];
-
-        for (const player of playersOnUM) {
-            const { playerData } = player;
-            const bet = bets.find((x) => x.playerId === playerData.session.playerId && x.operatorId === playerData.session.operatorId);
-            const halfCashOutBetLog = betLogs.find(
-                (x) =>
-                    x.action === Actions.HalfCashOut &&
-                    x.playerId === playerData.session.playerId &&
-                    x.operatorId === playerData.session.operatorId
-            );
-
-            const refundAmount = halfCashOutBetLog ? halfCashOutBetLog.amount : bet.amount;
-
-            refundBetLogs.push(
-                this.createBetLog(bet, {
-                    time: new Date(),
-                    amount: refundAmount,
-                    winAmount: refundAmount,
-                    action: Actions.Refund,
-                })
-            );
-        }
-
-        await this.betLogsRepository.insertMany(refundBetLogs);
-        return refundBetLogs;
-    }
-
-    async addCrashBetLog(bets, betLogs, crashTime) {
-        const crashBetLogs = [];
-        for (const bet of bets) {
-            if (
-                !betLogs.some(
-                    (x) =>
-                        (x.action === Actions.CashOut || x.action === Actions.Refund) &&
-                        x.playerId === bet.playerId &&
-                        x.operatorId === bet.operatorId
-                )
-            ) {
-                const halfCashOutBetLog = betLogs.find(
-                    (x) => x.action === Actions.HalfCashOut && x.playerId === bet.playerId && x.operatorId === bet.operatorId
-                );
-
-                crashBetLogs.push(
-                    this.createBetLog(bet, {
-                        time: crashTime,
-                        amount: halfCashOutBetLog ? halfCashOutBetLog.amount : bet.amount,
-                        winAmount: 0,
-                        action: Actions.Crash,
-                    })
-                );
+            if (!round || !betLogs) {
+                this.logService.logError(`${this.definition.name} Settle Error: Invalid round data: ${roundId}`);
+                return;
             }
+
+            const betResult = this.calculateBetResult(round, betLogs);
+
+            round.betwin = betResult.totalWin;
+            round.paid = true;
+
+            const { result, settlementResult, tapCount } = this.getMineResults(betLogs);
+            round.result = result;
+            round.settlementResult = settlementResult;
+            round.tapCount = tapCount;
+
+            await round.save();
+            await this.callEndGame(round, roundId, time, betResult);
+            await this.userBetResultPublisher.publish(round.uid, {
+                ...betResult,
+                reachMaxWin: betLogs?.some((log) => log.reachMaxWin),
+            });
+
+            this.updatePlayerBetTracks(round.name);
+        } catch (error) {
+            this.logService?.logError(`Failed to settle round ${roundId}:`, error);
+            throw error;
         }
-
-        await this.betLogsRepository.insertMany(crashBetLogs);
-        return crashBetLogs;
     }
 
-    createBetLog(bet, { time, amount, winAmount, action }) {
-        return {
-            uid: bet.uid,
-            name: bet.name,
-            time,
-            action,
-            amount,
-            winAmount,
-            clientSendTime: new Date(),
-            receivedTime: new Date(),
-            roundId: bet.roundId,
-            siteId: bet.siteId,
-            currency: bet.currency,
-            rate: bet.rate,
-            operatorId: bet.operatorId,
-            playerId: bet.playerId,
-        };
+    updatePlayerBetTracks(playerName) {
+        const playerGameData = this.gameData.ingame[playerName];
+        playerGameData.betTracks = {};
     }
 
-    calculateWinAmount(betLog = []) {
-        return betLog.reduce((win, log) => win + (log.winAmount ?? 0), 0) ?? 0;
+    getMineResults(betLogs = []) {
+        const result = [];
+        const settlementResult = [];
+        let tapCount = 0;
+
+        betLogs
+            .filter((betLog) => betLog.action === Actions.Mine)
+            .forEach((betLog) => {
+                result.push(betLog.result);
+                settlementResult.push(betLog.result);
+                tapCount += 1;
+            });
+
+        return { result, settlementResult, tapCount };
+    }
+
+    calculateWinAmount(betLogs = []) {
+        const cashoutLog = betLogs?.find((betLog) => betLog.action === Actions.CashOut);
+
+        if (!cashoutLog) return 0;
+
+        return cashoutLog.amount * cashoutLog.multiplier;
     }
 
     calculateBetResult(bet, betLog = []) {
