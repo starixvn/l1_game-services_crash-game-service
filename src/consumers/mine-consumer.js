@@ -64,11 +64,11 @@ export class MineConsumer extends PlaceBetConsumer {
     }
 
     async handleMine(player, activeBet, clientSendTime) {
+        const { ingameData } = this.gameData.ingame[playerName];
         const playerName = player.profile.name;
-        const multiplier = this.gameData.ingame[playerName].currentMultiplier;
+        const multiplier = ingameData.currentMultiplier;
         const increment = this.calculateIncrement(multiplier);
-        const updatedMultiplier = multiplier + increment;
-        const result = this.roundResultConsumer.generateResult();
+        const updatedMultiplier = ingameData.crashPoint > multiplier + increment ? 0 : multiplier + increment;
 
         await this.insertMineBetLog(player, activeBet, {
             clientSendTime,
@@ -79,11 +79,19 @@ export class MineConsumer extends PlaceBetConsumer {
 
         this.updatePlayerGameState(playerName, updatedMultiplier);
         this.publishMineResult(player, activeBet.id, updatedMultiplier);
+
+        if (updatedMultiplier == 0) {
+            // Settle crash
+        }
     }
 
     calculateIncrement(currentMultiplier) {
-        // Implement increment calculation logic
-        return 0.1; // Example increment
+        const multiplierConfigs = this.gameData.gameConfigs;
+        const { increment } = multiplierConfigs.stages.find(
+            (stage) => currentMultiplier >= stage.minMultiplier && currentMultiplier <= stage.maxMultiplier
+        );
+
+        return increment;
     }
 
     async insertMineBetLog(player, activeBet, { clientSendTime, increment, result, updatedMultiplier }) {

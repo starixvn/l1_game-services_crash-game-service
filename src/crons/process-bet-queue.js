@@ -65,7 +65,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             case Actions.Bet:
                 await this.proceedBet(player, payload);
                 break;
-            case Actions.Mine: //TODO: use mine consumer instead of proceedMine
+            case Actions.Mine:
                 await this.proceedMine(player, payload);
                 break;
             case Actions.CashOut:
@@ -176,44 +176,13 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
         if (playerGameData?.activeBet) {
             await this.mineConsumer.mine(player, payload);
-        } else {
-            await this.initializeNewBet(player, payload);
         }
     }
 
-    async initializeNewBet(player, payload) {
-        const playerName = player.profile.name;
+    async upsertBet(player, roundId, bet, rate) {
         const roundId = this.gameData.roundId;
-        const result = this.roundResultConsumer.generateResult();
+        await super.upsertBet(player, roundId, bet, rate);
 
-        // Initialize round document
-        await this.initializeRound(roundId, result, playerName, payload.amount);
-
-        // Initialize player game state
-        await this.initializePlayerGameState(player, payload, roundId);
-
-        // Proceed with bet handling
-        await this.proceedBet(player, payload);
-    }
-
-    async initializeRound(roundId, result, playerName, betAmount) {
-        await this.roundsRepository.create({
-            id: roundId,
-            result: result,
-            time: new Date(),
-            exchangeRateId: this.gameData.exchangeRates.id,
-            tapCount: 1,
-            playerName: playerName,
-            betAmount: betAmount,
-        });
-    }
-
-    async initializePlayerGameState(player, payload, roundId) {
-        const playerName = player.profile.name;
-        const playerGameData = this.gameData.ingame[playerName];
-        const playerBetTracks = playerGameData?.betTracks ?? {};
-
-        playerBetTracks[Actions.Bet].roundId = roundId;
-        playerBetTracks[Actions.Bet].tapCount = 1;
+        await this.provablyFairConsumer.createResultRecord(player.profile.name, roundId);
     }
 }
