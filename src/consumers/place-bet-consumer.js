@@ -2,7 +2,7 @@ import { Core } from "sc-game-base";
 import { helpers } from "sc-common";
 import { Actions } from "../constants";
 
-export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetConsumer {
+export class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetConsumer {
     composeValidationCriteria(player, amount) {
         const bettingTimeValidationCriteria = this.composeBettingTimeValidationCriteria(player);
         const betAmountValidationCriteria = this.composeBetAmountValidationCriteria(player, amount);
@@ -55,15 +55,10 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
     }
 
     consume(player, payload) {
-        //TODO: do not increment roundId here, it should be done in ProcessBetQueue
-        const currentRoundId = this.gameData.roundId;
-        this.gameData.roundId++;
-
         Object.assign(payload, {
             amount: payload.amount >> 0,
             receivedTime: new Date(),
             mode: payload.m ?? this.DisplayMode.Landscape,
-            roundId: currentRoundId,
         });
 
         if (!this.validateBetRequest(player, payload.amount)) {

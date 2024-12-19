@@ -56,19 +56,18 @@ export class MineConsumer extends PlaceBetConsumer {
             };
         }
 
-        // Add any additional validations here
-
         return {
             isValid: true,
         };
     }
 
     async handleMine(player, activeBet, clientSendTime) {
-        const { ingameData } = this.gameData.ingame[playerName];
         const playerName = player.profile.name;
+        const ingameData = this.gameData.ingame[playerName];
+        const { provablyFair } = this.gameData.provablyFair[playerName];
         const multiplier = ingameData.currentMultiplier;
         const increment = this.calculateIncrement(multiplier);
-        const updatedMultiplier = ingameData.crashPoint > multiplier + increment ? 0 : multiplier + increment;
+        const updatedMultiplier = provablyFair.finalResult > multiplier + increment ? 0 : multiplier + increment;
 
         await this.insertMineBetLog(player, activeBet, {
             clientSendTime,
@@ -81,7 +80,8 @@ export class MineConsumer extends PlaceBetConsumer {
         this.publishMineResult(player, activeBet.id, updatedMultiplier);
 
         if (updatedMultiplier == 0) {
-            // Settle crash
+            await this.settleCashOutConsumer.proceedCashOut(player, { action: Actions.CashOut });
+            await this.settleGameRoundConsumer.settleRound(provablyFair.roundId, new Date());
         }
     }
 

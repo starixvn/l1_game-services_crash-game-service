@@ -1,4 +1,3 @@
-import crypto from "crypto";
 import { CryptoHelper, ServerSeedHelper, SeedHelper } from "sc-game-base/src/core/helpers";
 
 export default class ProvablyFairConsumer {
@@ -24,11 +23,12 @@ export default class ProvablyFairConsumer {
         this.roundResultPublisher.publishProvablyFair(playerId, provablyFair);
     }
 
-    generateCrashPoint(playerName, clientSeed) {
+    generateCrashPoint(playerName, clientSeed, roundId) {
         const provablyFair = this.gameData.provablyFair[playerName];
         provablyFair.clientSeed = this.validateClientSeed(clientSeed) ? clientSeed : 0;
         provablyFair.finalHash = SeedHelper.getSHA512Hash(provablyFair.serverSeed + clientSeed);
         provablyFair.finalResult = this.definition.generateResult(provablyFair.finalHash);
+        provablyFair.roundId = roundId;
 
         return provablyFair.finalResult;
     }
@@ -53,7 +53,7 @@ export default class ProvablyFairConsumer {
         const provablyFair = {
             hash: record.hash,
             clientSeed: record.clientSeed,
-            finalResult: JSON.parse(decrypt(record.encryptedFinalResult)),
+            finalResult: JSON.parse(CryptoHelper.decrypt(record.encryptedFinalResult)),
         };
         this.gameData.provablyFair[playerName] = provablyFair;
 

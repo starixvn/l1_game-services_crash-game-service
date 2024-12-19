@@ -1,7 +1,5 @@
 import Chance from "chance";
 import { Core } from "sc-game-base";
-import { cardRanks } from "../cards";
-import { choiceNames } from "../game-settings";
 
 export default class GameCron extends Core.Crons.BaseGameCron {
     constructor({

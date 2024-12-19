@@ -76,10 +76,12 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     }
 
     async handleSuccessBet(player, balance, roundId, bet) {
+        this.gameData.roundId++;
         const rate = this.calculateCurrencyRate(player.session);
         const playerName = player.profile.name;
+        this.provablyFairConsumer.generateCrashPoint(playerName, bet.clientSeed, roundId);
 
-        //TODO: insert new round, with roundId increment by 1
+        await this.provablyFairConsumer.createResultRecord(player.profile.name, roundId);
         await this.insertBet(player, roundId, bet, rate);
         await this.insertBetLog(player, roundId, bet);
 
@@ -89,7 +91,6 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             name: playerName,
             amount: bet.amount,
             rate,
-            autoCashOut: bet.autoCashOut,
         });
 
         if (!bet.freeBet && (player.profile.minBet !== balance.minBet || player.profile.maxBet !== balance.maxBet)) {
@@ -177,12 +178,5 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         if (playerGameData?.activeBet) {
             await this.mineConsumer.mine(player, payload);
         }
-    }
-
-    async upsertBet(player, roundId, bet, rate) {
-        const roundId = this.gameData.roundId;
-        await super.upsertBet(player, roundId, bet, rate);
-
-        await this.provablyFairConsumer.createResultRecord(player.profile.name, roundId);
     }
 }
