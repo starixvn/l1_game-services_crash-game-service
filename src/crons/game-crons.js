@@ -18,9 +18,7 @@ export default class GameCron extends Core.Crons.BaseGameCron {
         currencyGroupGamesRepository,
         partnerConfigRepository,
         currencyGroupRepository,
-        currencyRepository,
-        collectConsumer,
-        settleTurnConsumer,
+        currencyRepository,     
     }) {
         super({
             definition,
@@ -41,8 +39,7 @@ export default class GameCron extends Core.Crons.BaseGameCron {
             currencyRepository,
         });
 
-        this.collectConsumer = collectConsumer;
-        this.settleTurnConsumer = settleTurnConsumer;
+  
         this.chance = new Chance();
     }
 
@@ -88,8 +85,7 @@ export default class GameCron extends Core.Crons.BaseGameCron {
         unsettledBets.forEach((bet) => {
             this.gameData.ingame[bet.name] = {
                 betTracks: {
-                    ...bet,
-                    turnResult: { isLose: false, betwin: bet.totalTurns === 0 ? bet.amount : bet.betwin },
+                   //TODO: convert it to approprate Bet || Mine || Cashout  
                 },
             };
         });
@@ -99,21 +95,4 @@ export default class GameCron extends Core.Crons.BaseGameCron {
         );
     }
 
-    async enableGame() {
-        await Promise.all(
-            Object.values(this.gameData.ingame).map(async (player) => {
-                if (player.betTracks && Object.keys(player.betTracks).length) {
-                    const bet = player.betTracks;
-                    bet.turnResult = {
-                        isLose: false,
-                        betwin: bet.totalTurns === 0 ? bet.amount : bet.betwin,
-                    };
-
-                    await this.settleGameRoundConsumer.settleBets(bet.name);
-                }
-            })
-        );
-
-        await super.enableGame();
-    }
 }
