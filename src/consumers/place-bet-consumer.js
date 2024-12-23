@@ -61,7 +61,10 @@ export class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetConsumer {
             mode: payload.m ?? this.DisplayMode.Landscape,
         });
 
-        if (!this.validateBetRequest(player, payload.amount)) {
+        if (
+            (payload.action === Actions.Mine && !this.validateMineRequest(player)) ||
+            (payload.action === Actions.Bet && !this.validateBetRequest(player, payload.amount))
+        ) {
             return;
         }
 
@@ -84,6 +87,17 @@ export class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetConsumer {
             this.gameData.ingame[name].betQueue = [];
         }
 
-        this.gameData.ingame[name].betQueue.push({ player, payload: { action: Actions.Bet, bet: payload } });
+        this.gameData.ingame[name].betQueue.push({ player, payload: { action: payload.action, bet: payload } });
+    }
+
+    validateMineRequest(player) {
+        const name = player.profile.name;
+
+        if (!this.gameData.ingame[name]?.betTracks[Actions.Bet] || this.gameData.ingame[name]?.betTracks[Actions.CashOut]) {
+            this.publisher.publishToUser(player.UID, { endBet: -1, notice: helpers.noticeHelper.invalidMine });
+            return false;
+        }
+
+        return true;
     }
 }
