@@ -68,6 +68,7 @@ export class MineConsumer extends PlaceBetConsumer {
         const multiplier = ingameData.currentMultiplier;
         const increment = this.calculateIncrement(multiplier);
         const updatedMultiplier = provablyFair.finalResult > multiplier + increment ? 0 : multiplier + increment;
+        const result = provablyFair.finalResult;
 
         await this.insertMineBetLog(player, activeBet, {
             clientSendTime,
@@ -80,8 +81,7 @@ export class MineConsumer extends PlaceBetConsumer {
         this.publishMineResult(player, activeBet.id, updatedMultiplier);
 
         if (updatedMultiplier == 0) {
-            await this.settleCashOutConsumer.proceedCashOut(player, { action: Actions.CashOut });
-            await this.settleGameRoundConsumer.settleRound(provablyFair.roundId, new Date());
+            await this.settleCashOutConsumer.proceedCashOut(player, true);
         }
     }
 

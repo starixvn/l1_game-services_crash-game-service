@@ -5,13 +5,14 @@ export class SettleCashOutConsumer {
     /**
      * @param {Object} dependencies
      * @param {GameData} dependencies.gameData
+     * @param {SettleGameRoundConsumer} dependencies.settleGameRoundConsumer
      * @param {BaseEventPublisher} dependencies.baseEventPublisher
      * @param {logger} dependencies.logService
      * @param {mongoose.Model} dependencies.betLogsRepository
      */
-    constructor(gameData, baseEventPublisher, logService, betLogsRepository) {
+    constructor(gameData, settleGameRoundConsumer, baseEventPublisher, logService, betLogsRepository) {
         this.gameData = gameData;
-
+        this.settleGameRoundConsumer = settleGameRoundConsumer;
         this.baseEventPublisher = baseEventPublisher;
         this.logService = logService;
         this.betLogsRepository = betLogsRepository;
@@ -21,22 +22,14 @@ export class SettleCashOutConsumer {
         const playerData = this.gameData.ingame[player.profile.name];
         const betTracks = playerData?.betTracks;
 
-        // Check if player has placed a bet and hasn't cashed out yet
         return betTracks?.[Actions.Bet] && !betTracks?.[Actions.CashOut];
     }
 
-    async proceedCashOut(player, payload) {
+    async proceedCashOut(player, isAutoCashOut = false) {
         const isValidCashOut = this.validateCashOut(player);
-
-        if (!isValidCashOut) {
-            this.baseEventPublisher.publishToUser(player.UID, { endBet: -1, notice: helpers.invalidCashOut });
-
-            return null;
-        }
-
         const bet = this.getCashOutBet(player);
 
-        if (!bet) {
+        if (!isValidCashOut || !bet) {
             this.baseEventPublisher.publishToUser(player.UID, { endBet: -1, notice: helpers.invalidCashOut });
 
             return null;
@@ -44,8 +37,9 @@ export class SettleCashOutConsumer {
 
         const { multiplier, roundId, tapCount, amount } = bet;
 
-        await this.insertBetLog(player, roundId, { multiplier, roundId, tapCount, amount });
+        await this.insertBetLog(player, roundId, { multiplier, roundId, tapCount, amount, isAutoCashOut });
         this.updateGameData(player, { multiplier, roundId, tapCount });
+        await this.settleGameRoundConsumer.settleRound({ roundId, time: new Date() });
 
         return { player, multiplier, roundId, tapCount, amount };
     }
@@ -106,6 +100,7 @@ export class SettleCashOutConsumer {
             roundId,
             multiplier: bet.multiplier,
             tapCount: bet.tapCount,
+            isAutoCashOut: bet.isAutoCashOut,
         };
 
         if (player.session) {

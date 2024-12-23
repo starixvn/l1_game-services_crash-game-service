@@ -1,8 +1,6 @@
 import { Core } from "sc-game-base";
 import { tracer } from "sc-instrument";
 import { Actions } from "../constants";
-import { generateTapResult } from "../helpers/crash-point-helper";
-import noticeHelper from "../helpers/notice-helper";
 
 export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     constructor({
