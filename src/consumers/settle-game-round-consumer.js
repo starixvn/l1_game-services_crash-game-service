@@ -14,6 +14,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
         tempBetsRepository,
         tempBetLogsRepository,
         logService,
+        provablyFairConsumer,
     }) {
         super({
             definition,
@@ -29,6 +30,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
         this.betLogsRepository = betLogsRepository;
         this.tempBetLogsRepository = tempBetLogsRepository;
         this.logService = logService;
+        this.provablyFairConsumer = provablyFairConsumer;
     }
 
     queryRound(roundId) {
@@ -70,8 +72,9 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
                 ...betResult,
                 reachMaxWin: betLogs?.some((log) => log.reachMaxWin),
             });
-
             this.updatePlayerBetTracks(round.name);
+
+            this.provablyFairConsumer.generateNextResultAndPublish(betTrack.uid, playerName);
         } catch (error) {
             this.logService?.logError(`Failed to settle round ${roundId}:`, error);
             throw error;
