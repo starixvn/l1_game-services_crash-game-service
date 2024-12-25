@@ -11,7 +11,7 @@ import { generateRawResultForHash, generateResult, getSettlementResult } from ".
 
 const run = async () => {
     const appName = process.env.APP_NAME;
-    const gameName = appName ? appName.replace("service", "").replaceAll("_", "") : "";
+    const gameName = appName ? appName.replace("service", "").replaceAll("_", "").trimEnd() : "";
 
     if (appConfigs.otel?.enabled) {
         const { otel } = appConfigs;

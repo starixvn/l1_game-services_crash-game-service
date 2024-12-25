@@ -6,14 +6,14 @@ export class SettleCashOutConsumer {
      * @param {Object} dependencies
      * @param {GameData} dependencies.gameData
      * @param {SettleGameRoundConsumer} dependencies.settleGameRoundConsumer
-     * @param {BaseEventPublisher} dependencies.baseEventPublisher
+     * @param {BaseEventPublisher} dependencies.publisher
      * @param {logger} dependencies.logService
      * @param {mongoose.Model} dependencies.betLogsRepository
      */
-    constructor(gameData, settleGameRoundConsumer, baseEventPublisher, logService, betLogsRepository) {
+    constructor(gameData, settleGameRoundConsumer, publisher, logService, betLogsRepository) {
         this.gameData = gameData;
         this.settleGameRoundConsumer = settleGameRoundConsumer;
-        this.baseEventPublisher = baseEventPublisher;
+        this.publisher = publisher;
         this.logService = logService;
         this.betLogsRepository = betLogsRepository;
     }
@@ -30,7 +30,7 @@ export class SettleCashOutConsumer {
         const bet = this.getCashOutBet(player);
 
         if (!isValidCashOut || !bet) {
-            this.baseEventPublisher.publishToUser(player.UID, { endBet: -1, notice: helpers.invalidCashOut });
+            this.publisher.publishToUser(player.UID, { endBet: -1, notice: helpers.invalidCashOut });
 
             return null;
         }

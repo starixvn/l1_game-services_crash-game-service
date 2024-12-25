@@ -2,47 +2,6 @@ import Chance from "chance";
 import { Core } from "sc-game-base";
 
 export default class GameCron extends Core.Crons.BaseGameCron {
-    constructor({
-        definition,
-        gameData,
-        bot,
-        settleGameRoundConsumer,
-        gameStatusPublisher,
-        runningRoundInfoPublisher,
-        logService,
-        gameConfigsRepository,
-        roundsRepository,
-        archiveStatusesRepository,
-        notificationRepository,
-        exchangeRatesRepository,
-        currencyGroupGamesRepository,
-        partnerConfigRepository,
-        currencyGroupRepository,
-        currencyRepository,     
-    }) {
-        super({
-            definition,
-            gameData,
-            bot,
-            settleGameRoundConsumer,
-            gameStatusPublisher,
-            runningRoundInfoPublisher,
-            logService,
-            gameConfigsRepository,
-            roundsRepository,
-            archiveStatusesRepository,
-            notificationRepository,
-            exchangeRatesRepository,
-            currencyGroupGamesRepository,
-            partnerConfigRepository,
-            currencyGroupRepository,
-            currencyRepository,
-        });
-
-  
-        this.chance = new Chance();
-    }
-
     async start() {
         await super.start();
         await this.proceedUnsettledBets();
@@ -85,7 +44,7 @@ export default class GameCron extends Core.Crons.BaseGameCron {
         unsettledBets.forEach((bet) => {
             this.gameData.ingame[bet.name] = {
                 betTracks: {
-                   //TODO: convert it to approprate Bet || Mine || Cashout  
+                    //TODO: convert it to approprate Bet || Mine || Cashout
                 },
             };
         });
@@ -94,5 +53,4 @@ export default class GameCron extends Core.Crons.BaseGameCron {
             Object.values(this.gameData.ingame).map((player) => this.settleGameRoundConsumer.settleBets(player.betTracks.name))
         );
     }
-
 }

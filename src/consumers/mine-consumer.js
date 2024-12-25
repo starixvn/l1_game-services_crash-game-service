@@ -1,4 +1,4 @@
-import { PlaceBetConsumer } from "sc-game-base";
+import { PlaceBetConsumer } from "sc-game-base/src/core/event-consumers";
 import { Actions } from "../constants";
 import { generateTapResult } from "../helpers/crash-point-helper";
 import noticeHelper from "../helpers/notice-helper";

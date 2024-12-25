@@ -8,6 +8,7 @@ import {
     SettleCashOutConsumer,
     SettleGameRoundConsumer,
     UnsettledRoundConsumer,
+    MineConsumer,
 } from "./consumers";
 import Bot from "./crons/bot";
 import GameCrons from "./crons/game-crons";
@@ -60,6 +61,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
         super.registerConsumers();
 
         this.container.register({
+            mineConsumer: asClass(MineConsumer).singleton(),
             inGameConsumer: asClass(InGameConsumer).singleton(),
             placeBetConsumer: asClass(PlaceBetConsumer).singleton(),
             cashOutConsumer: asClass(CashOutConsumer).singleton(),
