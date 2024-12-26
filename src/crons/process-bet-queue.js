@@ -73,6 +73,10 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         }
     }
 
+    composeBettingTimeValidationCriteria(roundId) {
+        return [];
+    }
+
     async handleSuccessBet(player, balance, roundId, bet) {
         this.gameData.roundId++;
         const rate = this.calculateCurrencyRate(player.session);
