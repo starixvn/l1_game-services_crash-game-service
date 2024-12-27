@@ -5,6 +5,7 @@ import { SettleCashOutConsumer } from "./settle-cash-out-consumer";
 import { SettleGameRoundConsumer } from "./settle-game-round-consumer";
 import { UnsettledRoundConsumer } from "./unsettled-round-consumer";
 import { MineConsumer } from "./mine-consumer";
+import { ProvablyFairConsumer } from "./provably-fair-consumer";
 
 export {
     CashOutConsumer,
@@ -14,4 +15,5 @@ export {
     SettleGameRoundConsumer,
     UnsettledRoundConsumer,
     MineConsumer,
+    ProvablyFairConsumer,
 };

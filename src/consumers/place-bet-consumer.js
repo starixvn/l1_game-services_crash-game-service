@@ -62,6 +62,7 @@ export class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetConsumer {
             receivedTime: new Date(),
             mode: payload.m ?? this.DisplayMode.Landscape,
             roundId: this.gameData.roundId,
+            clientSeed: payload.clientSeed ?? "aaa",
         });
 
         if (

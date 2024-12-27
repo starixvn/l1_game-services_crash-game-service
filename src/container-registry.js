@@ -9,6 +9,7 @@ import {
     SettleGameRoundConsumer,
     UnsettledRoundConsumer,
     MineConsumer,
+    ProvablyFairConsumer,
 } from "./consumers";
 import Bot from "./crons/bot";
 import GameCrons from "./crons/game-crons";
@@ -68,6 +69,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
             settleCashOutConsumer: asClass(SettleCashOutConsumer).singleton(),
             unsettledRoundConsumer: asClass(UnsettledRoundConsumer).singleton().proxy(),
+            provablyFairConsumer: asClass(ProvablyFairConsumer).singleton(),
         });
     }
 

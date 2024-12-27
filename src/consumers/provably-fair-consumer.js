@@ -1,6 +1,7 @@
-import { CryptoHelper, ServerSeedHelper, SeedHelper } from "sc-game-base/src/core/helpers";
+import { ServerSeedHelper, SeedHelper } from "sc-game-base/src/core/helpers";
+import { encrypt, decrypt } from "../helpers/crypto-helper";
 
-export default class ProvablyFairConsumer {
+export class ProvablyFairConsumer {
     constructor(gameData, definition, roundResultPublisher, resultsRepository) {
         this.gameData = gameData;
         this.definition = definition;
@@ -40,9 +41,9 @@ export default class ProvablyFairConsumer {
             await this.resultsRepository.create({
                 roundId: roundId,
                 clientSeed: provablyFair.clientSeed,
-                encryptedServerSeed: CryptoHelper.encrypt(provablyFair.serverSeed),
+                encryptedServerSeed: encrypt(provablyFair.serverSeed),
                 serverSeedHash: provablyFair.serverSeedHash,
-                encryptedFinalResult: CryptoHelper.encrypt(provablyFair.finalResult),
+                encryptedFinalResult: encrypt(provablyFair.finalResult),
                 time: new Date(),
             });
         }
@@ -53,7 +54,7 @@ export default class ProvablyFairConsumer {
         const provablyFair = {
             hash: record.hash,
             clientSeed: record.clientSeed,
-            finalResult: JSON.parse(CryptoHelper.decrypt(record.encryptedFinalResult)),
+            finalResult: JSON.parse(decrypt(record.encryptedFinalResult)),
         };
         this.gameData.provablyFair[playerName] = provablyFair;
 
