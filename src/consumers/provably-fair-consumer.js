@@ -39,15 +39,22 @@ export class ProvablyFairConsumer {
     }
 
     async createResultRecord(playerName, roundId) {
+        //TODO: review the process of creating result record
         const record = await this.findResultRecord(roundId);
         if (!record) {
             const provablyFair = this.gameData.provablyFair[playerName];
+
+            const encryptedServerSeed = encrypt(provablyFair.serverSeed);
+            const encryptedFinalResult = encrypt(`${provablyFair.finalResult}`);
+
             await this.resultsRepository.create({
                 roundId: roundId,
-                clientSeed: provablyFair.clientSeed,
-                encryptedServerSeed: encrypt(provablyFair.serverSeed),
+                serverSeed: provablyFair.serverSeed,
                 serverSeedHash: provablyFair.serverSeedHash,
-                encryptedFinalResult: encrypt(provablyFair.finalResult),
+                clientSeeds: [provablyFair.clientSeed],
+                mergeClientSeed: provablyFair.clientSeed,
+                encryptedServerSeed,
+                encryptedFinalResult,
                 time: new Date(),
             });
         }

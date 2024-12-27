@@ -1,6 +1,18 @@
 import mongoose from "mongoose";
-import { ResultSchema } from "sc-game-base/src/core/models";
+
+const resultSchema = new mongoose.Schema({
+    roundId: { type: Number, required: true },
+    serverSeed: { type: String },
+    serverSeedHash: { type: String },
+    clientSeeds: { type: Array, default: [] },
+    mergeClientSeed: { type: String },
+    mergeSeed: { type: String },
+    finalHash: { type: String },
+    encryptedFinalResult: { type: Object },
+    encryptedServerSeed: { type: Object },
+    time: { type: Date, default: new Date() },
+});
 
 export default function (gameConfigName) {
-    return mongoose.model(`${gameConfigName}_results`, ResultSchema);
+    return mongoose.model(`${gameConfigName}_results`, resultSchema);
 }
