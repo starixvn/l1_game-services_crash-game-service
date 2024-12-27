@@ -6,6 +6,16 @@ const Schema = new mongoose.Schema({
     time: { type: Date, default: new Date() },
     exchangeRateId: { type: Number, required: true },
     tapCount: { type: Number, required: true },
+    name: { type: String, required: true },
+    memberId: { type: String, required: true },
+    currency: { type: String, required: true },
+    amount: { type: Number, required: true },
+    odds: { type: Object, required: true },
+    betwin: { type: Number },
+    result: { type: Array },
+    settlementResult: { type: Array },
+    paid: { type: Boolean, default: false },
+    tapCount: { type: Number, default: 0 },
 });
 
 export default function (gameConfigName) {

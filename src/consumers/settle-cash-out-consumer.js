@@ -21,15 +21,18 @@ export class SettleCashOutConsumer {
     validateCashOut(player) {
         const playerData = this.gameData.ingame[player.profile.name];
         const betTracks = playerData?.betTracks;
+        const isHavingBet = betTracks?.[Actions.Bet];
+        //TODO: review if cashout is existing
+        // const isHavingCashOut = betTracks?.[Actions.CashOut];
 
-        return betTracks?.[Actions.Bet] && !betTracks?.[Actions.CashOut];
+        return isHavingBet;
     }
 
     async proceedCashOut(player, isAutoCashOut = false) {
         const isValidCashOut = this.validateCashOut(player);
         const bet = this.getCashOutBet(player);
 
-        if (!isValidCashOut || !bet) {
+        if (!isValidCashOut || !bet || !this.isValidCashOutBet(bet)) {
             this.publisher.publishToUser(player.UID, { endBet: -1, notice: helpers.invalidCashOut });
 
             return null;
@@ -42,6 +45,13 @@ export class SettleCashOutConsumer {
         await this.settleGameRoundConsumer.settleRound({ roundId, time: new Date() });
 
         return { player, multiplier, roundId, tapCount, amount };
+    }
+
+    isValidCashOutBet(bet) {
+        const { multiplier, roundId, tapCount, amount } = bet;
+
+        //TODO: validate multiplier, tapCount > 1
+        return multiplier && roundId && tapCount && amount;
     }
 
     getCashOutBet(player) {
@@ -95,8 +105,8 @@ export class SettleCashOutConsumer {
             time: new Date(),
             action: Actions.CashOut,
             amount: bet.amount,
-            clientSendTime: bet.clientSendTime,
-            receivedTime: bet.receivedTime,
+            clientSendTime: bet.clientSendTime ?? new Date(),
+            receivedTime: bet.receivedTime ?? new Date(),
             roundId,
             multiplier: bet.multiplier,
             tapCount: bet.tapCount,

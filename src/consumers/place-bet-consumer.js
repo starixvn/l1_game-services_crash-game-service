@@ -114,10 +114,11 @@ export class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetConsumer {
             const playerInGame = this.gameData.ingame[playerName];
 
             playerInGame.betTracks[action] = {
-                amount: 100,
+                amount,
                 time: bet.receivedTime,
                 roundId: bet.roundId,
-                tapCount: 0, //TODO review value after placing bet
+                tapCount: 1,
+                multiplier: 1,
             };
         }
     }
