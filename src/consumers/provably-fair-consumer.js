@@ -7,6 +7,8 @@ export class ProvablyFairConsumer {
         this.definition = definition;
         this.roundResultPublisher = roundResultPublisher;
         this.resultsRepository = resultsRepository;
+
+        this.gameData.provablyFair = {};
     }
 
     generateServerSeedAndPublishHash(playerId, playerName) {
@@ -25,11 +27,13 @@ export class ProvablyFairConsumer {
     }
 
     generateCrashPoint(playerName, clientSeed, roundId) {
-        const provablyFair = this.gameData.provablyFair[playerName];
+        const provablyFair = this.gameData?.provablyFair?.[playerName] ?? {};
         provablyFair.clientSeed = this.validateClientSeed(clientSeed) ? clientSeed : 0;
         provablyFair.finalHash = SeedHelper.getSHA512Hash(provablyFair.serverSeed + clientSeed);
         provablyFair.finalResult = this.definition.generateResult(provablyFair.finalHash);
         provablyFair.roundId = roundId;
+
+        this.gameData.provablyFair[playerName] = provablyFair;
 
         return provablyFair.finalResult;
     }
