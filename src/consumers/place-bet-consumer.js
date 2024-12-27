@@ -91,6 +91,8 @@ export class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetConsumer {
             this.gameData.ingame[name].betQueue = [];
         }
 
+        this.adjustBetTracks(player.profile.name, payload);
+
         this.gameData.ingame[name].betQueue.push({ player, payload: { action: payload.action, bet: payload } });
     }
 
@@ -103,5 +105,20 @@ export class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetConsumer {
         }
 
         return true;
+    }
+
+    adjustBetTracks(playerName, bet) {
+        const { action, amount } = bet;
+
+        if (this.gameData.ingame?.[playerName]) {
+            const playerInGame = this.gameData.ingame[playerName];
+
+            playerInGame.betTracks[action] = {
+                amount: 100,
+                time: bet.receivedTime,
+                roundId: bet.roundId,
+                tapCount: 0, //TODO review value after placing bet
+            };
+        }
     }
 }
