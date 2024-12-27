@@ -34,7 +34,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
     }
 
     queryRound(roundId) {
-        return this.roundsRepository.find({ id: roundId }).exec();
+        return this.roundsRepository.findOne({ id: roundId }).exec();
     }
 
     async queryBetLogs(roundId) {
@@ -82,6 +82,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
     }
 
     updatePlayerBetTracks(playerName) {
+        //TODO: betTracks is not defined :)
         const playerGameData = this.gameData.ingame[playerName];
         playerGameData.betTracks = {};
     }
