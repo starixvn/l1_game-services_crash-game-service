@@ -61,7 +61,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     async proceedActions(player, payload) {
         switch (payload.action) {
             case Actions.Bet:
-                await this.proceedBet(player, payload);
+                await this.proceedBet(player, payload.bet);
                 break;
             case Actions.Mine:
                 await this.proceedMine(player, payload);
