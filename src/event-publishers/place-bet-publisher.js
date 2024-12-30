@@ -5,4 +5,8 @@ export default class PlaceBetPublisher extends Table.EventPublishers.TablePlaceB
         this.publishToUser(playerId, payload);
         this.publishToAllUsersExcept(playerId, { otherPlayer: { ...payload, rate } });
     }
+
+    publishMineResult(playerId, payload) {
+        this.publishToUser(playerId, payload);
+    }
 }

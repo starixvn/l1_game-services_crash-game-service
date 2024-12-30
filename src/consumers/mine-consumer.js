@@ -5,15 +5,16 @@ import noticeHelper from "../helpers/notice-helper";
 
 export class MineConsumer extends PlaceBetConsumer {
     /**
-     * @param {Object} dependencies
-     * @param {GameData} dependencies.gameData
-     * @param {PlaceBetPublisher} dependencies.placeBetPublisher
-     * @param {logger} dependencies.logService
-     * @param {mongoose.Model} dependencies.betLogsRepository
-     * @param {RoundResultConsumer} dependencies.roundResultConsumer
+     * @param {GameDefinition} definition
+     * @param {GameData} gameData
+     * @param {BaseEventPublisher} publisher
+     * @param {logger} logService
+     * @param {mongoose.Model} betLogsRepository
+     * @param {RoundResultConsumer} roundResultConsumer
      */
-    constructor({ gameData, placeBetPublisher, logService, betLogsRepository, roundResultConsumer }) {
-        super({ gameData, placeBetPublisher, logService });
+    constructor(definition, gameData, placeBetPublisher, logService, betLogsRepository, roundResultConsumer) {
+        super(definition, gameData, placeBetPublisher);
+        this.logService = logService;
         this.betLogsRepository = betLogsRepository;
         this.roundResultConsumer = roundResultConsumer;
     }
@@ -42,7 +43,7 @@ export class MineConsumer extends PlaceBetConsumer {
         const playerName = player.profile.name;
         const playerGameData = this.gameData.ingame[playerName];
 
-        if (!playerGameData?.activeBet) {
+        if (!playerGameData?.betTracks[Actions.Bet]) {
             return {
                 isValid: false,
                 error: noticeHelper.noBetFound,
@@ -64,10 +65,10 @@ export class MineConsumer extends PlaceBetConsumer {
     async handleMine(player, activeBet, clientSendTime) {
         const playerName = player.profile.name;
         const ingameData = this.gameData.ingame[playerName];
-        const { provablyFair } = this.gameData.provablyFair[playerName];
-        const multiplier = ingameData.currentMultiplier;
+        const provablyFair = this.gameData.provablyFair[playerName];
+        const multiplier = ingameData.activeBet.currentMultiplier;
         const increment = this.calculateIncrement(multiplier);
-        const updatedMultiplier = provablyFair.finalResult > multiplier + increment ? 0 : multiplier + increment;
+        const updatedMultiplier = provablyFair.finalResult < multiplier + increment ? 0 : multiplier + increment;
         const result = provablyFair.finalResult;
 
         await this.insertMineBetLog(player, activeBet, {
@@ -86,7 +87,7 @@ export class MineConsumer extends PlaceBetConsumer {
     }
 
     calculateIncrement(currentMultiplier) {
-        const multiplierConfigs = this.gameData.gameConfigs;
+        const { multiplierConfigs } = this.gameData.gameConfigs.crashConfig;
         const { increment } = multiplierConfigs.stages.find(
             (stage) => currentMultiplier >= stage.minMultiplier && currentMultiplier <= stage.maxMultiplier
         );
@@ -95,7 +96,7 @@ export class MineConsumer extends PlaceBetConsumer {
     }
 
     async insertMineBetLog(player, activeBet, { clientSendTime, increment, result, updatedMultiplier }) {
-        await this.betLogsRepository.create({
+        const newBetLog = {
             uid: player.UID,
             name: player.profile.name,
             time: new Date(),
@@ -109,7 +110,18 @@ export class MineConsumer extends PlaceBetConsumer {
             result: generateTapResult(result),
             multiplier: updatedMultiplier,
             roundId: this.gameData.roundId,
-        });
+        };
+
+        if (player.session) {
+            newBetLog.siteId = player.session.siteId;
+            newBetLog.currency = player.session.currencyName;
+            newBetLog.rate = player.session.multiplier * this.gameData.exchangeRates.code[player.session.currencyCode];
+
+            newBetLog.operatorId = player.session.operatorId;
+            newBetLog.playerId = player.session.playerId;
+        }
+
+        await this.betLogsRepository.create(newBetLog);
     }
 
     updatePlayerGameState(playerName, updatedMultiplier) {
@@ -119,14 +131,14 @@ export class MineConsumer extends PlaceBetConsumer {
     }
 
     publishMineResult(player, betId, multiplier) {
-        this.placeBetPublisher.publishMineResult(player.UID, {
+        this.publisher.publishMineResult(player.UID, {
             multiplier,
             betId,
         });
     }
 
     publishMineFailed(player, errorCode) {
-        this.placeBetPublisher.publishGameFailedBet(player.UID, {
+        this.publisher.publishGameFailedBet(player.UID, {
             endBet: -1,
             notice: { errorCode },
         });

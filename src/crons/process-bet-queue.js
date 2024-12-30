@@ -88,6 +88,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         await this.insertBetLog(player, roundId, bet);
         await this.insertRound(roundId, player, bet);
 
+        const currentMultiplier = this.gameData.provablyFair[playerName].finalResult > 1 ? 1.01 : 0;
         this.notifyPlacingBetResult(player, balance, bet, rate);
 
         this.gameData.addPlayerToBetList(player.UID, {
@@ -95,6 +96,8 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             amount: bet.amount,
             rate,
         });
+
+        this.gameData.ingame[playerName].activeBet = { ...bet, currentMultiplier };
 
         if (!bet.freeBet && (player.profile.minBet !== balance.minBet || player.profile.maxBet !== balance.maxBet)) {
             await this.updateUserStakeLevel(player, balance.minBet, balance.maxBet);
@@ -195,7 +198,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     async proceedMine(player, payload) {
         const playerGameData = this.gameData.ingame[player.profile.name];
 
-        if (playerGameData?.activeBet) {
+        if (playerGameData?.betTracks[Actions.Bet]) {
             await this.mineConsumer.mine(player, payload);
         }
     }
