@@ -31,7 +31,7 @@ const run = async () => {
 
         if (gameConfigs) {
             gameSettings.id = gameConfigs.gameId;
-            gameSettings.name = gameConfigs.displayName.replace(/ /g, "");
+            gameSettings.name = gameConfigs.name;
 
             const definition = new Table.TableGameDefinition(gameSettings, generateResult, getSettlementResult, generateRawResultForHash);
             const gameData = new CrashGameData(gameSettings.durations.wholeRound);
