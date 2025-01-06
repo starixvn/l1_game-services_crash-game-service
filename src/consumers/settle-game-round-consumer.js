@@ -46,7 +46,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
         return [...realPlayerBetLogs, ...botBetLogs];
     }
 
-    async settleRound({ roundId, time }) {
+    async settleRound({ roundId, time, player }) {
         try {
             const round = await this.queryRound(roundId);
             const betLogs = await this.queryBetLogs(roundId);
@@ -68,13 +68,13 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
 
             await round.save();
             await this.callEndGame(round, roundId, time, betResult);
-            await this.userBetResultPublisher.publish(round.uid, {
+            await this.userBetResultPublisher.publish(player.UID, {
                 ...betResult,
                 reachMaxWin: betLogs?.some((log) => log.reachMaxWin),
             });
             this.updatePlayerBetTracks(round.name);
 
-            this.provablyFairConsumer.generateServerSeedAndPublishHash(betTrack.uid, playerName);
+            this.provablyFairConsumer.generateServerSeedAndPublishHash(player.UID, player.profile.name);
         } catch (error) {
             this.logService?.logError(`Failed to settle round ${roundId}: ${error}`);
             throw error;

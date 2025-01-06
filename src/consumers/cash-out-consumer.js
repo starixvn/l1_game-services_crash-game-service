@@ -5,7 +5,7 @@ import noticeHelper from "../helpers/notice-helper";
 export class CashOutConsumer extends BaseEventConsumers.PlaceBetConsumer {
     consume(player, payload) {
         Object.assign(payload, {
-            roundId: payload.roundId ?? this.gameData.roundId,
+            roundId: payload.roundId,
             m: payload.multiplier,
             clientSendTime: payload.clientSendTime,
             mode: payload.m ?? this.DisplayMode.Landscape,

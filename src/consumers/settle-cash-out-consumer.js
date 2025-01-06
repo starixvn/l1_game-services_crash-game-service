@@ -42,7 +42,7 @@ export class SettleCashOutConsumer {
 
         await this.insertBetLog(player, roundId, { multiplier, roundId, tapCount, amount, isAutoCashOut });
         this.updateGameData(player, { multiplier, roundId, tapCount });
-        await this.settleGameRoundConsumer.settleRound({ roundId, time: new Date() });
+        await this.settleGameRoundConsumer.settleRound({ roundId, time: new Date(), player });
 
         return { player, multiplier, roundId, tapCount, amount };
     }
@@ -55,19 +55,17 @@ export class SettleCashOutConsumer {
     }
 
     getCashOutBet(player) {
-        const playerData = this.gameData.ingame[player.profile.name];
-        const betTracks = playerData?.betTracks;
-        const bet = betTracks?.[Actions.Bet];
+        const activeBet = this.gameData.ingame[player.profile.name].activeBet;
 
-        if (!bet) {
+        if (!activeBet) {
             return null;
         }
 
         return {
-            multiplier: bet.multiplier,
-            tapCount: bet.tapCount,
-            roundId: bet.roundId,
-            amount: bet.amount,
+            multiplier: activeBet.multiplier,
+            tapCount: activeBet.tapCount,
+            roundId: activeBet.roundId,
+            amount: activeBet.amount,
         };
     }
 
