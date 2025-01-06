@@ -12,11 +12,12 @@ export class MineConsumer extends PlaceBetConsumer {
      * @param {mongoose.Model} betLogsRepository
      * @param {RoundResultConsumer} roundResultConsumer
      */
-    constructor(definition, gameData, placeBetPublisher, logService, betLogsRepository, roundResultConsumer) {
+    constructor(definition, gameData, placeBetPublisher, logService, betLogsRepository, roundResultConsumer, settleCashOutConsumer) {
         super(definition, gameData, placeBetPublisher);
         this.logService = logService;
         this.betLogsRepository = betLogsRepository;
         this.roundResultConsumer = roundResultConsumer;
+        this.settleCashOutConsumer = settleCashOutConsumer;
     }
 
     async mine(player, payload) {

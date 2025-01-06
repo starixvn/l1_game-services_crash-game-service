@@ -74,7 +74,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
             });
             this.updatePlayerBetTracks(round.name);
 
-            this.provablyFairConsumer.generateNextResultAndPublish(betTrack.uid, playerName);
+            this.provablyFairConsumer.generateServerSeedAndPublishHash(betTrack.uid, playerName);
         } catch (error) {
             this.logService?.logError(`Failed to settle round ${roundId}: ${error}`);
             throw error;
@@ -82,9 +82,12 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
     }
 
     updatePlayerBetTracks(playerName) {
-        //TODO: betTracks is not defined :)
         const playerGameData = this.gameData.ingame[playerName];
-        playerGameData.betTracks = {};
+
+        if (playerGameData) {
+            playerGameData.betTracks = {};
+            playerGameData.activeBet = undefined;
+        }
     }
 
     getMineResults(betLogs = []) {

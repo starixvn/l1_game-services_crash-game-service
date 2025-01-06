@@ -4,7 +4,7 @@ import { Core } from "sc-game-base";
 export default class GameCron extends Core.Crons.BaseGameCron {
     async start() {
         await super.start();
-        await this.proceedUnsettledBets();
+        //await this.proceedUnsettledBets();
     }
 
     async getLastArchiveRound() {
