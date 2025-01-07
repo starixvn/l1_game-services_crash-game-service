@@ -22,8 +22,6 @@ export class SettleCashOutConsumer {
         const playerData = this.gameData.ingame[player.profile.name];
         const betTracks = playerData?.betTracks;
         const isHavingBet = betTracks?.[Actions.Bet];
-        //TODO: review if cashout is existing
-        // const isHavingCashOut = betTracks?.[Actions.CashOut];
 
         return isHavingBet;
     }
@@ -48,10 +46,9 @@ export class SettleCashOutConsumer {
     }
 
     isValidCashOutBet(bet) {
-        const { multiplier, roundId, tapCount, amount } = bet;
+        const { roundId, tapCount, amount } = bet;
 
-        //TODO: validate multiplier, tapCount > 1
-        return multiplier && roundId && tapCount && amount;
+        return roundId && tapCount && amount;
     }
 
     getCashOutBet(player) {
@@ -62,7 +59,7 @@ export class SettleCashOutConsumer {
         }
 
         return {
-            multiplier: activeBet.multiplier,
+            multiplier: activeBet.currentMultiplier,
             tapCount: activeBet.tapCount,
             roundId: activeBet.roundId,
             amount: activeBet.amount,

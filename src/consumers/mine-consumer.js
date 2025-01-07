@@ -71,6 +71,7 @@ export class MineConsumer extends PlaceBetConsumer {
         const increment = this.calculateIncrement(multiplier);
         const updatedMultiplier = provablyFair.finalResult < multiplier + increment ? 0 : multiplier + increment;
         ingameData.activeBet.currentMultiplier = updatedMultiplier;
+        ingameData.activeBet.tapCount++;
         const result = provablyFair.finalResult;
 
         await this.insertMineBetLog(player, activeBet, {

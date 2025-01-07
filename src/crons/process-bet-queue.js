@@ -97,7 +97,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             rate,
         });
 
-        this.gameData.ingame[playerName].activeBet = { ...bet, currentMultiplier };
+        this.gameData.ingame[playerName].activeBet = { ...bet, currentMultiplier, tapCount: 1 };
 
         if (!bet.freeBet && (player.profile.minBet !== balance.minBet || player.profile.maxBet !== balance.maxBet)) {
             await this.updateUserStakeLevel(player, balance.minBet, balance.maxBet);
