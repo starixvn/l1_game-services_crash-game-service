@@ -4,7 +4,7 @@ import { Core } from "sc-game-base";
 export default class GameCron extends Core.Crons.BaseGameCron {
     async start() {
         await super.start();
-        //await this.proceedUnsettledBets();
+        await this.proceedUnsettledBets();
     }
 
     async getLastArchiveRound() {
@@ -50,7 +50,7 @@ export default class GameCron extends Core.Crons.BaseGameCron {
         });
 
         await Promise.all(
-            Object.values(this.gameData.ingame).map((player) => this.settleGameRoundConsumer.settleBets(player.betTracks.name))
+            Object.values(unsettledBets).map((round) => this.settleGameRoundConsumer.settleRound({ roundId: round.id, time: Date.now() }))
         );
     }
 }

@@ -67,8 +67,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
                 await this.proceedMine(player, payload);
                 break;
             case Actions.CashOut:
-                await this.settleCashOutConsumer.proceedCashOut(player, payload);
-                //TODO: call settle-game-round-consumer to settle player bet
+                await this.settleCashOutConsumer.proceedCashOut(player);
                 break;
         }
     }
