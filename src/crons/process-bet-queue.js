@@ -88,6 +88,8 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         await this.insertRound(roundId, player, bet);
 
         const currentMultiplier = this.gameData.provablyFair[playerName].finalResult > 1 ? 1.01 : 0;
+        this.gameData.ingame[playerName].activeBet = { ...bet, currentMultiplier, tapCount: 1 };
+
         this.notifyPlacingBetResult(player, balance, bet, rate);
 
         this.gameData.addPlayerToBetList(player.UID, {
@@ -96,8 +98,6 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             rate,
         });
 
-        this.gameData.ingame[playerName].activeBet = { ...bet, currentMultiplier, tapCount: 1 };
-
         if (!bet.freeBet && (player.profile.minBet !== balance.minBet || player.profile.maxBet !== balance.maxBet)) {
             await this.updateUserStakeLevel(player, balance.minBet, balance.maxBet);
         }
@@ -105,9 +105,12 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
     generatePlacingBetResult(player, balance, bet, rate) {
         const { amount } = bet;
+        const playerName = player.profile.name;
         const result = super.generatePlacingBetResult(player, balance, bet, rate);
+
+        result.multiplier = this.gameData.ingame[playerName].activeBet.currentMultiplier;
         result.ownChip = { amount };
-        result.user.name = player.profile.name;
+        result.user.name = playerName;
         return result;
     }
 
