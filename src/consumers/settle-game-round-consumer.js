@@ -64,6 +64,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
             await this.callEndGame(bet, bet.roundId, time, betResult);
 
             delete this.gameData.provablyFair[playerName];
+            delete this.gameData.ingame[playerName]?.activeBet;
 
             if (player) {
                 await this.userBetResultPublisher.publish(player.UID, {
@@ -71,6 +72,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
                     reachMaxWin: betLogs?.some((log) => log.reachMaxWin),
                 });
                 this.updatePlayerBetTracks(bet.name);
+                this.gameData.ingame[playerName].betTracks = {};
 
                 this.provablyFairConsumer.generateServerSeedAndPublishHash(player.UID, player.profile.name);
             }
