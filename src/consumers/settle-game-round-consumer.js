@@ -48,33 +48,27 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
 
     async settleRound({ roundId, time, player }) {
         try {
-            const round = await this.queryRound(roundId);
+            const [bet] = await this.queryBets(roundId);
             const betLogs = await this.queryBetLogs(roundId);
 
-            if (!round || !betLogs) {
+            if (!bet || !betLogs) {
                 this.logService.logError(`${this.definition.name} Settle Error: Invalid round data: ${roundId}`);
                 return;
             }
 
-            const betResult = this.calculateBetResult(round, betLogs);
+            const betResult = this.calculateBetResult(bet, betLogs);
 
-            round.betwin = betResult.totalWin;
-            round.paid = true;
+            bet.betwin = betResult.totalWin;
+            bet.paid = true;
 
-            const { result, settlementResult, tapCount } = this.getMineResults(betLogs);
-            round.result = result;
-            round.settlementResult = settlementResult;
-            round.tapCount = tapCount;
-
-            await round.save();
-            await this.callEndGame(round, roundId, time, betResult);
+            await this.callEndGame(bet, bet.roundId, time, betResult);
 
             if (player) {
                 await this.userBetResultPublisher.publish(player.UID, {
                     ...betResult,
                     reachMaxWin: betLogs?.some((log) => log.reachMaxWin),
                 });
-                this.updatePlayerBetTracks(round.name);
+                this.updatePlayerBetTracks(bet.name);
 
                 this.provablyFairConsumer.generateServerSeedAndPublishHash(player.UID, player.profile.name);
             }

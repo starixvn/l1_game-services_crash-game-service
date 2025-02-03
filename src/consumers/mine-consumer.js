@@ -92,7 +92,7 @@ export class MineConsumer extends PlaceBetConsumer {
     calculateIncrement(currentMultiplier) {
         const { multiplierConfigs } = this.gameData.gameConfigs.crashConfig;
         const { increment } = multiplierConfigs.stages.find(
-            (stage) => currentMultiplier >= stage.minMultiplier && currentMultiplier <= stage.maxMultiplier
+            (stage) => currentMultiplier >= stage.minMultiplier && currentMultiplier < stage.maxMultiplier
         );
 
         return increment;

@@ -1,7 +1,57 @@
-import Chance from "chance";
 import { Core } from "sc-game-base";
 
 export default class GameCron extends Core.Crons.BaseGameCron {
+    constructor({
+        definition,
+        gameData,
+        bot,
+        settleGameRoundConsumer,
+        gameStatusPublisher,
+        runningRoundInfoPublisher,
+        logService,
+        gameConfigsRepository,
+        roundsRepository,
+        archiveStatusesRepository,
+        notificationRepository,
+        exchangeRatesRepository,
+        currencyGroupGamesRepository,
+        partnerConfigRepository,
+        currencyGroupRepository,
+        currencyRepository,
+        roundResultConsumer,
+        resultsRepository,
+        promotionRepository,
+        appConfigs,
+        provablyFairConsumer,
+        unsettledRoundConsumer,
+        betsRepository,
+    }) {
+        super({
+            definition,
+            gameData,
+            bot,
+            settleGameRoundConsumer,
+            gameStatusPublisher,
+            runningRoundInfoPublisher,
+            logService,
+            gameConfigsRepository,
+            roundsRepository,
+            archiveStatusesRepository,
+            notificationRepository,
+            exchangeRatesRepository,
+            currencyGroupGamesRepository,
+            partnerConfigRepository,
+            currencyGroupRepository,
+            currencyRepository,
+            roundResultConsumer,
+            resultsRepository,
+            promotionRepository,
+            appConfigs,
+            provablyFairConsumer,
+            unsettledRoundConsumer,
+        });
+        this.betsRepository = betsRepository;
+    }
     async start() {
         await super.start();
         await this.proceedUnsettledBets();
@@ -40,17 +90,10 @@ export default class GameCron extends Core.Crons.BaseGameCron {
     async processRunningRounds() {}
 
     async proceedUnsettledBets() {
-        const unsettledBets = await this.roundsRepository.find({ paid: false }).lean().exec();
-        unsettledBets.forEach((bet) => {
-            this.gameData.ingame[bet.name] = {
-                betTracks: {
-                    //TODO: convert it to approprate Bet || Mine || Cashout
-                },
-            };
-        });
+        const unsettledBets = await this.betsRepository.find({ paid: false }).lean().exec();
 
         await Promise.all(
-            Object.values(unsettledBets).map((round) => this.settleGameRoundConsumer.settleRound({ roundId: round.id, time: Date.now() }))
+            Object.values(unsettledBets).map((bet) => this.settleGameRoundConsumer.settleRound({ roundId: bet.roundId, time: Date.now() }))
         );
     }
 }

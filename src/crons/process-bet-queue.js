@@ -85,7 +85,6 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         await this.provablyFairConsumer.createResultRecord(player.profile.name, roundId);
         await this.insertBet(player, roundId, bet, rate);
         await this.insertBetLog(player, roundId, bet);
-        await this.insertRound(roundId, player, bet);
 
         const currentMultiplier = this.gameData.provablyFair[playerName].finalResult > 1 ? 1.01 : 0;
         this.gameData.ingame[playerName].activeBet = { ...bet, currentMultiplier, tapCount: 1 };
@@ -147,6 +146,8 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     }
 
     async insertBet(player, roundId, bet, rate) {
+        const { crashConfig } = this.gameData.gameConfigs;
+
         const newBet = {
             uid: player.UID,
             name: player.profile.name,
@@ -157,6 +158,8 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             autoCashOut: bet.autoCashOut,
             clientSeed: bet.clientSeed,
             totalAmount: bet.amount,
+            odds: crashConfig.multiplierConfigs,
+            exchangeRateId: this.gameData.exchangeRates.exId,
         };
 
         if (player.session) {
@@ -170,23 +173,6 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
         await this.betsRepository.create(newBet);
         return newBet.time;
-    }
-
-    async insertRound(roundId, player, bet) {
-        const { crashConfig } = this.gameData.gameConfigs;
-
-        const newRound = {
-            id: roundId,
-            time: new Date(),
-            name: player.profile.name,
-            memberId: player.session.playerId,
-            currency: player.session.currencyName,
-            amount: bet.amount,
-            odds: crashConfig.multiplierConfigs,
-            exchangeRateId: this.gameData.exchangeRates.exId,
-        };
-
-        await this.roundsRepository.create(newRound);
     }
 
     decreaseBetTracks(playerName) {
