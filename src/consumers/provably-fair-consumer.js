@@ -39,7 +39,6 @@ export class ProvablyFairConsumer {
     }
 
     async createResultRecord(playerName, roundId) {
-        //TODO: review the process of creating result record
         const record = await this.findResultRecord(roundId);
         if (!record) {
             const provablyFair = this.gameData.provablyFair[playerName];
