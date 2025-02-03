@@ -46,7 +46,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
         return [...realPlayerBetLogs, ...botBetLogs];
     }
 
-    async settleRound({ roundId, time, player }) {
+    async settleRound({ roundId, time, player, playerName }) {
         try {
             const [bet] = await this.queryBets(roundId);
             const betLogs = await this.queryBetLogs(roundId);
@@ -63,7 +63,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
 
             await this.callEndGame(bet, bet.roundId, time, betResult);
 
-            delete this.gameData.provablyFair[player.profile.name];
+            delete this.gameData.provablyFair[playerName];
 
             if (player) {
                 await this.userBetResultPublisher.publish(player.UID, {

@@ -93,7 +93,9 @@ export default class GameCron extends Core.Crons.BaseGameCron {
         const unsettledBets = await this.betsRepository.find({ paid: false }).lean().exec();
 
         await Promise.all(
-            Object.values(unsettledBets).map((bet) => this.settleGameRoundConsumer.settleRound({ roundId: bet.roundId, time: Date.now() }))
+            Object.values(unsettledBets).map((bet) =>
+                this.settleGameRoundConsumer.settleRound({ roundId: bet.roundId, playerName: bet.name, time: Date.now() })
+            )
         );
     }
 }
