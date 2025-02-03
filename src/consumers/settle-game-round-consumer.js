@@ -61,6 +61,8 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
             bet.betwin = betResult.totalWin;
             bet.paid = true;
 
+            await bet.save();
+
             await this.callEndGame(bet, bet.roundId, time, betResult);
 
             delete this.gameData.provablyFair[playerName];
