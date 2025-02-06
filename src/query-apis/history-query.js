@@ -1,6 +1,11 @@
 import { QueryApis } from "sc-game-base/src/core";
 
 export default class HistoryQuery extends QueryApis.HistoryQuery {
+    constructor(roundQuery, betsRepository, betLogsRepository, roundsRepository) {
+        super(roundQuery, betsRepository, betLogsRepository);
+        this.roundsRepository = roundsRepository;
+    }
+
     convertBet(bet) {
         return { ...bet, totalAmount: bet.amount };
     }

@@ -6,6 +6,7 @@ const Schema = new mongoose.Schema({
     time: { type: Date, default: new Date() },
     exchangeRateId: { type: Number, required: true },
     tapCount: { type: Number, required: true },
+    uid: { type: String, required: true },
     name: { type: String, required: true },
     currency: { type: String, required: true },
     amount: { type: Number, required: true },
