@@ -56,12 +56,24 @@ export default class GameCron extends Core.Crons.BaseGameCron {
         await super.start();
         await this.proceedUnsettledBets();
     }
+    async initRoundId() {
+        const lastRound = await this.betsRepository
+            .findOne({}, "roundId", { sort: { roundId: -1 } })
+            .lean()
+            .exec();
+
+        if (lastRound) {
+            this.gameData.roundId = lastRound.roundId + 1;
+        } else {
+            this.gameData.roundId = await this.getLastArchiveRound();
+        }
+    }
 
     async getLastArchiveRound() {
         const { configName } = this.definition;
         const archiveStatus = await this.archiveStatusesRepository.findOne({ name: configName }, "lastArcId").lean().exec();
 
-        return archiveStatus ? archiveStatus.lastArcId["_rounds"] + 1 : 1;
+        return archiveStatus ? archiveStatus.lastArcId["_bets"] + 1 : 1;
     }
 
     async proceed() {
