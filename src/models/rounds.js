@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const Schema = new mongoose.Schema({
+    siteId: { type: String },
+    operatorId: { type: String, required: true },
+    playerId: { type: String },
+
     id: { type: Number, required: true },
     result: { type: Object, required: true },
     time: { type: Date, default: new Date() },
