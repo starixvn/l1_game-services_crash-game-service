@@ -35,13 +35,17 @@ export default class HistoryQuery extends QueryApis.HistoryQuery {
             .lean()
             .exec();
 
-        const bets = rounds.map((round) => {
-            round.roundId = round.id;
-            delete round.id;
-
-            return round;
-        });
+        const bets = rounds.map((round) => this.convertRound(round));
 
         return { history: { betLogs: bets, page, pageSize, total } };
+    }
+
+    convertRound(round) {
+        round.roundId = round.id;
+        round.totalAmount = round.amount;
+        delete round.id;
+        delete round.amount;
+
+        return round;
     }
 }
