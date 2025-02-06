@@ -30,10 +30,17 @@ export default class HistoryQuery extends QueryApis.HistoryQuery {
             currency: false,
             operatorId: false,
         };
-        const bets = await this.roundsRepository
+        const rounds = await this.roundsRepository
             .find(filter, betProjection, { sort: { id: -1 }, skip: numberOfSkippedBets, limit: pageSize })
             .lean()
             .exec();
+
+        const bets = rounds.map((round) => {
+            round.roundId = round.id;
+            delete round.id;
+
+            return round;
+        });
 
         return { history: { betLogs: bets, page, pageSize, total } };
     }
