@@ -22,6 +22,10 @@ const schema = new mongoose.Schema({
     autoCashOut: { type: Number },
     clientSeed: { type: String },
     totalAmount: { type: Number, default: 0 },
+
+    tapCount: { type: Number, required: true },
+    exchangeRateId: { type: Number, required: true },
+    odds: { type: Object, required: true },
 });
 
 export function tempBets(gameConfigName) {

@@ -5,7 +5,7 @@ const generateResult = (finalHash) => {
     const decimalValue = parseInt(hexValue, 16);
     const floatPoint = Math.max((2 ** 32 / (decimalValue + 1)) * (1 - 0.03), 1);
 
-    return Math.min(roundFloat(floatPoint), 2000);
+    return Math.min(roundFloat(floatPoint), 1000);
 };
 
 const getSettlementResult = () => {};

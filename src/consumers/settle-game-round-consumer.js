@@ -38,12 +38,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
     }
 
     async queryBetLogs(roundId) {
-        const [realPlayerBetLogs, botBetLogs] = await Promise.all([
-            this.betLogsRepository.find({ roundId }).lean().exec(),
-            this.tempBetLogsRepository.find({ roundId }).lean().exec(),
-        ]);
-
-        return [...realPlayerBetLogs, ...botBetLogs];
+        return this.betLogsRepository.find({ roundId }).lean().exec();
     }
 
     async settleRound({ roundId, time, player, playerName }) {
@@ -60,10 +55,10 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
 
             bet.betwin = betResult.totalWin;
             bet.paid = true;
-
-            await bet.save();
+            bet.tapCount = betLogs.length - 1;
 
             await this.callEndGame(bet, bet.roundId, time, betResult);
+            await bet.save();
 
             delete this.gameData.provablyFair[playerName];
             delete this.gameData.ingame[playerName]?.activeBet;

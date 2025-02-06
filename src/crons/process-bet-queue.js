@@ -77,7 +77,6 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     }
 
     async handleSuccessBet(player, balance, roundId, bet) {
-        this.gameData.roundId++;
         const rate = this.calculateCurrencyRate(player.session);
         const playerName = player.profile.name;
         this.provablyFairConsumer.generateCrashPoint(playerName, bet.clientSeed, roundId);
@@ -160,6 +159,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             totalAmount: bet.amount,
             odds: crashConfig.multiplierConfigs,
             exchangeRateId: this.gameData.exchangeRates.exId,
+            tapCount: 1,
         };
 
         if (player.session) {

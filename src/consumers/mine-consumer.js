@@ -112,7 +112,7 @@ export class MineConsumer extends PlaceBetConsumer {
             increment,
             result: generateTapResult(result),
             multiplier: updatedMultiplier,
-            roundId: this.gameData.roundId,
+            roundId: activeBet.roundId,
         };
 
         if (player.session) {
