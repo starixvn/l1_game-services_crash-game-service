@@ -80,12 +80,12 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         const rate = this.calculateCurrencyRate(player.session);
         const playerName = player.profile.name;
         this.provablyFairConsumer.generateCrashPoint(playerName, bet.clientSeed, roundId);
+        const currentMultiplier = this.gameData.provablyFair[playerName].finalResult > 1 ? 1.01 : 0;
 
         await this.provablyFairConsumer.createResultRecord(player.profile.name, roundId);
-        await this.insertBet(player, roundId, bet, rate);
+        await this.insertBet(player, roundId, bet, rate, currentMultiplier);
         await this.insertBetLog(player, roundId, bet);
 
-        const currentMultiplier = this.gameData.provablyFair[playerName].finalResult > 1 ? 1.01 : 0;
         this.gameData.ingame[playerName].activeBet = { ...bet, currentMultiplier, tapCount: 1 };
 
         this.notifyPlacingBetResult(player, balance, bet, rate, roundId);
@@ -98,6 +98,10 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
         if (!bet.freeBet && (player.profile.minBet !== balance.minBet || player.profile.maxBet !== balance.maxBet)) {
             await this.updateUserStakeLevel(player, balance.minBet, balance.maxBet);
+        }
+
+        if (currentMultiplier == 0) {
+            this.settleCashOutConsumer.proceedCashOut(player);
         }
     }
 
@@ -144,7 +148,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         await this.betLogsRepository.create(newBetLog);
     }
 
-    async insertBet(player, roundId, bet, rate) {
+    async insertBet(player, roundId, bet, rate, currentMultiplier) {
         const { crashConfig } = this.gameData.gameConfigs;
 
         const newBet = {
@@ -152,13 +156,14 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             name: player.profile.name,
             time: new Date(),
             freeBet: bet.freeBet,
-            roundId,
+            id: roundId,
             amount: bet.amount,
             autoCashOut: bet.autoCashOut,
             clientSeed: bet.clientSeed,
             totalAmount: bet.amount,
             odds: crashConfig.multiplierConfigs,
             exchangeRateId: this.gameData.exchangeRates.exId,
+            multiplier: currentMultiplier,
             tapCount: 1,
         };
 
@@ -171,7 +176,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             newBet.playerId = player.session.playerId;
         }
 
-        await this.betsRepository.create(newBet);
+        await this.roundsRepository.create(newBet);
         return newBet.time;
     }
 

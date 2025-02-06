@@ -53,27 +53,12 @@ export default class GameCron extends Core.Crons.BaseGameCron {
         this.betsRepository = betsRepository;
     }
     async start() {
-        await super.start();
+        await this.initRoundId();
+        await this.queryLastResult();
+        await this.getSettingForNewRound();
+        await this.updateExchangeRates();
         await this.proceedUnsettledBets();
-    }
-    async initRoundId() {
-        const lastRound = await this.betsRepository
-            .findOne({}, "roundId", { sort: { roundId: -1 } })
-            .lean()
-            .exec();
-
-        if (lastRound) {
-            this.gameData.roundId = lastRound.roundId + 1;
-        } else {
-            this.gameData.roundId = await this.getLastArchiveRound();
-        }
-    }
-
-    async getLastArchiveRound() {
-        const { configName } = this.definition;
-        const archiveStatus = await this.archiveStatusesRepository.findOne({ name: configName }, "lastArcId").lean().exec();
-
-        return archiveStatus ? archiveStatus.lastArcId["_bets"] + 1 : 1;
+        this.startCron();
     }
 
     async proceed() {
@@ -102,11 +87,11 @@ export default class GameCron extends Core.Crons.BaseGameCron {
     async processRunningRounds() {}
 
     async proceedUnsettledBets() {
-        const unsettledBets = await this.betsRepository.find({ paid: false }).lean().exec();
+        const unsettledBets = await this.roundsRepository.find({ paid: false }).lean().exec();
 
         await Promise.all(
-            Object.values(unsettledBets).map((bet) =>
-                this.settleGameRoundConsumer.settleRound({ roundId: bet.roundId, playerName: bet.name, time: Date.now() })
+            Object.values(unsettledBets).map((round) =>
+                this.settleGameRoundConsumer.settleRound({ roundId: round.id, playerName: round.name, time: Date.now() })
             )
         );
     }

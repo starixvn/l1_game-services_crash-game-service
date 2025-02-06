@@ -43,22 +43,23 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
 
     async settleRound({ roundId, time, player, playerName }) {
         try {
-            const [bet] = await this.queryBets(roundId);
+            const round = await this.queryRound(roundId);
             const betLogs = await this.queryBetLogs(roundId);
 
-            if (!bet || !betLogs) {
+            if (!round || !betLogs) {
                 this.logService.logError(`${this.definition.name} Settle Error: Invalid round data: ${roundId}`);
                 return;
             }
 
-            const betResult = this.calculateBetResult(bet, betLogs);
+            const betResult = this.calculateBetResult(round, betLogs);
 
-            bet.betwin = betResult.totalWin;
-            bet.paid = true;
-            bet.tapCount = betLogs.length - 1;
+            round.betwin = betResult.totalWin;
+            round.paid = true;
+            round.tapCount = betLogs.length - 1;
+            round.multiplier = this.getMultiplier(betLogs);
 
-            await this.callEndGame(bet, bet.roundId, time, betResult);
-            await bet.save();
+            await this.callEndGame(round, round.id, time, betResult);
+            await round.save();
 
             delete this.gameData.provablyFair[playerName];
             delete this.gameData.ingame[playerName]?.activeBet;
@@ -68,7 +69,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
                     ...betResult,
                     reachMaxWin: betLogs?.some((log) => log.reachMaxWin),
                 });
-                this.updatePlayerBetTracks(bet.name);
+                this.updatePlayerBetTracks(round.name);
                 this.gameData.ingame[playerName].betTracks = {};
 
                 this.provablyFairConsumer.generateServerSeedAndPublishHash(player.UID, player.profile.name);
@@ -104,17 +105,17 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
         return { result, settlementResult, tapCount };
     }
 
-    calculateWinAmount(betLogs = []) {
+    getMultiplier(betLogs = []) {
         const cashoutLog = betLogs?.find((betLog) => betLog.action === Actions.CashOut);
 
         if (!cashoutLog) return 0;
 
-        return cashoutLog.amount * cashoutLog.multiplier;
+        return cashoutLog.multiplier;
     }
 
     calculateBetResult(bet, betLog = []) {
         const { amount } = bet;
-        const winAmount = this.calculateWinAmount(betLog);
+        const winAmount = amount * this.getMultiplier(betLog);
         const winLoss = winAmount - amount;
 
         return {

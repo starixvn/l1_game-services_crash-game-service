@@ -12,7 +12,7 @@ export default class HistoryQuery extends QueryApis.HistoryQuery {
 
         const filter = { uid: player.UID, paid: true };
         const numberOfSkippedBets = (page - 1) * pageSize;
-        const total = await this.betsRepository.countDocuments(filter).exec();
+        const total = await this.roundsRepository.countDocuments(filter).exec();
         const betProjection = {
             _id: false,
             uid: false,
@@ -25,7 +25,7 @@ export default class HistoryQuery extends QueryApis.HistoryQuery {
             currency: false,
             operatorId: false,
         };
-        const bets = await this.betsRepository
+        const bets = await this.roundsRepository
             .find(filter, betProjection, { sort: { id: -1 }, skip: numberOfSkippedBets, limit: pageSize })
             .lean()
             .exec();
