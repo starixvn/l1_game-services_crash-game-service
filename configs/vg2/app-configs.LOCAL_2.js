@@ -61,4 +61,9 @@ export default {
         },
     },
     enabledBoostedOdds: true,
+    gameResultSettings: {
+        baseUrl: "http://l2_game_result_local_2:5000",
+        id: "Game Service",
+        key: "b396d3e4-c81d-4c5c-8100-94a8b330f12a",
+    },
 };

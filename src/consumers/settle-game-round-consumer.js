@@ -1,5 +1,6 @@
 import { EventConsumers } from "sc-game-base/src/table";
 import { Actions } from "../constants";
+import { decrypt } from "../helpers/crypto-helper";
 
 export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRoundConsumer {
     constructor({
@@ -15,6 +16,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
         tempBetLogsRepository,
         logService,
         provablyFairConsumer,
+        resultsRepository,
     }) {
         super({
             definition,
@@ -31,6 +33,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
         this.tempBetLogsRepository = tempBetLogsRepository;
         this.logService = logService;
         this.provablyFairConsumer = provablyFairConsumer;
+        this.resultsRepository = resultsRepository;
     }
 
     queryRound(roundId) {
@@ -44,9 +47,11 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
     async settleRound({ roundId, time, player, playerName }) {
         try {
             const round = await this.queryRound(roundId);
+            const result = await this.resultsRepository.findOne({ roundId }).lean().exec();
+            const crashPoint = decrypt(result.encryptedFinalResult);
             const betLogs = await this.queryBetLogs(roundId);
 
-            if (!round || !betLogs) {
+            if (!round || !betLogs || !result) {
                 this.logService.logError(`${this.definition.name} Settle Error: Invalid round data: ${roundId}`);
                 return;
             }
@@ -54,6 +59,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
             const betResult = this.calculateBetResult(round, betLogs);
 
             round.betwin = betResult.totalWin;
+            round.result = +crashPoint;
             round.paid = true;
             round.tapCount = betLogs.length - 1;
             round.multiplier = this.getMultiplier(betLogs);

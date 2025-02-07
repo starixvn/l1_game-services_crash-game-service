@@ -62,4 +62,9 @@ export default {
         enabled: true,
         endpoint: "http://10.10.50.69:4318/v1/traces",
     },
+    gameResultSettings: {
+        baseUrl: "http://l1_game_result_sit:5000",
+        id: "Game Service",
+        key: "dded3dfe-261e-47f0-a46e-076b367c5a09",
+    },
 };

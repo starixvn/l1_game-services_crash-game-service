@@ -14,6 +14,7 @@ export default class SocketRouter extends Routers.BaseSocketRouter {
         playGamePermissionValidator,
         cashOutConsumer,
         roundQuery,
+        gameResultServiceConsumer,
     }) {
         super({
             definition,
@@ -30,6 +31,7 @@ export default class SocketRouter extends Routers.BaseSocketRouter {
         });
 
         this.cashOutConsumer = cashOutConsumer;
+        this.gameResultServiceConsumer = gameResultServiceConsumer;
     }
 
     init(socketClient) {
@@ -45,6 +47,33 @@ export default class SocketRouter extends Routers.BaseSocketRouter {
             }
 
             this.cashOutConsumer.consume(this.gameData.realPlayers[this.socketClient.id], payload);
+        } catch (error) {
+            this.logService.logError(error);
+        }
+    }
+
+    async handleBetDetails(payload) {
+        try {
+            if (!this.verify()) {
+                return;
+            }
+
+            const { playerId, operatorId, siteId } = this.gameData.realPlayers[this.socketClient.id].session;
+            const { mode, timeZoneOffset, roundId, language } = payload;
+
+            const result = await this.gameResultServiceConsumer.getUrl({
+                playerId,
+                operatorId,
+                siteId,
+                roundId,
+                mode,
+                timeZoneOffset,
+                language,
+            });
+
+            if (result.isAuthenticated) {
+                this.socketClient.emit(this.definition.name, { betDetailsUrl: result.redirectUrl });
+            }
         } catch (error) {
             this.logService.logError(error);
         }

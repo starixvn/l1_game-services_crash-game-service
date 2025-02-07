@@ -51,4 +51,9 @@ export default {
     corsUrls: ["http://localhost:7456", "http://localhost:7000", "http://games.lumigame.com", "http://admin.lumigame.com"],
     chips: [1000, 500, 200, 100, 50, 10, 5, 1],
     maxQuickBets: 5,
+    gameResultSettings: {
+        baseUrl: "https://l1-result2.lumigame.com",
+        id: "Game Service",
+        key: "58148de3-b895-4f6b-82de-a35eed1b4b28",
+    },
 };
