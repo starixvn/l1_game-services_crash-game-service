@@ -38,6 +38,7 @@ export default class SocketRouter extends Routers.BaseSocketRouter {
         super.init(socketClient);
 
         this.socketClient.on("cashOut", this.handleCashOut.bind(this));
+        this.socketClient.on("betDetails", this.handleBetDetails.bind(this));
     }
 
     handleCashOut(payload) {
