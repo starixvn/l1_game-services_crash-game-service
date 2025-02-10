@@ -59,7 +59,7 @@ export default {
         endpoint: "http://10.10.50.69:4318/v1/traces",
     },
     gameResultSettings: {
-        baseUrl: "http://l2_game_result_local:5000",
+        baseUrl: "http://l2-game-result-local-service:5000",
         id: "Game Service",
         key: "b396d3e4-c81d-4c5c-8100-94a8b330f12a",
     },
