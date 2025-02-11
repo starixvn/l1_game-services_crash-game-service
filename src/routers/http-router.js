@@ -17,7 +17,7 @@ export default class HttpRouter extends Table.Routers.TableHttpRouter {
 
     handleSetBoard(params, res) {
         try {
-            if (!params || !params.result || !params.nickname) {
+            if (!params || !params.result || !params.nickName) {
                 this.logService.logError("receives a result cheating call with invalid params.");
                 res.send(false);
 
@@ -26,7 +26,7 @@ export default class HttpRouter extends Table.Routers.TableHttpRouter {
 
             this.logService.logWarning(`receives a result cheating call for ${params?.nickname} with the board as ${params.result}.`);
 
-            this.gameData.settlementResultFromAdmin[params.nickname] = params.result;
+            this.gameData.settlementResultFromAdmin[params.nickName] = params.result;
 
             res.send(true);
         } catch (error) {
