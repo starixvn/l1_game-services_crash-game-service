@@ -17,16 +17,16 @@ export default class HttpRouter extends Table.Routers.TableHttpRouter {
 
     handleSetBoard(params, res) {
         try {
-            if (!params || !params.result) {
+            if (!params || !params.result || !params.nickname) {
                 this.logService.logError("receives a result cheating call with invalid params.");
                 res.send(false);
 
                 return;
             }
 
-            this.logService.logWarning(`receives a result cheating call for ${params?.name} with the board as ${params.result}.`);
+            this.logService.logWarning(`receives a result cheating call for ${params?.nickname} with the board as ${params.result}.`);
 
-            this.gameData.settlementResultFromAdmin = { result: params.result, roundId: params.roundId ?? this.gameData.roundId + 1 };
+            this.gameData.settlementResultFromAdmin[params.nickname] = params.result;
 
             res.send(true);
         } catch (error) {

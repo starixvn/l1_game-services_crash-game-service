@@ -35,7 +35,20 @@ export class ProvablyFairConsumer {
 
         this.gameData.provablyFair[playerName] = provablyFair;
 
-        return provablyFair.finalResult;
+        return this.getResultFromAdmin(playerName, provablyFair.finalResult);
+    }
+
+    getResultFromAdmin(playerName, result) {
+        const resultFromAdmin = this.gameData.settlementResultFromAdmin[playerName];
+        let finalResult = result;
+
+        if (resultFromAdmin) {
+            finalResult = resultFromAdmin;
+
+            delete this.gameData.settlementResultFromAdmin[playerName];
+        }
+
+        return finalResult;
     }
 
     async createResultRecord(playerName, roundId) {
