@@ -30,12 +30,12 @@ export class ProvablyFairConsumer {
         const provablyFair = this.gameData?.provablyFair?.[playerName] ?? {};
         provablyFair.clientSeed = this.validateClientSeed(clientSeed) ? clientSeed : 0;
         provablyFair.finalHash = SeedHelper.getSHA512Hash(provablyFair.serverSeed + clientSeed);
-        provablyFair.finalResult = this.definition.generateResult(provablyFair.finalHash);
+        provablyFair.finalResult = this.getResultFromAdmin(playerName, this.definition.generateResult(provablyFair.finalHash));
         provablyFair.roundId = roundId;
 
         this.gameData.provablyFair[playerName] = provablyFair;
 
-        return this.getResultFromAdmin(playerName, provablyFair.finalResult);
+        return provablyFair.finalResult;
     }
 
     getResultFromAdmin(playerName, result) {
