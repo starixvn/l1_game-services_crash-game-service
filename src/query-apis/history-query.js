@@ -48,4 +48,23 @@ export default class HistoryQuery extends QueryApis.HistoryQuery {
 
         return round;
     }
+
+    async queryProvablyFair(player, roundId) {
+        let provablyFair = {};
+        const round = await this.roundsRepository.findOne({ id: roundId, uid: player.UID, paid: true }).lean().exec();
+        if (round) {
+            const resultRecord = await this.resultsRepository.findOne({ roundId: roundId }).lean().exec();
+            if (bets && resultRecord) {
+                provablyFair = {
+                    serverSeedHash: resultRecord.serverSeedHash,
+                    clientSeed: resultRecord.mergeClientSeed,
+                    finalHash: resultRecord.finalHash,
+                    serverSeed: decrypt(resultRecord.encryptedServerSeed),
+                    finalResult: decrypt(resultRecord.encryptedFinalResult),
+                };
+            }
+        }
+
+        return { provablyFair };
+    }
 }
