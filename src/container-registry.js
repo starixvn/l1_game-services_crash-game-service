@@ -11,6 +11,7 @@ import {
     MineConsumer,
     ProvablyFairConsumer,
     GameResultServiceConsumer,
+    UserDisconnectConsumer,
 } from "./consumers";
 import Bot from "./crons/bot";
 import GameCrons from "./crons/game-crons";
@@ -72,6 +73,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             unsettledRoundConsumer: asClass(UnsettledRoundConsumer).singleton().proxy(),
             provablyFairConsumer: asClass(ProvablyFairConsumer).singleton(),
             gameResultServiceConsumer: asClass(GameResultServiceConsumer).singleton().proxy(),
+            userDisconnectConsumer: asClass(UserDisconnectConsumer).singleton(),
         });
     }
 

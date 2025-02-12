@@ -7,6 +7,7 @@ import { UnsettledRoundConsumer } from "./unsettled-round-consumer";
 import { MineConsumer } from "./mine-consumer";
 import { ProvablyFairConsumer } from "./provably-fair-consumer";
 import { GameResultServiceConsumer } from "./game-result-service-consumer";
+import { UserDisconnectConsumer } from "./user-disconnect-consumer";
 export {
     CashOutConsumer,
     InGameConsumer,
@@ -17,4 +18,5 @@ export {
     MineConsumer,
     ProvablyFairConsumer,
     GameResultServiceConsumer,
+    UserDisconnectConsumer,
 };

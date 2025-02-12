@@ -11,7 +11,7 @@ export class UserDisconnectConsumer extends Core.BaseEventConsumers.UserDisconne
      * @param {mongoose.Model} dependencies.betLogsRepository
      * @param {SettleCashOutConsumer} dependencies.settleCashOutConsumer
      */
-    constructor({ gameData, betLogsRepository, settleCashOutConsumer }) {
+    constructor(gameData, betLogsRepository, settleCashOutConsumer) {
         super(gameData);
         this.settleCashOutConsumer = settleCashOutConsumer;
         this.betLogsRepository = betLogsRepository;
@@ -26,7 +26,6 @@ export class UserDisconnectConsumer extends Core.BaseEventConsumers.UserDisconne
         const isValidCashOut = this.settleCashOutConsumer.validateCashOut(player);
 
         if (isValidCashOut) {
-            //TODO might need to add isAutoCashOut true
             await this.settleCashOutConsumer.proceedCashOut(player, { action: Actions.CashOut });
         }
 
