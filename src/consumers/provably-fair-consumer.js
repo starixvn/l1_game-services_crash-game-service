@@ -1,5 +1,6 @@
 import { ServerSeedHelper, SeedHelper } from "sc-game-base/src/core/helpers";
 import { encrypt, decrypt } from "../helpers/crypto-helper";
+import { roundFloat } from "../helpers/result-helper";
 
 export class ProvablyFairConsumer {
     constructor(gameData, definition, roundResultPublisher, resultsRepository) {
@@ -48,7 +49,7 @@ export class ProvablyFairConsumer {
             delete this.gameData.settlementResultFromAdmin[playerName];
         }
 
-        return finalResult;
+        return roundFloat(finalResult);
     }
 
     async createResultRecord(playerName, roundId) {

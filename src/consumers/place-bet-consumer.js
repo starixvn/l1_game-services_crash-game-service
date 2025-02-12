@@ -11,8 +11,6 @@ export class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetConsumer {
     }
 
     composeBettingTimeValidationCriteria(player) {
-        //TODO: consider using the Bet consumer for both Bet and Mine action
-        //TODO: if so, need to check runningRound to determine action Bet or Mine
         const runningRound = this.gameData.ingame[player.profile.name]?.activeBet;
         const configs = this.gameData.gameConfigs;
 
