@@ -58,15 +58,16 @@ export class ProvablyFairConsumer {
 
             const encryptedServerSeed = encrypt(provablyFair.serverSeed);
             const encryptedFinalResult = encrypt(`${provablyFair.finalResult}`);
+            const encryptedFinalHash = encrypt(provablyFair.finalHash);
 
             await this.resultsRepository.create({
                 roundId: roundId,
-                serverSeed: provablyFair.serverSeed,
                 serverSeedHash: provablyFair.serverSeedHash,
                 clientSeeds: [provablyFair.clientSeed],
                 mergeClientSeed: provablyFair.clientSeed,
                 encryptedServerSeed,
                 encryptedFinalResult,
+                encryptedFinalHash,
                 time: new Date(),
             });
         }

@@ -2,14 +2,11 @@ import mongoose from "mongoose";
 
 const resultSchema = new mongoose.Schema({
     roundId: { type: Number, required: true },
-    serverSeed: { type: String },
     serverSeedHash: { type: String },
-    clientSeeds: { type: Array, default: [] },
     mergeClientSeed: { type: String },
-    mergeSeed: { type: String },
-    finalHash: { type: String },
     encryptedFinalResult: { type: Object },
     encryptedServerSeed: { type: Object },
+    encryptedFinalHash: { type: Object },
     time: { type: Date, default: new Date() },
 });
 

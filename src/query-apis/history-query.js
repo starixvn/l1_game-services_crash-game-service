@@ -1,9 +1,11 @@
 import { QueryApis } from "sc-game-base/src/core";
+import { decrypt } from "../helpers/crypto-helper";
 
 export default class HistoryQuery extends QueryApis.HistoryQuery {
-    constructor(roundQuery, betsRepository, betLogsRepository, roundsRepository) {
+    constructor(roundQuery, betsRepository, betLogsRepository, roundsRepository, resultsRepository) {
         super(roundQuery, betsRepository, betLogsRepository);
         this.roundsRepository = roundsRepository;
+        this.resultsRepository = resultsRepository;
     }
 
     convertBet(bet) {
@@ -54,13 +56,13 @@ export default class HistoryQuery extends QueryApis.HistoryQuery {
         const round = await this.roundsRepository.findOne({ id: roundId, uid: player.UID, paid: true }).lean().exec();
         if (round) {
             const resultRecord = await this.resultsRepository.findOne({ roundId: roundId }).lean().exec();
-            if (bets && resultRecord) {
+            if (resultRecord) {
                 provablyFair = {
                     serverSeedHash: resultRecord.serverSeedHash,
                     clientSeed: resultRecord.mergeClientSeed,
-                    finalHash: resultRecord.finalHash,
                     serverSeed: decrypt(resultRecord.encryptedServerSeed),
                     finalResult: decrypt(resultRecord.encryptedFinalResult),
+                    finalHash: decrypt(resultRecord.encryptedFinalHash),
                 };
             }
         }
