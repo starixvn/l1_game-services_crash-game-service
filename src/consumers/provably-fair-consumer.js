@@ -1,6 +1,6 @@
 import { ServerSeedHelper, SeedHelper } from "sc-game-base/src/core/helpers";
 import { encrypt, decrypt } from "../helpers/crypto-helper";
-import { roundFloat } from "../helpers/result-helper";
+import { roundFloat } from "../helpers/number-helper";
 
 export class ProvablyFairConsumer {
     constructor(gameData, definition, roundResultPublisher, resultsRepository) {
