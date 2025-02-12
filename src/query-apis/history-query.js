@@ -63,6 +63,7 @@ export default class HistoryQuery extends QueryApis.HistoryQuery {
                     serverSeed: decrypt(resultRecord.encryptedServerSeed),
                     finalResult: decrypt(resultRecord.encryptedFinalResult),
                     finalHash: decrypt(resultRecord.encryptedFinalHash),
+                    roundId: roundId,
                 };
             }
         }
