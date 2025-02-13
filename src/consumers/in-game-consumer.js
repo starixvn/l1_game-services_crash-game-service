@@ -29,8 +29,8 @@ export class InGameConsumer extends EventConsumers.TableInGameConsumer {
 
         const settings = this.gameData.currencyGroupGames.find((x) => x.groupId.toString() === session.currencyGroupId);
 
-        const { odds, enableFreeBet } = this.gameData.gameConfigs;
-        const gameConfigs = { ...settings, odds, enableFreeBet };
+        const { odds, enableFreeBet, crashConfig } = this.gameData.gameConfigs;
+        const gameConfigs = { ...settings, odds, enableFreeBet, maxWinPerRound: crashConfig.maxWinPerRound };
         const { betTracks } = this.gameData.ingame[realPlayer.profile.name] || { betTracks: {} };
         const betAmount = betTracks.roundId > 0 ? betTracks.amount : 0;
         const steps = betTracks.steps;
