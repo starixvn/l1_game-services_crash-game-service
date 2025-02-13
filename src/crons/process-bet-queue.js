@@ -139,7 +139,9 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         if (player.session) {
             newBetLog.siteId = player.session.siteId;
             newBetLog.currency = player.session.currencyName;
+            newBetLog.currencyMultiplier = player.session.multiplier;
             newBetLog.rate = rate;
+            newBetLog.currencyCode = player.session.currencyCode;
 
             newBetLog.operatorId = player.session.operatorId;
             newBetLog.playerId = player.session.playerId;

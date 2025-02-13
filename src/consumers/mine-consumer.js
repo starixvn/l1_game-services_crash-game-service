@@ -119,7 +119,8 @@ export class MineConsumer extends PlaceBetConsumer {
             newBetLog.siteId = player.session.siteId;
             newBetLog.currency = player.session.currencyName;
             newBetLog.rate = player.session.multiplier * this.gameData.exchangeRates.code[player.session.currencyCode];
-
+            newBetLog.currencyMultiplier = player.session.multiplier;
+            newBetLog.currencyCode = player.session.currencyCode;
             newBetLog.operatorId = player.session.operatorId;
             newBetLog.playerId = player.session.playerId;
         }

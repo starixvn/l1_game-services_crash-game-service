@@ -25,6 +25,8 @@ export default class GameCron extends Core.Crons.BaseGameCron {
         provablyFairConsumer,
         unsettledRoundConsumer,
         betsRepository,
+        betLogsRepository,
+        settleCashOutConsumer,
     }) {
         super({
             definition,
@@ -51,6 +53,8 @@ export default class GameCron extends Core.Crons.BaseGameCron {
             unsettledRoundConsumer,
         });
         this.betsRepository = betsRepository;
+        this.betLogsRepository = betLogsRepository;
+        this.settleCashOutConsumer = settleCashOutConsumer;
     }
     async start() {
         await this.initRoundId();
@@ -90,9 +94,38 @@ export default class GameCron extends Core.Crons.BaseGameCron {
         const unsettledBets = await this.roundsRepository.find({ paid: false }).lean().exec();
 
         await Promise.all(
-            Object.values(unsettledBets).map((round) =>
-                this.settleGameRoundConsumer.settleRound({ roundId: round.id, playerName: round.name, time: Date.now() })
-            )
+            Object.values(unsettledBets).map(async (round) => {
+                const betLogs = await this.betLogsRepository.find({ roundId: round.id }).lean().exec();
+                const { siteId, currency, operatorId, playerId, rate, currencyMultiplier, currencyCode } = betLogs[0];
+                const tapCount = betLogs.length;
+
+                const player = {
+                    UID: round.uid,
+                    profile: {
+                        name: round.name,
+                    },
+                    session: {
+                        siteId: siteId,
+                        currencyName: currency,
+                        currencyCode: currencyCode,
+                        multiplier: currencyMultiplier,
+                        operatorId: operatorId,
+                        playerId: playerId,
+                        rate: rate,
+                    },
+                };
+
+                this.gameData.ingame[player.profile.name] = {
+                    activeBet: {
+                        roundId: round.id,
+                        tapCount: tapCount,
+                        currentMultiplier: round.multiplier,
+                        amount: round.amount,
+                    },
+                };
+
+                await this.settleCashOutConsumer.proceedCashOut(player, true);
+            })
         );
     }
 }

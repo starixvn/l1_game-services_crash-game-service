@@ -27,7 +27,7 @@ export class SettleCashOutConsumer {
     }
 
     async proceedCashOut(player, isAutoCashOut = false) {
-        const isValidCashOut = this.validateCashOut(player);
+        const isValidCashOut = this.validateCashOut(player) || isAutoCashOut;
         const bet = this.getCashOutBet(player);
 
         if (!isValidCashOut || !bet || !this.isValidCashOutBet(bet)) {
@@ -111,8 +111,9 @@ export class SettleCashOutConsumer {
         if (player.session) {
             newBetLog.siteId = player.session.siteId;
             newBetLog.currency = player.session.currencyName;
+            newBetLog.currencyMultiplier = player.session.multiplier;
             newBetLog.rate = rate;
-
+            newBetLog.currencyCode = player.session.currencyCode;
             newBetLog.operatorId = player.session.operatorId;
             newBetLog.playerId = player.session.playerId;
         }
