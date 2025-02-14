@@ -11,8 +11,10 @@ export default class PlaceBetPublisher extends Table.EventPublishers.TablePlaceB
         this.publishToUser(playerId, payload);
 
         this.publishToAllUsersExceptSystem(Systems.Mobi, playerId, {
-            playerId,
-            ...payload,
+            playerMine: {
+                playerId,
+                ...payload,
+            },
         });
     }
 
