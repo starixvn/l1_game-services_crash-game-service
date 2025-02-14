@@ -29,6 +29,9 @@ export class UserDisconnectConsumer extends Core.BaseEventConsumers.UserDisconne
             await this.settleCashOutConsumer.proceedCashOut(player, { action: Actions.CashOut });
         }
 
+        delete this.gameData.provablyFair[player.profile.name];
+        delete this.gameData.ingame[player.profile.name];
+
         super.consume(socketClient);
     }
 }

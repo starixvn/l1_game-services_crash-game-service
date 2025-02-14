@@ -76,11 +76,11 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
                 this.updatePlayerBetTracks(round.name);
                 this.gameData.ingame[playerName].betTracks = {};
 
+                delete this.gameData.provablyFair[playerName];
+                delete this.gameData.ingame[playerName]?.activeBet;
+
                 this.provablyFairConsumer.generateServerSeedAndPublishHash(player.UID, player.profile.name);
             }
-
-            delete this.gameData.provablyFair[playerName];
-            delete this.gameData.ingame[playerName]?.activeBet;
         } catch (error) {
             this.logService?.logError(`Failed to settle round ${roundId}: ${error}`);
             throw error;
