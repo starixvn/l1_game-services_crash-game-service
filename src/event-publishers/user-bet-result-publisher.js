@@ -1,10 +1,13 @@
 import { BaseEventPublishers } from "sc-game-base/src/core";
+import { Systems } from "sc-game-base/src/constants/systems";
 
 export default class UserBetResultPublisher extends BaseEventPublishers.UserBetResultPublisher {
     async publish(userId, betResult) {
         const status = this.getBetResultStatus(betResult);
 
         await this.publishToUser(userId, { status });
+
+        this.publishToAllUsersExceptSystem(Systems.Mobi, userId, { ...status, rate: betResult.rate });
     }
 
     getBetResultStatus(betResult) {

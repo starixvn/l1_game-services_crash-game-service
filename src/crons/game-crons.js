@@ -95,8 +95,12 @@ export default class GameCron extends Core.Crons.BaseGameCron {
 
         await Promise.all(
             Object.values(unsettledBets).map(async (round) => {
-                const betLogs = await this.betLogsRepository.find({ roundId: round.id }).lean().exec();
-                const { siteId, currency, operatorId, playerId, rate, currencyMultiplier, currencyCode } = betLogs[0];
+                const betLogs = await this.betLogsRepository
+                    .find({ roundId: round.id }, { _id: false }, { sort: { time: -1 } })
+                    .lean()
+                    .exec();
+
+                const { siteId, currency, operatorId, playerId, rate, currencyMultiplier, currencyCode, multiplier } = betLogs[0];
                 const tapCount = betLogs.length;
 
                 const player = {
@@ -119,7 +123,7 @@ export default class GameCron extends Core.Crons.BaseGameCron {
                     activeBet: {
                         roundId: round.id,
                         tapCount: tapCount,
-                        currentMultiplier: round.multiplier,
+                        currentMultiplier: multiplier,
                         amount: round.amount,
                     },
                 };

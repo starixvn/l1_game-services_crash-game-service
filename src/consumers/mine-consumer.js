@@ -82,7 +82,7 @@ export class MineConsumer extends PlaceBetConsumer {
         });
 
         this.updatePlayerGameState(playerName, updatedMultiplier);
-        this.publishMineResult(player, activeBet.id, updatedMultiplier);
+        this.publisher.publishMineResult(player.UID, { multiplier: updatedMultiplier });
 
         if (updatedMultiplier == 0) {
             await this.settleCashOutConsumer.proceedCashOut(player, true);
@@ -132,13 +132,6 @@ export class MineConsumer extends PlaceBetConsumer {
         if (this.gameData.ingame?.[playerName]) {
             this.gameData.ingame[playerName].currentMultiplier = updatedMultiplier;
         }
-    }
-
-    publishMineResult(player, betId, multiplier) {
-        this.publisher.publishMineResult(player.UID, {
-            multiplier,
-            betId,
-        });
     }
 
     publishMineFailed(player, errorCode) {

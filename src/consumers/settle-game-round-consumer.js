@@ -50,19 +50,20 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
             const result = await this.resultsRepository.findOne({ roundId }).lean().exec();
             const crashPoint = decrypt(result.encryptedFinalResult);
             const betLogs = await this.queryBetLogs(roundId);
+            const cashOutLog = betLogs.find((log) => log.action === Actions.CashOut);
 
-            if (!round || !betLogs || !result) {
+            if (!round || !cashOutLog || !result) {
                 this.logService.logError(`${this.definition.name} Settle Error: Invalid round data: ${roundId}`);
                 return;
             }
 
-            const betResult = this.calculateBetResult(round, betLogs);
+            const betResult = this.calculateBetResult(round, cashOutLog);
 
             round.betwin = betResult.totalWin;
             round.result = +crashPoint;
             round.paid = true;
             round.tapCount = betLogs.length - 1;
-            round.multiplier = this.getMultiplier(betLogs);
+            round.multiplier = this.getMultiplier(cashOutLog);
 
             await this.callEndGame(round, round.id, time, betResult);
             await round.save();
@@ -73,7 +74,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
             if (player) {
                 await this.userBetResultPublisher.publish(player.UID, {
                     ...betResult,
-                    reachMaxWin: betLogs?.some((log) => log.reachMaxWin),
+                    rate: cashOutLog.rate,
                 });
                 this.updatePlayerBetTracks(round.name);
                 this.gameData.ingame[playerName].betTracks = {};
@@ -111,17 +112,15 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
         return { result, settlementResult, tapCount };
     }
 
-    getMultiplier(betLogs = []) {
-        const cashoutLog = betLogs?.find((betLog) => betLog.action === Actions.CashOut);
+    getMultiplier(cashOutLog) {
+        if (!cashOutLog) return 0;
 
-        if (!cashoutLog) return 0;
-
-        return cashoutLog.multiplier;
+        return cashOutLog.multiplier;
     }
 
-    calculateBetResult(bet, betLog = []) {
+    calculateBetResult(bet, cashOutLog) {
         const { amount } = bet;
-        const winAmount = amount * this.getMultiplier(betLog);
+        const winAmount = amount * this.getMultiplier(cashOutLog);
         const winLoss = winAmount - amount;
 
         return {

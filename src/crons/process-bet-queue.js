@@ -84,7 +84,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
         await this.provablyFairConsumer.createResultRecord(player.profile.name, roundId);
         await this.insertBet(player, roundId, bet, rate, currentMultiplier);
-        await this.insertBetLog(player, roundId, bet);
+        await this.insertBetLog(player, roundId, bet, currentMultiplier);
 
         this.gameData.ingame[playerName].activeBet = { ...bet, currentMultiplier, tapCount: 1 };
 
@@ -116,7 +116,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         return result;
     }
 
-    async insertBetLog(player, roundId, bet) {
+    async insertBetLog(player, roundId, bet, currentMultiplier) {
         const rate = this.calculateCurrencyRate(player.session);
 
         const newBetLog = {
@@ -125,11 +125,11 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             time: new Date(),
             action: bet.action,
             amount: bet.amount,
-            winAmount: bet.winAmount,
+            winAmount: bet.amount * currentMultiplier,
             freeBet: bet.freeBet,
             increment: bet.increment,
             result: bet.result,
-            multiplier: bet.multiplier,
+            multiplier: currentMultiplier,
             clientSendTime: bet.clientSendTime,
             receivedTime: bet.receivedTime,
             roundId,

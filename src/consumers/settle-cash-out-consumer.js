@@ -66,18 +66,6 @@ export class SettleCashOutConsumer {
         };
     }
 
-    async publishCashOut(player, payload, winningDetails) {
-        this.placeBetPublisher.publishSuccessCashOut(
-            player.UID,
-            {
-                name: player.profile.name,
-                playerId: player.UID,
-                [payload.action]: winningDetails,
-            },
-            this.calculateCurrencyRate(player.session)
-        );
-    }
-
     async updateGameData(player, bet) {
         const playerName = player.profile.name;
         const playerGameData = this.gameData.ingame[playerName];
@@ -104,6 +92,7 @@ export class SettleCashOutConsumer {
             receivedTime: bet.receivedTime ?? new Date(),
             roundId,
             multiplier: bet.multiplier,
+            winAmount: bet.amount * bet.multiplier,
             tapCount: bet.tapCount,
             isAutoCashOut: bet.isAutoCashOut,
         };

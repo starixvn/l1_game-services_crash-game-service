@@ -1,4 +1,5 @@
 import { Table } from "sc-game-base";
+import { Systems } from "sc-game-base/src/constants/systems";
 
 export default class PlaceBetPublisher extends Table.EventPublishers.TablePlaceBetPublisher {
     publishSuccessCashOut(playerId, payload, rate) {
@@ -8,5 +9,23 @@ export default class PlaceBetPublisher extends Table.EventPublishers.TablePlaceB
 
     publishMineResult(playerId, payload) {
         this.publishToUser(playerId, payload);
+
+        this.publishToAllUsersExceptSystem(Systems.Mobi, playerId, {
+            playerId,
+            ...payload,
+        });
+    }
+
+    publishSuccessBet(playerId, payload, rate) {
+        super.publishSuccessBet(playerId, payload);
+
+        const otherUsersPayload = {
+            playerId,
+            rate,
+            multiplier: payload.multiplier,
+            ...payload.user,
+        };
+
+        this.publishToAllUsersExceptSystem(Systems.Mobi, playerId, { playerChip: otherUsersPayload });
     }
 }
