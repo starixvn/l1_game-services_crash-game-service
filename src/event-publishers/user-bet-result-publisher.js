@@ -7,7 +7,7 @@ export default class UserBetResultPublisher extends BaseEventPublishers.UserBetR
 
         await this.publishToUser(userId, { status });
 
-        this.publishToAllUsersExceptSystem(Systems.Mobi, userId, { ...status, rate: betResult.rate });
+        this.publishToAllUsersExceptSystem(Systems.Mobi, userId, { winners: { ...status, rate: betResult.rate } });
     }
 
     getBetResultStatus(betResult) {
