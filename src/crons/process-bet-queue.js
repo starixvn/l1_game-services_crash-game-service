@@ -1,7 +1,7 @@
 import { Core } from "sc-game-base";
 import { tracer } from "sc-instrument";
 import { Actions } from "../constants";
-
+import { helpers } from "sc-common";
 export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
     constructor({
         definition,
@@ -56,6 +56,20 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
                 }
             });
         }
+    }
+
+    async validateBetRequest(player, payload) {
+        const playerName = player.profile.name;
+        const playerGameData = this.gameData.ingame[playerName];
+        const activeBet = playerGameData.activeBet;
+
+        if (activeBet) {
+            this.handleFailedBet(player, helpers.noticeHelper.cannotPlaceBet, payload);
+
+            return false;
+        }
+
+        return true;
     }
 
     async proceedActions(player, payload) {

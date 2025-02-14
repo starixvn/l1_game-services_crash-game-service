@@ -3,11 +3,12 @@ import { helpers } from "sc-common";
 import { Actions } from "../constants";
 
 export class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetConsumer {
-    composeValidationCriteria(player, amount) {
+    composeValidationCriteria(player, payload) {
         const bettingTimeValidationCriteria = this.composeBettingTimeValidationCriteria(player);
-        const betAmountValidationCriteria = this.composeBetAmountValidationCriteria(player, amount);
+        const betAmountValidationCriteria = this.composeBetAmountValidationCriteria(player, payload.amount);
+        const clientSeedValidationCriteria = this.composeClientSeedValidationCriteria(payload.clientSeed);
 
-        return bettingTimeValidationCriteria.concat(betAmountValidationCriteria);
+        return bettingTimeValidationCriteria.concat(betAmountValidationCriteria, clientSeedValidationCriteria);
     }
 
     composeBettingTimeValidationCriteria(player) {
@@ -39,8 +40,17 @@ export class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetConsumer {
         ];
     }
 
-    validateBetRequest(player, amount) {
-        const criteria = this.composeValidationCriteria(player, amount);
+    composeClientSeedValidationCriteria(clientSeed) {
+        return [
+            {
+                failure: !clientSeed || typeof clientSeed !== "string" || clientSeed.length !== 4 || !/^\d+$/.test(clientSeed),
+                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet, { clientSeed }),
+            },
+        ];
+    }
+
+    validateBetRequest(player, payload) {
+        const criteria = this.composeValidationCriteria(player, payload);
         const failedCriterion = criteria.find((criterion) => criterion.failure);
 
         if (failedCriterion) {
@@ -59,12 +69,12 @@ export class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetConsumer {
             receivedTime: new Date(),
             mode: payload.m ?? this.DisplayMode.Landscape,
             roundId: this.gameData.roundId,
-            clientSeed: payload.clientSeed ?? "aaa", //TODO: remove default value
+            clientSeed: payload.clientSeed, //TODO: remove default value
         });
 
         if (
             (payload.action === Actions.Mine && !this.validateMineRequest(player)) ||
-            (payload.action === Actions.Bet && !this.validateBetRequest(player, payload.amount))
+            (payload.action === Actions.Bet && !this.validateBetRequest(player, payload))
         ) {
             return;
         }

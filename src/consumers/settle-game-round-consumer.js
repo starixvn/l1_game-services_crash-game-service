@@ -68,9 +68,6 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
             await this.callEndGame(round, round.id, time, betResult);
             await round.save();
 
-            delete this.gameData.provablyFair[playerName];
-            delete this.gameData.ingame[playerName]?.activeBet;
-
             if (player) {
                 await this.userBetResultPublisher.publish(player.UID, {
                     ...betResult,
@@ -81,6 +78,9 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
 
                 this.provablyFairConsumer.generateServerSeedAndPublishHash(player.UID, player.profile.name);
             }
+
+            delete this.gameData.provablyFair[playerName];
+            delete this.gameData.ingame[playerName]?.activeBet;
         } catch (error) {
             this.logService?.logError(`Failed to settle round ${roundId}: ${error}`);
             throw error;
