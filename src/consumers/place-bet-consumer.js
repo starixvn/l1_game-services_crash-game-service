@@ -43,7 +43,7 @@ export class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetConsumer {
     composeClientSeedValidationCriteria(clientSeed) {
         return [
             {
-                failure: !clientSeed || typeof clientSeed !== "string" || clientSeed.length <= 4 || !/^\d+$/.test(clientSeed),
+                failure: !clientSeed || typeof clientSeed !== "string" || clientSeed.length > 4 || !/^\d+$/.test(clientSeed),
                 notice: this.getNoticeObj(helpers.noticeHelper.invalidBet, { clientSeed }),
             },
         ];
