@@ -154,6 +154,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             newBetLog.siteId = player.session.siteId;
             newBetLog.currency = player.session.currencyName;
             newBetLog.currencyMultiplier = player.session.multiplier;
+            newBetLog.currencyGroupId = player.session.currencyGroupId;
             newBetLog.rate = rate;
             newBetLog.currencyCode = player.session.currencyCode;
 
@@ -181,6 +182,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
             exchangeRateId: this.gameData.exchangeRates.exId,
             multiplier: currentMultiplier,
             tapCount: 1,
+            maxWin: this.getMaxWinPerRound(player),
         };
 
         if (player.session) {
@@ -216,5 +218,13 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         const result = this.generatePlacingBetResult(player, balance, bet, rate);
 
         this.placeBetPublisher.publishSuccessBet(player.UID, { ...result, roundId }, rate);
+    }
+
+    getMaxWinPerRound(player) {
+        const { maxWinPerRound } = this.gameData.gameConfigs.crashConfig;
+        const settings = this.gameData.currencyGroupGames.find((x) => x.groupId.toString() === player.session.currencyGroupId);
+        const maxBet = Math.min(player.profile.maxBet, settings.maxBet);
+
+        return maxWinPerRound * maxBet;
     }
 }

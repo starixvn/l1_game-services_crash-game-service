@@ -57,13 +57,16 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
                 return;
             }
 
-            const betResult = this.calculateBetResult(round, cashOutLog);
+            const winAmount = Math.min(round.amount * this.getMultiplier(cashOutLog), round.maxWin);
+
+            const betResult = this.calculateBetResult(round.amount, winAmount);
 
             round.betwin = betResult.totalWin;
             round.result = +crashPoint;
             round.paid = true;
             round.tapCount = betLogs.length - 1;
             round.multiplier = this.getMultiplier(cashOutLog);
+            round.reachMaxWin = winAmount === round.maxWin;
 
             await this.callEndGame(round, round.id, time, betResult);
             await round.save();
@@ -72,6 +75,7 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
                 await this.userBetResultPublisher.publish(player.UID, {
                     ...betResult,
                     rate: cashOutLog.rate,
+                    reachMaxWin: round.reachMaxWin,
                 });
                 this.updatePlayerBetTracks(round.name);
                 this.gameData.ingame[playerName].betTracks = {};
@@ -118,13 +122,11 @@ export class SettleGameRoundConsumer extends EventConsumers.TableSettleGameRound
         return cashOutLog.multiplier;
     }
 
-    calculateBetResult(bet, cashOutLog) {
-        const { amount } = bet;
-        const winAmount = amount * this.getMultiplier(cashOutLog);
-        const winLoss = winAmount - amount;
+    calculateBetResult(betAmount, winAmount) {
+        const winLoss = winAmount - betAmount;
 
         return {
-            totalBetAmount: +amount.toFixed(2),
+            totalBetAmount: +betAmount.toFixed(2),
             totalWin: +winAmount.toFixed(2),
             netWin: +(winLoss > 0 ? winLoss : 0).toFixed(2),
             totalLost: +(winLoss < 0 ? -winLoss : 0).toFixed(2),

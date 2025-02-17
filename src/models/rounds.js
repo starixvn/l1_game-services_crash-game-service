@@ -17,6 +17,8 @@ const Schema = new mongoose.Schema({
     odds: { type: Object, required: true },
     betwin: { type: Number },
     result: { type: Number },
+    maxWin: { type: Number },
+    reachMaxWin: { type: Boolean, default: false },
     settlementResult: { type: Array },
     paid: { type: Boolean, default: false },
     multiplier: { type: Number, required: true },

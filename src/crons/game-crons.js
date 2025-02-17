@@ -109,13 +109,13 @@ export default class GameCron extends Core.Crons.BaseGameCron {
                         name: round.name,
                     },
                     session: {
-                        siteId: siteId,
+                        siteId,
                         currencyName: currency,
                         currencyCode: currencyCode,
                         multiplier: currencyMultiplier,
-                        operatorId: operatorId,
-                        playerId: playerId,
-                        rate: rate,
+                        operatorId,
+                        playerId,
+                        rate,
                     },
                 };
 
