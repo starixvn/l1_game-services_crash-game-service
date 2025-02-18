@@ -11,8 +11,8 @@ export class UserDisconnectConsumer extends Table.EventConsumers.TableOutGameCon
      * @param {mongoose.Model} dependencies.betLogsRepository
      * @param {SettleCashOutConsumer} dependencies.settleCashOutConsumer
      */
-    constructor(gameData, betLogsRepository, settleCashOutConsumer) {
-        super(gameData);
+    constructor(gameData, publisher, betLogsRepository, settleCashOutConsumer) {
+        super(gameData, publisher);
         this.settleCashOutConsumer = settleCashOutConsumer;
         this.betLogsRepository = betLogsRepository;
     }
