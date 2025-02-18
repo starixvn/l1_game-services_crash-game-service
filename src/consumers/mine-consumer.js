@@ -86,6 +86,7 @@ export class MineConsumer extends PlaceBetConsumer {
         this.updatePlayerGameState(playerName, updatedMultiplier);
         this.publisher.publishMineResult(player.UID, {
             multiplier: updatedMultiplier,
+            winAmount: Math.min(updatedMultiplier * activeBet.amount, activeBet.maxWin),
             reachMaxWin: updatedMultiplier * activeBet.amount >= activeBet.maxWin,
         });
 
