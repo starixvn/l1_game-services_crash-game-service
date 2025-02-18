@@ -22,6 +22,7 @@ export class InGameConsumer extends EventConsumers.TableInGameConsumer {
 
         realPlayer.socketClient.emit(this.definition.name, payload);
         this.provablyFairConsumer.generateServerSeedAndPublishHash(realPlayer.UID, realPlayer.profile.name);
+        this.publisher.publishToAllUsersExceptSystem(Systems.Mobi, realPlayer.UID, { player });
     }
 
     async buildPayload(realPlayer) {

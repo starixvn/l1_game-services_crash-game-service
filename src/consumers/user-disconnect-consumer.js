@@ -1,8 +1,8 @@
-import { Core } from "sc-game-base";
+import { Table } from "sc-game-base";
 import { Actions } from "../constants";
 import { SettleCashOutConsumer } from "./settle-cash-out-consumer";
 
-export class UserDisconnectConsumer extends Core.BaseEventConsumers.UserDisconnectConsumer {
+export class UserDisconnectConsumer extends Table.EventConsumers.TableOutGameConsumer {
     /**
      * @param {Object} dependencies
      * @param {GameData} dependencies.gameData
