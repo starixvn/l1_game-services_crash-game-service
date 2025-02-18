@@ -51,11 +51,8 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
 
         this.container.register({
             roundsRepository: asValue(Rounds(definition.configName)),
-            betsRepository: asValue(Bets(definition.configName)),
             resultsRepository: asValue(Results(definition.configName)),
             betLogsRepository: asValue(BetLogs(definition.configName)),
-            tempBetsRepository: asValue(tempBets(definition.configName)),
-            tempBetLogsRepository: asValue(tempBetLogs(definition.configName)),
             umInfoRepository: asValue(umInfo()),
         });
     }
@@ -81,7 +78,6 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
         super.registerPublishers();
 
         this.container.register({
-            liveGamePublisher: asClass(LiveGamePublisher).singleton(),
             placeBetPublisher: asClass(PlaceBetPublisher).singleton(),
             userBetResultPublisher: asClass(UserBetResultPublisher).singleton(),
             roundResultPublisher: asClass(RoundResultPublisher).singleton(),
