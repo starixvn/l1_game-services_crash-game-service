@@ -1,4 +1,5 @@
 import { EventConsumers } from "sc-game-base/src/table";
+import { Systems } from "sc-game-base/src/constants/systems";
 
 export class InGameConsumer extends EventConsumers.TableInGameConsumer {
     constructor(definition, gameData, roundQuery, publisher, getBalance, userInfosRepository, provablyFairConsumer) {
