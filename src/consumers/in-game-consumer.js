@@ -33,18 +33,7 @@ export class InGameConsumer extends EventConsumers.TableInGameConsumer {
 
         const { odds, enableFreeBet, crashConfig } = this.gameData.gameConfigs;
         const gameConfigs = { ...settings, odds, enableFreeBet, maxWinPerRound: crashConfig.maxWinPerRound };
-        const { betTracks } = this.gameData.ingame[realPlayer.profile.name] || { betTracks: {} };
-        const betAmount = betTracks.roundId > 0 ? betTracks.amount : 0;
-        const steps = betTracks.steps;
-
-        const ownBets =
-            betTracks.roundId > 0
-                ? {
-                      roundId: betTracks.roundId,
-                      betAmount,
-                      steps,
-                  }
-                : {};
+        const players = realPlayer.session?.system === Systems.Mobi ? {} : this.buildPlayersPayload(realPlayer);
 
         await this.getBalance(realPlayer, true);
 
@@ -52,8 +41,8 @@ export class InGameConsumer extends EventConsumers.TableInGameConsumer {
 
         return {
             gameConfigs,
-            ownBets,
             user,
+            players,
         };
     }
 }
