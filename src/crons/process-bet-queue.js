@@ -126,6 +126,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
 
         result.multiplier = this.gameData.ingame[playerName].activeBet.currentMultiplier;
         result.ownChip = { amount };
+        result.winAmount = amount * result.multiplier;
         result.user.name = playerName;
         return result;
     }
