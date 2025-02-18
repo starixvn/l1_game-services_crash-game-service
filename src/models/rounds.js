@@ -14,6 +14,7 @@ const Schema = new mongoose.Schema({
     name: { type: String, required: true },
     currency: { type: String, required: true },
     amount: { type: Number, required: true },
+    totalAmount: { type: Number, required: true },
     odds: { type: Object, required: true },
     betwin: { type: Number },
     result: { type: Number },
