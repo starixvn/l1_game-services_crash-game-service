@@ -100,7 +100,7 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         await this.insertBet(player, roundId, bet, rate, currentMultiplier);
         await this.insertBetLog(player, roundId, bet, currentMultiplier);
 
-        this.gameData.ingame[playerName].activeBet = { ...bet, currentMultiplier, tapCount: 1 };
+        this.gameData.ingame[playerName].activeBet = { ...bet, currentMultiplier, tapCount: 1, maxWin: this.getMaxWinPerRound(player) };
 
         this.notifyPlacingBetResult(player, balance, bet, rate, roundId);
 
