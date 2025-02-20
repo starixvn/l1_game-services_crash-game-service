@@ -12,7 +12,8 @@ export default class GameBot extends Table.Crons.TableGameBot {
         super(definition, gameData, publisher, userInfosRepository);
         this.chance = new Chance();
         this.activeBots = new Map();
-        this.minBotsAtTheTable = 2;
+        this.minBotsAtTheTable = 4;
+        this.maxBotsAtTheTable = 8;
     }
 
     async run() {
