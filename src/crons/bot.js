@@ -1,15 +1,187 @@
 import Chance from "chance";
-import { Core } from "sc-game-base";
+import { Table } from "sc-game-base";
+import { Actions } from "../constants";
+import { ServerSeedHelper, SeedHelper } from "sc-game-base/src/core/helpers";
+import { helpers } from "sc-common";
+import { Systems } from "sc-game-base/src/constants";
+import { calculateIncrement } from "../helpers/crash-point-helper";
+import { roundFloat } from "../helpers/number-helper";
 
-export default class GameBot extends Core.Crons.BaseBot {
-    constructor(definition, gameData, userInfosRepository) {
-        super(definition, gameData, userInfosRepository);
+export default class GameBot extends Table.Crons.TableGameBot {
+    constructor(definition, gameData, publisher, userInfosRepository) {
+        super(definition, gameData, publisher, userInfosRepository);
         this.chance = new Chance();
+        this.activeBots = new Map();
+        this.minBotsAtTheTable = 2;
     }
 
     async run() {
-        if (this.gameData.gameConfigs?.botenabled && this.maxNumberOfBots > 0) {
-            this.gameData.roundId += this.chance.integer({ min: 1, max: this.maxNumberOfBots });
+        if (!this.gameData.gameConfigs?.botenabled) {
+            return;
         }
+
+        const random = this.chance.integer({ min: 0, max: 5 });
+
+        if (this.shouldAddBot(random)) {
+            await this.joinRoom();
+        }
+
+        if (this.shouldRemoveBot(random)) {
+            await this.leaveRoom();
+        }
+
+        Object.keys(this.botsInRoom).forEach(async (botId) => {
+            await this.handleBotActions(botId);
+        });
+    }
+
+    async placeBet(botId) {
+        this.gameData.roundId += 1;
+        const maxBet = this.getMaxBet(this.botsInRoom[botId]);
+        const minBet = this.getMinBet();
+        const betAmount = this.convertAmountToChip(helpers.numberHelper.getRandomNumberStep5(minBet, maxBet, true));
+
+        const user = await this.userInfosRepository.findOneAndUpdate(
+            { id: botId, red: { $gt: betAmount } },
+            { $inc: { red: -betAmount } },
+            { new: true, lean: true }
+        );
+
+        if (user) {
+            const serverSeed = ServerSeedHelper.generateServerSeed();
+            const finalHash = SeedHelper.getSHA512Hash(serverSeed);
+            const result = this.definition.generateResult(finalHash);
+            const multiplier = result > 1 ? 1.01 : 0;
+
+            this.updateBalanceAndPublishBetPayload(botId, multiplier, betAmount, user.red);
+
+            if (result > 1) {
+                this.activeBots.set(botId, {
+                    amount: betAmount,
+                    result,
+                    multiplier: 1.01,
+                    tapCount: 1,
+                    lastActionTime: Date.now(),
+                });
+            } else {
+                await this.handleCashout(botId);
+            }
+        }
+    }
+
+    updateBalanceAndPublishBetPayload(botId, multiplier, amount, balance) {
+        if (this.gameData.players[botId]) {
+            this.gameData.players[botId].red = balance;
+        }
+
+        this.publisher.publishToAllUsersExceptSystem(Systems.Mobi, null, {
+            playerChip: {
+                playerId: botId,
+                rate: 1,
+                multiplier: multiplier,
+                amount: amount,
+                red: balance,
+            },
+        });
+    }
+
+    async handleBotActions(botId) {
+        const action = this.getAction(botId);
+
+        switch (action) {
+            case Actions.Bet:
+                await this.placeBet(botId);
+                break;
+            case Actions.Mine:
+                await this.handleMining(botId);
+                break;
+            case Actions.CashOut:
+                await this.handleCashout(botId);
+                break;
+        }
+    }
+
+    getRemovalBotIds(totalRemoval) {
+        const botIds = Object.keys(this.botsInRoom).filter((botId) => !this.activeBots.has(botId));
+        if (!this.removeBotAtTheTable) {
+            this.removeBotAtTheTable = true;
+
+            const botsOnTable = botIds?.length > 8 ? botIds.slice(0, 8) : botIds;
+
+            return botsOnTable?.length > 3 ? this.chance.pickset(botsOnTable, this.chance.integer({ min: 1, max: 3 })) : botsOnTable;
+        }
+
+        return botIds?.length > totalRemoval ? this.chance.pickset(Object.keys(this.botsInRoom), totalRemoval) : botIds;
+    }
+
+    getAction(botId) {
+        const botState = this.activeBots.get(botId);
+        let action = null;
+
+        if (!botState) {
+            const isBet = this.chance.bool({ likelihood: 30 });
+            action = isBet ? Actions.Bet : null;
+        } else {
+            action = this.chance.weighted(
+                [Actions.Mine, Actions.CashOut, null],
+                [75 - botState.tapCount, botState.tapCount, 25 + botState.tapCount]
+            );
+        }
+
+        return action;
+    }
+
+    async handleMining(botId) {
+        const botState = this.activeBots.get(botId);
+        const increment = calculateIncrement(botState.multiplier, this.gameData.gameConfigs.crashConfig.multiplierConfigs);
+        let updatedMultiplier = roundFloat(botState.multiplier + increment);
+        updatedMultiplier = updatedMultiplier > 1000 || updatedMultiplier > botState.result ? 0 : updatedMultiplier;
+        botState.hasMined = true;
+        botState.lastActionTime = Date.now();
+        botState.multiplier = updatedMultiplier;
+        botState.tapCount++;
+        this.activeBots.set(botId, botState);
+
+        this.publisher.publishToAllUsersExceptSystem("Mobi", null, { playerMine: { playerId: botId, multiplier: updatedMultiplier } });
+
+        if (updatedMultiplier == 0) {
+            await this.handleCashout(botId);
+        }
+    }
+
+    async handleCashout(botId) {
+        const botState = this.activeBots.get(botId);
+
+        const winAmount = botState.multiplier * botState.amount;
+        const user = await this.userInfosRepository.findOneAndUpdate({ id: botId }, { $inc: { red: +winAmount } });
+
+        if (this.gameData.players[botId]) {
+            this.gameData.players[botId].red = user.red;
+        }
+
+        this.publisher.publishToAllUsersExceptSystem("Mobi", null, {
+            winners: { playerId: botId, bet: winAmount, rate: 1, reachMaxWin: false, win: winAmount > 0 },
+        });
+
+        this.activeBots.delete(botId);
+    }
+
+    resetBot(bot) {
+        super.resetBot(bot);
+        this.activeBots.delete(bot.id);
+    }
+
+    async removeBot(botId) {
+        this.activeBots.delete(botId);
+        await super.removeBot(botId);
+    }
+
+    getMaxBet(bot) {
+        const maxBet = bot.profile?.maxBet || this.gameData.gameConfigs.maxbet;
+        return Math.min(maxBet, bot.red, this.gameData.gameConfigs.bot_maxbet);
+    }
+
+    getBetChoice() {
+        return Actions.Bet;
     }
 }

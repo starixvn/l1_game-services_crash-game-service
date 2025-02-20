@@ -19,12 +19,13 @@ export default class PlaceBetPublisher extends Table.EventPublishers.TablePlaceB
     }
 
     publishSuccessBet(playerId, payload, rate) {
-        super.publishSuccessBet(playerId, payload);
+        this.publishToUser(playerId, payload);
 
         const otherUsersPayload = {
             playerId,
             rate,
             multiplier: payload.multiplier,
+            amount: payload.amount,
             ...payload.user,
         };
 

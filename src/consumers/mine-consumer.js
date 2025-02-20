@@ -1,7 +1,8 @@
 import { PlaceBetConsumer } from "sc-game-base/src/core/event-consumers";
 import { Actions } from "../constants";
-import { generateTapResult } from "../helpers/crash-point-helper";
+import { calculateIncrement, generateTapResult } from "../helpers/crash-point-helper";
 import noticeHelper from "../helpers/notice-helper";
+import { roundFloat } from "../helpers/number-helper";
 
 export class MineConsumer extends PlaceBetConsumer {
     /**
@@ -68,10 +69,9 @@ export class MineConsumer extends PlaceBetConsumer {
         const ingameData = this.gameData.ingame[playerName];
         const provablyFair = this.gameData.provablyFair[playerName];
         const multiplier = ingameData.activeBet.currentMultiplier;
-        const increment = this.calculateIncrement(multiplier);
-        const updatedMultiplier = +(
-            multiplier == 1000 || provablyFair.finalResult < multiplier + increment ? 0 : multiplier + increment
-        ).toFixed(2);
+        const increment = calculateIncrement(multiplier, this.gameData.gameConfigs.crashConfig.multiplierConfigs);
+        let updatedMultiplier = roundFloat(multiplier + increment);
+        updatedMultiplier = updatedMultiplier > 1000 || updatedMultiplier > provablyFair.finalResult ? 0 : updatedMultiplier;
         ingameData.activeBet.currentMultiplier = updatedMultiplier;
         ingameData.activeBet.tapCount++;
         const result = provablyFair.finalResult;
@@ -93,15 +93,6 @@ export class MineConsumer extends PlaceBetConsumer {
         if (updatedMultiplier == 0) {
             await this.settleCashOutConsumer.proceedCashOut(player, true);
         }
-    }
-
-    calculateIncrement(currentMultiplier) {
-        const { multiplierConfigs } = this.gameData.gameConfigs.crashConfig;
-        const { increment } = multiplierConfigs.stages.find(
-            (stage) => currentMultiplier >= stage.minMultiplier && currentMultiplier < stage.maxMultiplier
-        );
-
-        return increment;
     }
 
     async insertMineBetLog(player, activeBet, { clientSendTime, increment, result, updatedMultiplier }) {

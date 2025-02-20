@@ -20,26 +20,12 @@ function findStage(multiplier, stages) {
     return stages.find((stage) => multiplier >= stage.minMultiplier && multiplier <= stage.maxMultiplier);
 }
 
-function calculateIncrement(multiplier, stageConfigs) {
-    const { stages } = stageConfigs;
+function calculateIncrement(currentMultiplier, multiplierConfigs) {
+    const { increment } = multiplierConfigs.stages.find(
+        (stage) => currentMultiplier >= stage.minMultiplier && currentMultiplier < stage.maxMultiplier
+    );
 
-    if (stages.length === 0) {
-        return 0;
-    }
-
-    const currentStage = findStage(multiplier, stages);
-
-    return currentStage ? currentStage.increment : stages[stages.length - 1].increment;
-}
-
-function calculateNextTapMultiplier(current, stageConfigs) {
-    const { stages } = stageConfigs;
-    const currentStage = findStage(current, stages);
-
-    const increment = calculateIncrement(current, stageConfigs);
-    const nextMultiplier = roundFloat(current + increment);
-
-    return currentStage ? Math.min(nextMultiplier, currentStage.maxMultiplier) : nextMultiplier;
+    return increment;
 }
 
 function getInitialTapMultiplier(stageConfigs) {
@@ -50,12 +36,4 @@ function generateTapResult(result) {
     return result > 1.0;
 }
 
-export {
-    calculateMultiplier,
-    calculateCrashTimeInMillisecond,
-    calculateNextTapMultiplier,
-    getInitialTapMultiplier,
-    generateTapResult,
-    calculateIncrement,
-    findStage,
-};
+export { calculateMultiplier, calculateCrashTimeInMillisecond, getInitialTapMultiplier, generateTapResult, calculateIncrement, findStage };
