@@ -14,12 +14,15 @@ export default class GameBot extends Table.Crons.TableGameBot {
         this.activeBots = new Map();
         this.minBotsAtTheTable = 4;
         this.maxBotsAtTheTable = 8;
+        this.activeTimeouts = new Set();
     }
 
     async run() {
         if (!this.gameData.gameConfigs?.botenabled) {
             return;
         }
+
+        this.clearTimeouts();
 
         const random = this.chance.integer({ min: 0, max: 5 });
 
@@ -31,7 +34,24 @@ export default class GameBot extends Table.Crons.TableGameBot {
             await this.leaveRoom();
         }
 
-        Object.keys(this.botsInRoom).map((botId) => this.handleBotActions(botId));
+        const botIds = Object.keys(this.botsInRoom);
+        botIds.forEach((botId) => {
+            const delay = this.chance.integer({ min: 0, max: 800 });
+            const timeout = setTimeout(() => {
+                this.handleBotActions(botId).catch((error) => {
+                    this.logger.error(`Error handling bot action for ${botId}:`, error);
+                });
+                this.activeTimeouts.delete(timeout);
+            }, delay);
+            this.activeTimeouts.add(timeout);
+        });
+    }
+
+    clearTimeouts() {
+        for (const timeout of this.activeTimeouts) {
+            clearTimeout(timeout);
+        }
+        this.activeTimeouts.clear();
     }
 
     async placeBet(botId) {
@@ -170,11 +190,13 @@ export default class GameBot extends Table.Crons.TableGameBot {
     }
 
     resetBot(bot) {
+        this.clearTimeouts();
         super.resetBot(bot);
         this.activeBots.delete(bot.id);
     }
 
     async removeBot(botId) {
+        this.clearTimeouts();
         this.activeBots.delete(botId);
         await super.removeBot(botId);
     }
