@@ -31,9 +31,7 @@ export default class GameBot extends Table.Crons.TableGameBot {
             await this.leaveRoom();
         }
 
-        Object.keys(this.botsInRoom).forEach(async (botId) => {
-            await this.handleBotActions(botId);
-        });
+        Object.keys(this.botsInRoom).map((botId) => this.handleBotActions(botId));
     }
 
     async placeBet(botId) {
@@ -87,6 +85,10 @@ export default class GameBot extends Table.Crons.TableGameBot {
     }
 
     async handleBotActions(botId) {
+        try {
+        } catch (error) {
+            this.logger.error(error);
+        }
         const action = this.getAction(botId);
 
         switch (action) {
