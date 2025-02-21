@@ -187,4 +187,12 @@ export default class GameBot extends Table.Crons.TableGameBot {
     getBetChoice() {
         return Actions.Bet;
     }
+
+    getBotsToJoin(botUsers) {
+        const remaining = this.maxNumberOfBots - Object.keys(this.botsInRoom).length;
+        const numberOfBotsToJoin = this.chance.integer({ min: 1, max: remaining });
+        const shuffleBots = this.chance.shuffle(botUsers);
+
+        return shuffleBots.slice(0, numberOfBotsToJoin);
+    }
 }
