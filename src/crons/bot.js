@@ -122,12 +122,12 @@ export default class GameBot extends Table.Crons.TableGameBot {
         let action = null;
 
         if (!botState) {
-            const isBet = this.chance.bool({ likelihood: 30 });
+            const isBet = this.chance.bool({ likelihood: 20 });
             action = isBet ? Actions.Bet : null;
         } else {
             action = this.chance.weighted(
                 [Actions.Mine, Actions.CashOut, null],
-                [75 - botState.tapCount, botState.tapCount, 25 + botState.tapCount]
+                [50 - botState.tapCount, botState.tapCount, 50 + botState.tapCount]
             );
         }
 
