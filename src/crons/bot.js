@@ -56,15 +56,15 @@ export default class GameBot extends Table.Crons.TableGameBot {
 
             this.updateBalanceAndPublishBetPayload(botId, multiplier, betAmount, user.red);
 
-            if (result > 1) {
-                this.activeBots.set(botId, {
-                    amount: betAmount,
-                    result,
-                    multiplier: 1.01,
-                    tapCount: 1,
-                    lastActionTime: Date.now(),
-                });
-            } else {
+            this.activeBots.set(botId, {
+                amount: betAmount,
+                result,
+                multiplier,
+                tapCount: 1,
+                lastActionTime: Date.now(),
+            });
+
+            if (multiplier == 0) {
                 await this.handleCashout(botId);
             }
         }
