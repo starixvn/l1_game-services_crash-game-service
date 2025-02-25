@@ -212,6 +212,10 @@ export default class GameBot extends Table.Crons.TableGameBot {
 
     getBotsToJoin(botUsers) {
         const remaining = this.maxNumberOfBots - Object.keys(this.botsInRoom).length;
+        if (remaining < 1) {
+            return [];
+        }
+
         const numberOfBotsToJoin = this.chance.integer({ min: 1, max: remaining });
         const shuffleBots = this.chance.shuffle(botUsers);
 
