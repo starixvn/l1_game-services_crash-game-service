@@ -77,6 +77,10 @@ export default class GameCron extends Core.Crons.BaseGameCron {
             this.gameData.remainingTime--;
             this.bot && (await this.bot.run());
         }
+
+        if (this.gameData.remainingTime < 0) {
+            this.gameData.remainingTime = durations.wholeRound;
+        }
     }
 
     async processRunningRounds() {}

@@ -21,11 +21,11 @@ function findStage(multiplier, stages) {
 }
 
 function calculateIncrement(currentMultiplier, multiplierConfigs) {
-    const { increment } = multiplierConfigs.stages.find(
+    const stage = multiplierConfigs.stages.find(
         (stage) => currentMultiplier >= stage.minMultiplier && currentMultiplier < stage.maxMultiplier
     );
 
-    return increment;
+    return stage?.increment ?? 0;
 }
 
 function getInitialTapMultiplier(stageConfigs) {
