@@ -1,17 +1,15 @@
 import { Table } from "sc-game-base";
-import { Actions } from "../constants";
 import { SettleCashOutConsumer } from "./settle-cash-out-consumer";
 
 export class UserDisconnectConsumer extends Table.EventConsumers.TableOutGameConsumer {
     /**
      * @param {Object} dependencies
      * @param {GameData} dependencies.gameData
-     * @param {BaseEventPublisher} dependencies.baseEventPublisher
-     * @param {logger} dependencies.logService
+     * @param {BaseEventPublisher} dependencies.publisher
      * @param {mongoose.Model} dependencies.betLogsRepository
      * @param {SettleCashOutConsumer} dependencies.settleCashOutConsumer
      */
-    constructor(gameData, publisher, betLogsRepository, settleCashOutConsumer) {
+    constructor({ gameData, publisher, betLogsRepository, settleCashOutConsumer }) {
         super(gameData, publisher);
         this.settleCashOutConsumer = settleCashOutConsumer;
         this.betLogsRepository = betLogsRepository;
@@ -26,7 +24,7 @@ export class UserDisconnectConsumer extends Table.EventConsumers.TableOutGameCon
         const isValidCashOut = this.settleCashOutConsumer.validateCashOut(player);
 
         if (isValidCashOut) {
-            await this.settleCashOutConsumer.proceedCashOut(player, { action: Actions.CashOut });
+            await this.settleCashOutConsumer.proceedCashOut(player, true);
         }
 
         delete this.gameData.provablyFair[player.profile.name];

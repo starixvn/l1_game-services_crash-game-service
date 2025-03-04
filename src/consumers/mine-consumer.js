@@ -3,6 +3,7 @@ import { Actions } from "../constants";
 import { calculateIncrement, generateTapResult } from "../helpers/crash-point-helper";
 import noticeHelper from "../helpers/notice-helper";
 import { roundFloat } from "../helpers/number-helper";
+import { SettleCashOutConsumer } from "./settle-cash-out-consumer";
 
 export class MineConsumer extends PlaceBetConsumer {
     /**
@@ -12,6 +13,7 @@ export class MineConsumer extends PlaceBetConsumer {
      * @param {logger} logService
      * @param {mongoose.Model} betLogsRepository
      * @param {RoundResultConsumer} roundResultConsumer
+     * @param {SettleCashOutConsumer} settleCashOutConsumer
      */
     constructor(definition, gameData, placeBetPublisher, logService, betLogsRepository, roundResultConsumer, settleCashOutConsumer) {
         super(definition, gameData, placeBetPublisher);

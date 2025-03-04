@@ -12,4 +12,10 @@ const getSettlementResult = () => {};
 
 const generateRawResultForHash = (roundResult) => roundResult;
 
-export { generateResult, getSettlementResult, generateRawResultForHash };
+/**
+ * @param {number} multiplier
+ * @returns {boolean}
+ */
+const isBigWin = (multiplier) => multiplier >= 2.5;
+
+export { generateResult, getSettlementResult, generateRawResultForHash, isBigWin };

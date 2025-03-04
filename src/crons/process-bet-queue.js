@@ -2,7 +2,17 @@ import { Core } from "sc-game-base";
 import { tracer } from "sc-instrument";
 import { Actions } from "../constants";
 import { helpers } from "sc-common";
+import mongoose from "mongoose";
+import { SettleCashOutConsumer, MineConsumer, ProvablyFairConsumer } from "../consumers";
 export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
+    /**
+     * @param {Object} dependencies
+     * @param {SettleCashOutConsumer} dependencies.settleCashOutConsumer
+     * @param {ProvablyFairConsumer} dependencies.provablyFairConsumer
+     * @param {mongoose.Model} dependencies.roundsRepository
+     * @param {MineConsumer} dependencies.mineConsumer
+     *
+     * */
     constructor({
         definition,
         gameData,

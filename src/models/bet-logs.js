@@ -12,6 +12,7 @@ const Schema = new mongoose.Schema({
     reachMaxWin: { type: Boolean, default: false },
     increment: { type: Number, default: 0 },
     result: { type: Boolean, default: false },
+    isAutoCashOut: { type: Boolean, default: false },
 
     time: { type: Date },
     clientSendTime: { type: Date },

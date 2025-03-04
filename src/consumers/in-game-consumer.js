@@ -1,10 +1,18 @@
-import { EventConsumers } from "sc-game-base/src/table";
 import { Systems } from "sc-game-base/src/constants/systems";
+import { EventConsumers } from "sc-game-base/src/table";
+import { ProvablyFairConsumer, BigWinConsumer } from "./index";
 
 export class InGameConsumer extends EventConsumers.TableInGameConsumer {
-    constructor(definition, gameData, roundQuery, publisher, getBalance, userInfosRepository, provablyFairConsumer) {
+    /**
+     * @param {Object} dependencies
+     * @param {ProvablyFairConsumer} dependencies.provablyFairConsumer
+     * @param {BigWinConsumer} dependencies.bigWinConsumer
+     */
+
+    constructor({ definition, gameData, roundQuery, publisher, getBalance, userInfosRepository, provablyFairConsumer, bigWinConsumer }) {
         super(definition, gameData, roundQuery, publisher, getBalance, userInfosRepository);
         this.provablyFairConsumer = provablyFairConsumer;
+        this.bigWinConsumer = bigWinConsumer;
     }
 
     async consume(realPlayer) {
@@ -43,6 +51,7 @@ export class InGameConsumer extends EventConsumers.TableInGameConsumer {
             gameConfigs,
             user,
             players,
+            recentBigWinningWinners: await this.bigWinConsumer.getRecentBigWinningWinners(realPlayer),
         };
     }
 }

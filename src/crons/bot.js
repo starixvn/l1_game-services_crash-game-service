@@ -1,20 +1,30 @@
 import Chance from "chance";
+import { helpers, logger } from "sc-common";
 import { Table } from "sc-game-base";
-import { Actions } from "../constants";
-import { ServerSeedHelper, SeedHelper } from "sc-game-base/src/core/helpers";
-import { helpers } from "sc-common";
 import { Systems } from "sc-game-base/src/constants";
+import { SeedHelper, ServerSeedHelper } from "sc-game-base/src/core/helpers";
+import { Actions } from "../constants";
+import { BigWinConsumer } from "../consumers";
+import { RecentBigWinPublisher } from "../event-publishers";
 import { calculateIncrement } from "../helpers/crash-point-helper";
 import { roundFloat } from "../helpers/number-helper";
+import { isBigWin } from "../helpers/result-helper";
+import * as util from "util";
 
 export default class GameBot extends Table.Crons.TableGameBot {
-    constructor(definition, gameData, publisher, userInfosRepository) {
+    /**
+     * @param {BigWinConsumer} bigWinConsumer
+     * @param {RecentBigWinPublisher} recentBigWinPublisher
+     */
+    constructor(definition, gameData, publisher, userInfosRepository, bigWinConsumer, recentBigWinPublisher) {
         super(definition, gameData, publisher, userInfosRepository);
         this.chance = new Chance();
         this.activeBots = new Map();
         this.minBotsAtTheTable = 4;
         this.maxBotsAtTheTable = 8;
         this.activeTimeouts = new Set();
+        this.bigWinConsumer = bigWinConsumer;
+        this.recentBigWinPublisher = recentBigWinPublisher;
     }
 
     async run() {
@@ -39,7 +49,7 @@ export default class GameBot extends Table.Crons.TableGameBot {
             const delay = this.chance.integer({ min: 0, max: 800 });
             const timeout = setTimeout(() => {
                 this.handleBotActions(botId).catch((error) => {
-                    this.logger.error(`Error handling bot action for ${botId}:`, error);
+                    logger.logError(`Error handling bot action for ${botId}: ${util.inspect(error)}`);
                 });
                 this.activeTimeouts.delete(timeout);
             }, delay);
@@ -107,7 +117,7 @@ export default class GameBot extends Table.Crons.TableGameBot {
     async handleBotActions(botId) {
         try {
         } catch (error) {
-            this.logger.error(error);
+            logger.logError(error);
         }
         const action = this.getAction(botId);
 
@@ -165,7 +175,9 @@ export default class GameBot extends Table.Crons.TableGameBot {
         botState.tapCount++;
         this.activeBots.set(botId, botState);
 
-        this.publisher.publishToAllUsersExceptSystem("Mobi", null, { playerMine: { playerId: botId, multiplier: updatedMultiplier } });
+        this.publisher.publishToAllUsersExceptSystem(Systems.Mobi, null, {
+            playerMine: { playerId: botId, multiplier: updatedMultiplier },
+        });
 
         if (updatedMultiplier == 0) {
             await this.handleCashout(botId);
@@ -175,15 +187,36 @@ export default class GameBot extends Table.Crons.TableGameBot {
     async handleCashout(botId) {
         const botState = this.activeBots.get(botId);
 
-        const winAmount = botState.multiplier * botState.amount;
-        const user = await this.userInfosRepository.findOneAndUpdate({ id: botId }, { $inc: { red: +winAmount } });
+        let recentBigWinningWinner = {};
+        const multiplier = botState.multiplier;
+        const rate = this.botRate;
+        const amount = botState.amount;
+        const baseAmount = amount * rate;
+        const winningAmount = multiplier * amount;
+        const baseWinningAmount = winningAmount * rate;
+
+        const user = await this.userInfosRepository.findOneAndUpdate({ id: botId }, { $inc: { red: +winningAmount } });
 
         if (this.gameData.players[botId]) {
             this.gameData.players[botId].red = user.red;
+            user.profile = { name: user.name };
+        }
+        if (isBigWin(multiplier)) {
+            recentBigWinningWinner = await this.bigWinConsumer.add(user, {
+                roundId: this.gameData.roundId,
+                amount,
+                baseAmount,
+                winningAmount,
+                baseWinningAmount,
+                multiplier,
+                rate,
+            });
+            await this.bigWinConsumer.removeOldestRecord();
+            this.recentBigWinPublisher.publish(recentBigWinningWinner);
         }
 
-        this.publisher.publishToAllUsersExceptSystem("Mobi", null, {
-            winners: { playerId: botId, bet: winAmount, rate: 1, reachMaxWin: false, win: winAmount > 0 },
+        this.publisher.publishToAllUsersExceptSystem(Systems.Mobi, null, {
+            winners: { playerId: botId, bet: winningAmount, rate, reachMaxWin: false, win: winningAmount > 0 },
         });
 
         this.activeBots.delete(botId);

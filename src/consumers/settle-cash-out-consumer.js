@@ -1,5 +1,10 @@
+import mongoose from "mongoose";
 import { Actions } from "../constants";
 import helpers from "../helpers/notice-helper";
+import { isBigWin } from "../helpers/result-helper";
+import BigWinConsumer from "./big-win-consumer";
+import { SettleGameRoundConsumer } from "./settle-game-round-consumer";
+import { RecentBigWinPublisher } from "../event-publishers";
 
 export class SettleCashOutConsumer {
     /**
@@ -9,13 +14,17 @@ export class SettleCashOutConsumer {
      * @param {BaseEventPublisher} dependencies.publisher
      * @param {logger} dependencies.logService
      * @param {mongoose.Model} dependencies.betLogsRepository
+     * @param {BigWinConsumer} dependencies.bigWinConsumer
+     * @param {RecentBigWinPublisher} dependencies.recentBigWinPublisher
      */
-    constructor(gameData, settleGameRoundConsumer, publisher, logService, betLogsRepository) {
+    constructor({ gameData, settleGameRoundConsumer, publisher, logService, betLogsRepository, bigWinConsumer, recentBigWinPublisher }) {
         this.gameData = gameData;
         this.settleGameRoundConsumer = settleGameRoundConsumer;
         this.publisher = publisher;
         this.logService = logService;
         this.betLogsRepository = betLogsRepository;
+        this.bigWinConsumer = bigWinConsumer;
+        this.recentBigWinPublisher = recentBigWinPublisher;
     }
 
     validateCashOut(player) {
@@ -42,6 +51,23 @@ export class SettleCashOutConsumer {
         this.updateGameData(player, { multiplier, roundId, tapCount });
         await this.settleGameRoundConsumer.settleRound({ roundId, time: new Date(), player, playerName: player.profile.name });
 
+        if (isBigWin(multiplier)) {
+            const rate = this.calculateCurrencyRate(player.session);
+            const baseAmount = amount * rate;
+            const winningAmount = multiplier * amount;
+            const baseWinningAmount = winningAmount * rate;
+            const recentBigWinningWinner = await this.bigWinConsumer.add(player, {
+                roundId,
+                amount,
+                baseAmount,
+                winningAmount,
+                baseWinningAmount,
+                multiplier,
+                rate,
+            });
+            await this.bigWinConsumer.removeOldestRecord();
+            this.recentBigWinPublisher.publish(recentBigWinningWinner);
+        }
         return { player, multiplier, roundId, tapCount, amount };
     }
 
