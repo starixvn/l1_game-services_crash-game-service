@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
 import GameData from "../game-data";
-import * as util from "util";
-import { logger } from "sc-common";
 const MAX_BIG_WINS_RECORDS = 10;
 
 export default class BigWinConsumer {
