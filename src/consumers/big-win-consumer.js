@@ -59,7 +59,8 @@ export default class BigWinConsumer {
     async removeOldestRecord() {
         const bigWins = await this.bigWinsRepository.find({}).sort({ time: 1 });
         if (bigWins.length > MAX_BIG_WINS_RECORDS) {
-            await this.bigWinsRepository.deleteOne({ _id: bigWins[0]._id });
+            const numberOfRecordsToDelete = bigWins.length - MAX_BIG_WINS_RECORDS;
+            await this.bigWinsRepository.find({}).sort({ time: 1 }).limit(numberOfRecordsToDelete).deleteMany();
         }
     }
 
