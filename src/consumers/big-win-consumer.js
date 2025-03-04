@@ -69,8 +69,8 @@ export default class BigWinConsumer {
      */
     async getRecentBigWinningWinners(realPlayer) {
         const bigWins = await this.bigWinsRepository
-            .find({})
-            .select("-_id -uid -roundId -currency -operatorId -__v")
+            .find({}, { _id: false, uid: false, roundId: false, currency: false, operatorId: false, __v: false })
+            .lean()
             .sort({ time: -1 })
             .limit(MAX_BIG_WINS_RECORDS);
 
@@ -86,17 +86,11 @@ export default class BigWinConsumer {
      * @param {Object[]} winners
      */
     async updateExchangeRateCode(realPlayer, winners) {
-        const exchangeRates = await this.getExchangeRates(winners.map((winner) => winner.exchangeRateId));
+        const exchangeRates = await this.getExchangeRates(winners.map((w) => w.exchangeRateId));
         const { session } = realPlayer;
         for (const winner of winners) {
-            winner.exchangeRateCode = {
-                [session.currencyCode]: parseFloat(
-                    exchangeRates.find((er) => winner.exchangeRateId === er.exId)?.code[session.currencyCode]
-                ),
-            };
+            this.updateBigWinExchangeRateCode(winner, session.currencyCode, exchangeRates);
         }
-        logger.log(`updateExchangeRateCode
-            ${util.inspect(winners, { depth: null })}`);
     }
 
     updateBigWinExchangeRateCode(winner, currencyCode, exchangeRates) {
@@ -108,8 +102,6 @@ export default class BigWinConsumer {
         winner.exchangeRateCode = {
             [currencyCode]: parseFloat(exchangeRate.code[currencyCode]),
         };
-        logger.log(`updateBigWinExchangeRateCode
-            ${util.inspect(winner, { depth: null })}`);
     }
 
     /**

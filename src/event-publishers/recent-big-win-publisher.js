@@ -23,8 +23,6 @@ export default class RecentBigWinPublisher extends Core.BaseEventPublishers.Base
         players.forEach((player) => {
             const socket = player.socketClient;
             this.bigWinConsumer.updateExchangeRateCode(player, [recentBigWinningWinner]);
-            logger.log(`RecentBigWinPublisher.publish ${JSON.stringify(recentBigWinningWinner)}`);
-
             socket.emit(this.gameName, { recentBigWinningWinner });
         });
     }

@@ -46,12 +46,12 @@ export class InGameConsumer extends EventConsumers.TableInGameConsumer {
         await this.getBalance(realPlayer, true);
 
         const user = await this.getUserInfo(realPlayer.UID);
-
+        const recentBigWinningWinners = await this.bigWinConsumer.getRecentBigWinningWinners(realPlayer);
         return {
             gameConfigs,
             user,
             players,
-            recentBigWinningWinners: await this.bigWinConsumer.getRecentBigWinningWinners(realPlayer),
+            recentBigWinningWinners,
         };
     }
 }
