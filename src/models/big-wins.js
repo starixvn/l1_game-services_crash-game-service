@@ -18,5 +18,5 @@ export default function (gameConfigName) {
         operatorId: { type: String, required: false },
         playerId: { type: String },
     });
-    return mongoose.model(`${gameConfigName}_big_wins`, bigWinSchema);
+    return mongoose.model(`${gameConfigName}_recentbigwins`, bigWinSchema);
 }
