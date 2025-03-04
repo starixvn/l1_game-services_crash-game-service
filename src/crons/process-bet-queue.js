@@ -74,7 +74,10 @@ export default class ProcessBetQueue extends Core.Crons.ProcessBetQueue {
         const activeBet = playerGameData.activeBet;
 
         if (activeBet) {
-            this.placeBetPublisher.publishGameFailedBet(player.UID, { endBet: -1, notice: helpers.noticeHelper.cannotPlaceBet });
+            this.placeBetPublisher.publishGameFailedBet(player.UID, {
+                endBet: -1,
+                notice: { errorCode: helpers.noticeHelper.cannotPlaceBet },
+            });
 
             return false;
         }
