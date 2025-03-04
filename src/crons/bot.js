@@ -211,7 +211,6 @@ export default class GameBot extends Table.Crons.TableGameBot {
                 multiplier,
                 rate,
             });
-            await this.bigWinConsumer.removeOldestRecord();
             this.recentBigWinPublisher.publish(recentBigWinningWinner);
         }
 

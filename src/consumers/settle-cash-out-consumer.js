@@ -65,7 +65,6 @@ export class SettleCashOutConsumer {
                 multiplier,
                 rate,
             });
-            await this.bigWinConsumer.removeOldestRecord();
             this.recentBigWinPublisher.publish(recentBigWinningWinner);
         }
         return { player, multiplier, roundId, tapCount, amount };

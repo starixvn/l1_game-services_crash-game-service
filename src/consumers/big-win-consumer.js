@@ -54,14 +54,6 @@ export default class BigWinConsumer {
         return bigWin;
     }
 
-    async removeOldestRecord() {
-        const bigWins = await this.bigWinsRepository.find({}).sort({ time: 1 });
-        if (bigWins.length > MAX_BIG_WINS_RECORDS) {
-            const numberOfRecordsToDelete = bigWins.length - MAX_BIG_WINS_RECORDS;
-            await this.bigWinsRepository.find({}).sort({ time: 1 }).limit(numberOfRecordsToDelete).deleteMany();
-        }
-    }
-
     /**
      * @param {Object} realPlayer
      * @returns {Object[]}
