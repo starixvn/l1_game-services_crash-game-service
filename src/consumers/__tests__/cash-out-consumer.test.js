@@ -63,13 +63,7 @@ describe("CashOutConsumer", () => {
             consumer.consume(player, payload);
 
             // Assert
-            expect(consumer.validateRequest).toBeCalledWith(
-                player,
-                payload.roundId,
-                payload.halfCashOut,
-                payload.clientSendTime,
-                payload.receivedTime
-            );
+            expect(consumer.validateRequest).toBeCalledWith(player, payload.roundId, payload.halfCashOut);
         });
 
         describe("when bet request is invalid", () => {
@@ -324,63 +318,6 @@ describe("CashOutConsumer", () => {
 
                 // Assert
                 expect(result).toBeTruthy();
-            });
-        });
-
-        describe("when deltaTime valid", () => {
-            it("should NOT publishToUser invalid cash out", () => {
-                // Act
-                const clientSendTime = new Date(2023, 8, 1, 10, 10);
-                const receivedTime = new Date(2023, 8, 1, 10, 10);
-                consumer.validateRequest(player, gameData.roundId, payload.halfCashOut, clientSendTime, receivedTime);
-
-                // Assert
-                expect(consumer.publisher.publishToUser).not.toBeCalled();
-            });
-
-            it("should return true", () => {
-                //Arrange
-                const clientSendTime = new Date(2023, 8, 1, 10, 10);
-                const receivedTime = new Date(2023, 8, 1, 10, 10);
-                // Act
-                const result = consumer.validateRequest(player, gameData.roundId, payload.halfCashOut, clientSendTime, receivedTime);
-
-                // Assert
-                expect(result).toBeTruthy();
-            });
-        });
-
-        describe("when deltaTime invalid", () => {
-            it("should  publishToUser invalid cash out", () => {
-                // Act
-                const clientSendTime = new Date(2023, 8, 1, 10, 10);
-                const receivedTime = new Date(2023, 8, 1, 12, 10);
-                consumer.validateRequest(player, gameData.roundId, payload.halfCashOut, clientSendTime, receivedTime);
-
-                // Assert
-                expect(consumer.publisher.publishToUser).toBeCalled();
-            });
-
-            it("should return false", () => {
-                //Arrange
-                const clientSendTime = new Date(2023, 8, 1, 10, 10);
-                const receivedTime = new Date(2023, 8, 1, 12, 10);
-                // Act
-                const result = consumer.validateRequest(player, gameData.roundId, payload.halfCashOut, clientSendTime, receivedTime);
-
-                // Assert
-                expect(result).toBeFalsy();
-            });
-
-            it("should return false", () => {
-                //Arrange
-                const clientSendTime = new Date(2023, 8, 1, 12, 10);
-                const receivedTime = new Date(2023, 8, 1, 10, 10);
-                // Act
-                const result = consumer.validateRequest(player, gameData.roundId, payload.halfCashOut, clientSendTime, receivedTime);
-
-                // Assert
-                expect(result).toBeFalsy();
             });
         });
     });
